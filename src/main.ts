@@ -1,6 +1,10 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/swagger'
+import {
+	DocumentBuilder,
+	SwaggerDocumentOptions,
+	SwaggerModule,
+} from '@nestjs/swagger'
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
@@ -12,10 +16,7 @@ async function bootstrap() {
 		.build()
 	const options: SwaggerDocumentOptions = {
 		deepScanRoutes: true,
-		operationIdFactory: (
-			controllerKey: string,
-			methodKey: string,
-		) => methodKey,
+		operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
 	}
 
 	const document = SwaggerModule.createDocument(app, config, options)
