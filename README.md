@@ -87,3 +87,7 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 # Badges
 
 [![codecov](https://codecov.io/github/kimseungbin/trip-settle/graph/badge.svg?token=E6P5UWDAQ6)](https://codecov.io/github/kimseungbin/trip-settle)
+
+## Coverage Graph
+
+![coverage-graph](https://codecov.io/github/kimseungbin/trip-settle/graphs/sunburst.svg?token=E6P5UWDAQ6)
