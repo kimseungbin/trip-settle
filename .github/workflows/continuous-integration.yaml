@@ -10,6 +10,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
+      - name: Install required dependency
+        run: npm i -D @eslint/eslintrc
       - name: Run lint check
         run: npm run lint:check
   test:
