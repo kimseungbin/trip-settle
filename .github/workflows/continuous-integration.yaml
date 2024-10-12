@@ -2,7 +2,7 @@ name: Continuous Integration
 run-name: CI - Test and Coverage Check by @${{ github.actor }}
 on: push
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
