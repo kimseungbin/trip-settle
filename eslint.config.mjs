@@ -33,7 +33,7 @@ export default [{
 
 		parserOptions: {
 			project: 'tsconfig.json',
-			tsconfigRootDir: '/Users/kimseungbin/Documents/dev/trip-settle',
+			tsconfigRootDir: __dirname,
 		},
 	},
 
