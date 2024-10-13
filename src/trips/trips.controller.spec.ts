@@ -120,12 +120,13 @@ describe('TripsController', () => {
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
-
 			const mockResponse = {
 				status: jest.fn().mockReturnThis(),
 				location: jest.fn().mockReturnThis(),
 				send: jest.fn(),
 			} as unknown as Response
+
+			mockTripsService.find.mockReturnValue(updateTripDto)
 
 			await controller.update(base64TripId, updateTripDto, mockResponse)
 
@@ -133,8 +134,8 @@ describe('TripsController', () => {
 			expect(mockResponse.location).toHaveBeenCalledWith(`/trips/${base64TripId}`)
 			expect(mockResponse.send).toHaveBeenCalled()
 
-			expect(service.find).toHaveBeenCalledWith(base64TripId)
-			expect(service.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
+			expect(mockTripsService.find).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripsService.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
 		})
 
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {

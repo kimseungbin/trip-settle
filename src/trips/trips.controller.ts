@@ -26,6 +26,7 @@ export class TripsController {
 	@Patch(':id')
 	async update(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto, @Res() res: Response): Promise<void> {
 		const trip = await this.tripsService.find(id)
+		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
 
 		await this.tripsService.update(id, updateTripDto)
 
