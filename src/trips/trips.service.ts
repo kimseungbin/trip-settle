@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
 
@@ -12,6 +12,7 @@ export class TripsService {
 
 	async find(id: string) {
 		const trip = await this.tripsRepository.findOne(id)
+		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
 
 		return trip
 	}
