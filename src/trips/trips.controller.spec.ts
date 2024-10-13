@@ -3,10 +3,13 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { TripsController } from './trips.controller'
 import { TripsService } from './trips.service'
 import { FindTripDto } from './dto/find-trip.dto'
-import { NotFoundException } from '@nestjs/common'
+import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { ExpenseDto } from './dto/expense.dto'
+import { CreateTripDto } from './dto/create-trip.dto'
+import { Response } from 'express'
 
 const mockTripsService = {
+	create: jest.fn(),
 	find: jest.fn(),
 }
 
@@ -81,6 +84,31 @@ describe('TripsController', () => {
 			await expect(controller.find(base64TripId)).rejects.toThrowError(NotFoundException)
 
 			expect(service.find).toHaveBeenCalledWith(base64TripId)
+		})
+	})
+
+	describe('create', () => {
+		it('should create a new trip with participants and return a Location header', async () => {
+			const createTripDto: CreateTripDto = {
+				participants: ['Alice', 'Bob', 'Charlie'],
+			}
+
+			const newTrip = { id: 'newBase64TripId', participants: ['Alice', 'Bob', 'Charlie'], expenses: [] }
+			mockTripsService.create.mockReturnValue(newTrip)
+
+			const mockResponse = {
+				status: jest.fn().mockReturnThis(),
+				location: jest.fn().mockReturnThis(),
+				send: jest.fn(),
+			} as unknown as Response
+
+			await controller.create(createTripDto, mockResponse)
+
+			expect(mockResponse.status).toHaveBeenCalledWith(201)
+			expect(mockResponse.location).toHaveBeenCalledWith(`/trips/${newTrip.id}`)
+			expect(mockResponse.send).toHaveBeenCalled()
+
+			expect(service.create).toHaveBeenCalledWith(createTripDto)
 		})
 	})
 })
