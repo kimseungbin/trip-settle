@@ -99,7 +99,7 @@ describe('TripsService', () => {
 			}
 
 			mockTripsRepository.findOne.mockResolvedValue(tripEntity)
-			mockTripsRepository.save.mockResolvedValue(updatedTripEntity)
+			mockTripsRepository.update.mockResolvedValue(updatedTripEntity)
 
 			await service.update(base64TripId, updateTripDto)
 

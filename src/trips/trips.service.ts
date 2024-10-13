@@ -18,6 +18,9 @@ export class TripsService {
 	}
 
 	async update(id: string, updateTripDto: UpdateTripDto): Promise<void> {
+		const trip = await this.tripsRepository.findOne(id)
+		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
+
 		await this.tripsRepository.update(id, updateTripDto)
 	}
 
