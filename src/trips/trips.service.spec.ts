@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { TripsService } from './trips.service'
 import { randomBytes } from 'crypto'
+import { NotFoundException } from '@nestjs/common'
 
 const mockTripsRepository = {
 	findOne: jest.fn(),
@@ -36,13 +37,19 @@ describe('TripsService', () => {
 	})
 
 	describe('find', () => {
-		it('should return the trip object', async () => {
+		it('should return the trip object with a given ID', async () => {
 			const expectedTrip = {}
 			mockTripsRepository.findOne.mockResolvedValue(expectedTrip)
 
 			const trip = await service.find(base64TripId)
 
 			expect(trip).toEqual(expectedTrip)
+			expect(mockTripsRepository.findOne).toHaveBeenCalledWith(base64TripId)
+		})
+		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
+			mockTripsRepository.findOne.mockResolvedValue(null)
+
+			await expect(service.find(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
 			expect(mockTripsRepository.findOne).toHaveBeenCalledWith(base64TripId)
 		})
 	})
