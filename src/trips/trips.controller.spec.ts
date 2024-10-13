@@ -13,6 +13,7 @@ const mockTripsService = {
 	create: jest.fn(),
 	find: jest.fn(),
 	update: jest.fn(),
+	remove: jest.fn(),
 }
 
 describe('TripsController', () => {
@@ -155,7 +156,28 @@ describe('TripsController', () => {
 				NotFoundException,
 			)
 
-			expect(service.find).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripsService.find).toHaveBeenCalledWith(base64TripId)
+		})
+	})
+
+	describe('delete', () => {
+		it('should delete a trip with the given ID', async () => {
+			const base64TripId = randomBytes(16).toString('base64url')
+			const mockResponse = {
+				status: jest.fn().mockReturnThis(),
+				location: jest.fn().mockReturnThis(),
+				send: jest.fn(),
+			} as unknown as Response
+
+			mockTripsService.remove.mockReturnValue(true)
+
+			await controller.remove(base64TripId, mockResponse)
+
+			expect(mockResponse.status).toHaveBeenCalledWith(204)
+			expect(mockResponse.location).toHaveBeenCalledWith('/trips')
+			expect(mockResponse.send).toHaveBeenCalled()
+
+			expect(mockTripsService.remove).toHaveBeenCalledWith(base64TripId)
 		})
 	})
 })
