@@ -3,14 +3,16 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { TripsController } from './trips.controller'
 import { TripsService } from './trips.service'
 import { FindTripDto } from './dto/find-trip.dto'
-import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { NotFoundException } from '@nestjs/common'
 import { ExpenseDto } from './dto/expense.dto'
 import { CreateTripDto } from './dto/create-trip.dto'
 import { Response } from 'express'
+import { UpdateTripDto } from './dto/update-trip.dto'
 
 const mockTripsService = {
 	create: jest.fn(),
 	find: jest.fn(),
+	update: jest.fn(),
 }
 
 describe('TripsController', () => {
@@ -109,6 +111,30 @@ describe('TripsController', () => {
 			expect(mockResponse.send).toHaveBeenCalled()
 
 			expect(service.create).toHaveBeenCalledWith(createTripDto)
+		})
+	})
+
+	describe('update', () => {
+		it('should update participants to an existing trip.', async () => {
+			const base64TripId = randomBytes(16).toString('base64url')
+			const updateTripDto: UpdateTripDto = {
+				participants: ['Alice', 'Bob', 'Charlie'],
+			}
+
+			const mockResponse = {
+				status: jest.fn().mockReturnThis(),
+				location: jest.fn().mockReturnThis(),
+				send: jest.fn(),
+			} as unknown as Response
+
+			await controller.update(base64TripId, updateTripDto, mockResponse)
+
+			expect(mockResponse.status).toHaveBeenCalledWith(204)
+			expect(mockResponse.location).toHaveBeenCalledWith(`/trips/${base64TripId}`)
+			expect(mockResponse.send).toHaveBeenCalled()
+
+			expect(service.find).toHaveBeenCalledWith(base64TripId)
+			expect(service.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
 		})
 	})
 })
