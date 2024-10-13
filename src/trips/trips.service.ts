@@ -17,8 +17,8 @@ export class TripsService {
 		return trip
 	}
 
-	update(id: number, updateTripDto: UpdateTripDto) {
-		return `This action updates a #${id} trip`
+	async update(id: string, updateTripDto: UpdateTripDto): Promise<void> {
+		await this.tripsRepository.update(id, updateTripDto)
 	}
 
 	remove(id: number) {
