@@ -17,7 +17,7 @@ export class TripsController {
 
 	@Get(':id')
 	async find(@Param('id') id: string): Promise<FindTripDto> {
-		const trip = this.tripsService.find(id)
+		const trip = await this.tripsService.find(id)
 		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
 
 		return trip
