@@ -129,5 +129,11 @@ describe('TripsService', () => {
 
 			expect(mockTripsRepository.remove).toHaveBeenCalledWith(base64TripId)
 		})
+		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
+			mockTripsRepository.findOne.mockResolvedValue(null)
+
+			await expect(service.remove(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
+			expect(mockTripsRepository.findOne).toHaveBeenCalledWith(base64TripId)
+		})
 	})
 })
