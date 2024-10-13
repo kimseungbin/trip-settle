@@ -16,6 +16,12 @@ const mockTripsService = {
 	remove: jest.fn(),
 }
 
+const mockResponse = {
+	status: jest.fn().mockReturnThis(),
+	location: jest.fn().mockReturnThis(),
+	send: jest.fn(),
+} as unknown as Response
+
 describe('TripsController', () => {
 	let controller: TripsController
 	let service: TripsService
@@ -33,6 +39,8 @@ describe('TripsController', () => {
 
 		controller = module.get<TripsController>(TripsController)
 		service = module.get<TripsService>(TripsService)
+
+		jest.clearAllMocks()
 	})
 
 	it('should be defined', () => {
@@ -99,12 +107,6 @@ describe('TripsController', () => {
 			const newTrip = { id: 'newBase64TripId', participants: ['Alice', 'Bob', 'Charlie'], expenses: [] }
 			mockTripsService.create.mockReturnValue(newTrip)
 
-			const mockResponse = {
-				status: jest.fn().mockReturnThis(),
-				location: jest.fn().mockReturnThis(),
-				send: jest.fn(),
-			} as unknown as Response
-
 			await controller.create(createTripDto, mockResponse)
 
 			expect(mockResponse.status).toHaveBeenCalledWith(201)
@@ -121,11 +123,6 @@ describe('TripsController', () => {
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
-			const mockResponse = {
-				status: jest.fn().mockReturnThis(),
-				location: jest.fn().mockReturnThis(),
-				send: jest.fn(),
-			} as unknown as Response
 
 			mockTripsService.find.mockReturnValue(updateTripDto)
 
@@ -144,11 +141,6 @@ describe('TripsController', () => {
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice'],
 			}
-			const mockResponse = {
-				status: jest.fn().mockReturnThis(),
-				location: jest.fn().mockReturnThis(),
-				send: jest.fn(),
-			} as unknown as Response
 
 			mockTripsService.find.mockReturnValue(null)
 
@@ -163,11 +155,6 @@ describe('TripsController', () => {
 	describe('delete', () => {
 		it('should delete a trip with the given ID', async () => {
 			const base64TripId = randomBytes(16).toString('base64url')
-			const mockResponse = {
-				status: jest.fn().mockReturnThis(),
-				location: jest.fn().mockReturnThis(),
-				send: jest.fn(),
-			} as unknown as Response
 
 			mockTripsService.find.mockReturnValue({ id: base64TripId })
 			mockTripsService.remove.mockReturnValue(true)
@@ -183,11 +170,6 @@ describe('TripsController', () => {
 
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
 			const base64TripId = randomBytes(16).toString('base64url')
-			const mockResponse = {
-				status: jest.fn().mockReturnThis(),
-				location: jest.fn().mockReturnThis(),
-				send: jest.fn(),
-			} as unknown as Response
 
 			mockTripsService.find.mockReturnValue(null)
 			mockTripsService.remove.mockReturnValue(false)
