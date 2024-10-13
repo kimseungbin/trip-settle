@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException } from '@nestjs/common'
 import { TripsService } from './trips.service'
 import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
@@ -15,7 +15,10 @@ export class TripsController {
 
 	@Get(':id')
 	async find(@Param('id') id: string): Promise<FindTripDto> {
-		return this.tripsService.find(id)
+		const trip = this.tripsService.find(id)
+		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
+
+		return trip
 	}
 
 	@Patch(':id')
