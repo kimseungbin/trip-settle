@@ -29,6 +29,8 @@ describe('TripsController', () => {
 	let participants: string[]
 	let expenses: ExpenseDto[]
 	let createTripDto: CreateTripDto
+	let newTrip: FindTripDto
+	let updateTripDto: UpdateTripDto
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -76,6 +78,8 @@ describe('TripsController', () => {
 			},
 		]
 		createTripDto = { participants }
+		newTrip = { id: 'newBase64TripId', participants, expenses: [] }
+		updateTripDto = { participants }
 	})
 
 	it('should be defined', () => {
@@ -103,7 +107,6 @@ describe('TripsController', () => {
 
 	describe('create', () => {
 		it('should create a new trip with participants and return a Location header', async () => {
-			const newTrip = { id: 'newBase64TripId', participants: ['Alice', 'Bob', 'Charlie'], expenses: [] }
 			mockTripsService.create.mockResolvedValue(newTrip)
 
 			await controller.create(createTripDto, mockResponse)
@@ -118,10 +121,6 @@ describe('TripsController', () => {
 
 	describe('update', () => {
 		it('should update participants to an existing trip.', async () => {
-			const updateTripDto: UpdateTripDto = {
-				participants: ['Alice', 'Bob', 'Charlie'],
-			}
-
 			mockTripsService.find.mockResolvedValue(updateTripDto)
 
 			await controller.update(base64TripId, updateTripDto, mockResponse)
@@ -135,10 +134,6 @@ describe('TripsController', () => {
 		})
 
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			const updateTripDto: UpdateTripDto = {
-				participants: ['Alice'],
-			}
-
 			mockTripsService.find.mockResolvedValue(null)
 
 			await expect(controller.update(base64TripId, updateTripDto, mockResponse)).rejects.toThrow(
