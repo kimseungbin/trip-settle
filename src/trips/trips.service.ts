@@ -25,6 +25,9 @@ export class TripsService {
 	}
 
 	async remove(id: string): Promise<void> {
+		const trip = await this.tripsRepository.findOne(id)
+		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
+
 		await this.tripsRepository.remove(id)
 	}
 }
