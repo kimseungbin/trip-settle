@@ -2,6 +2,7 @@ import { randomBytes } from 'crypto'
 import { Test, TestingModule } from '@nestjs/testing'
 import { TripsController } from './trips.controller'
 import { TripsService } from './trips.service'
+import { FindTripDto } from './dto/find-trip.dto'
 
 const mockTripsService = {
 	find: jest.fn(),
@@ -33,7 +34,7 @@ describe('TripsController', () => {
 	describe('find', () => {
 		it('should return a trip with a given ID', async () => {
 			const base64TripId = randomBytes(16).toString('base64url')
-			const expectedTrip = { id: base64TripId }
+			const expectedTrip: FindTripDto = { id: base64TripId }
 
 			mockTripsService.find.mockReturnValue(expectedTrip)
 
