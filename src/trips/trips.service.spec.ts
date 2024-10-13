@@ -3,6 +3,7 @@ import { TripsService } from './trips.service'
 import { randomBytes } from 'crypto'
 import { NotFoundException } from '@nestjs/common'
 import { Trip } from './entities/trip.entity'
+import { CreateTripDto } from './dto/create-trip.dto'
 
 const mockTripsRepository = {
 	findOne: jest.fn(),
@@ -35,6 +36,28 @@ describe('TripsService', () => {
 
 	it('should be defined', () => {
 		expect(service).toBeDefined()
+	})
+
+	describe('create', () => {
+		it('should create and return a new trip entity with base64url id', async () => {
+			const createTripDto: CreateTripDto = {
+				participants: ['Alice', 'Bob'],
+			}
+			const tripEntity: Trip = {
+				id: base64TripId,
+				participants: ['Alice', 'Bob'],
+				expenses: [],
+			}
+
+			mockTripsRepository.create.mockReturnValue(tripEntity)
+			mockTripsRepository.create.mockResolvedValue(tripEntity)
+
+			const trip = await service.create(createTripDto)
+
+			expect(trip).toEqual(tripEntity)
+
+			expect(mockTripsRepository.create).toHaveBeenCalledWith(createTripDto)
+		})
 	})
 
 	describe('find', () => {
