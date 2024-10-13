@@ -12,14 +12,9 @@ export class TripsController {
 		return this.tripsService.create(createTripDto)
 	}
 
-	@Get()
-	findAll() {
-		return this.tripsService.findAll()
-	}
-
 	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return this.tripsService.findOne(+id)
+	find() {
+		return this.tripsService.find()
 	}
 
 	@Patch(':id')
