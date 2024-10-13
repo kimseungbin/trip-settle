@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto'
 import { Test, TestingModule } from '@nestjs/testing'
 import { TripsController } from './trips.controller'
 import { TripsService } from './trips.service'
@@ -30,8 +31,9 @@ describe('TripsController', () => {
 	})
 
 	describe('find', () => {
-		it('should return a trip', async () => {
-			expect(await controller.find()).toEqual({})
+		it('should return a trip with a given ID', async () => {
+			const base64TripId = randomBytes(16).toString('base64url')
+			expect(await controller.find(base64TripId)).toEqual({})
 			expect(service.find).toHaveBeenCalled()
 		})
 	})
