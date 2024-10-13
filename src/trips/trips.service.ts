@@ -24,7 +24,7 @@ export class TripsService {
 		await this.tripsRepository.update(id, updateTripDto)
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} trip`
+	async remove(id: string): Promise<void> {
+		await this.tripsRepository.remove(id)
 	}
 }
