@@ -35,7 +35,9 @@ describe('TripsController', () => {
 	describe('find', () => {
 		it('should return a trip with a given ID', async () => {
 			const base64TripId = randomBytes(16).toString('base64url')
-			const expectedTrip: FindTripDto = { id: base64TripId }
+			const participants = ['Alice', 'Bob', 'Charlie']
+
+			const expectedTrip: FindTripDto = { id: base64TripId, participants }
 
 			mockTripsService.find.mockReturnValue(expectedTrip)
 
