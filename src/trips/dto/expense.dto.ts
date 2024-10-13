@@ -1,4 +1,4 @@
-import { ArrayNotEmpty, IsAlpha, IsArray, IsNumber, IsOptional, IsString, Length, Matches } from 'class-validator'
+import { ArrayNotEmpty, IsArray, IsNumber, IsOptional, IsString, Length, Matches } from 'class-validator'
 
 export class ExpenseDto {
 	/**
