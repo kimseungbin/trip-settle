@@ -13,8 +13,8 @@ export class TripsController {
 	}
 
 	@Get(':id')
-	find() {
-		return this.tripsService.find()
+	find(@Param('id') id: string) {
+		return this.tripsService.find(id)
 	}
 
 	@Patch(':id')
