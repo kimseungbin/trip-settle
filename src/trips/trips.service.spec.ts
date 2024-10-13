@@ -11,7 +11,7 @@ const mockTripsRepository = {
 	create: jest.fn(),
 	save: jest.fn(),
 	update: jest.fn(),
-	delete: jest.fn(),
+	remove: jest.fn(),
 }
 
 describe('TripsService', () => {
@@ -106,5 +106,19 @@ describe('TripsService', () => {
 			expect(mockTripsRepository.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
 		})
 	})
-	describe('delete', () => {})
+	describe('delete', () => {
+		it('should delete an existing trip', async () => {
+			const trip: Trip = {
+				id: base64TripId,
+				participants: ['Alice', 'Bob'],
+				expenses: [],
+			}
+
+			mockTripsRepository.findOne.mockResolvedValue(trip)
+
+			await service.remove(base64TripId)
+
+			expect(mockTripsRepository.remove).toHaveBeenCalledWith(base64TripId)
+		})
+	})
 })
