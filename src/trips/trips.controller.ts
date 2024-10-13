@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Res } from '@nestjs/common'
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Res } from '@nestjs/common'
 import { TripsService } from './trips.service'
 import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
@@ -24,8 +24,12 @@ export class TripsController {
 	}
 
 	@Patch(':id')
-	update(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto) {
-		return this.tripsService.update(+id, updateTripDto)
+	async update(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto, @Res() res: Response): Promise<void> {
+		const trip = await this.tripsService.find(id)
+
+		await this.tripsService.update(id, updateTripDto)
+
+		res.status(204).location(`/trips/${id}`).send()
 	}
 
 	@Delete(':id')
