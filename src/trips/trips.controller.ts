@@ -34,7 +34,11 @@ export class TripsController {
 	}
 
 	@Delete(':id')
-	remove(@Param('id') id: string) {
-		return this.tripsService.remove(+id)
+	async remove(@Param('id') id: string, @Res() res: Response): Promise<void> {
+		const trip = await this.tripsService.find(id)
+
+		await this.tripsService.remove(id)
+
+		res.status(204).location('/trips').send()
 	}
 }
