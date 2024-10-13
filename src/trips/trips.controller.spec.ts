@@ -10,10 +10,10 @@ import { Response } from 'express'
 import { UpdateTripDto } from './dto/update-trip.dto'
 
 const mockTripsService = {
-	create: jest.fn(),
-	find: jest.fn(),
-	update: jest.fn(),
-	remove: jest.fn(),
+	create: jest.fn().mockResolvedValue(null),
+	find: jest.fn().mockResolvedValue(null),
+	update: jest.fn().mockResolvedValue(null),
+	remove: jest.fn().mockResolvedValue(null),
 }
 
 const mockResponse = {
@@ -81,7 +81,7 @@ describe('TripsController', () => {
 
 			const expectedTrip: FindTripDto = { id: base64TripId, participants, expenses }
 
-			mockTripsService.find.mockReturnValue(expectedTrip)
+			mockTripsService.find.mockResolvedValue(expectedTrip)
 
 			expect(await controller.find(base64TripId)).toEqual(expectedTrip)
 			expect(mockTripsService.find).toHaveBeenCalledWith(base64TripId)
@@ -90,7 +90,7 @@ describe('TripsController', () => {
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
 			const base64TripId = randomBytes(16).toString('base64url')
 
-			mockTripsService.find.mockReturnValue(null)
+			mockTripsService.find.mockResolvedValue(null)
 
 			await expect(controller.find(base64TripId)).rejects.toThrow(NotFoundException)
 
@@ -105,7 +105,7 @@ describe('TripsController', () => {
 			}
 
 			const newTrip = { id: 'newBase64TripId', participants: ['Alice', 'Bob', 'Charlie'], expenses: [] }
-			mockTripsService.create.mockReturnValue(newTrip)
+			mockTripsService.create.mockResolvedValue(newTrip)
 
 			await controller.create(createTripDto, mockResponse)
 
@@ -124,7 +124,7 @@ describe('TripsController', () => {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
-			mockTripsService.find.mockReturnValue(updateTripDto)
+			mockTripsService.find.mockResolvedValue(updateTripDto)
 
 			await controller.update(base64TripId, updateTripDto, mockResponse)
 
@@ -142,7 +142,7 @@ describe('TripsController', () => {
 				participants: ['Alice'],
 			}
 
-			mockTripsService.find.mockReturnValue(null)
+			mockTripsService.find.mockResolvedValue(null)
 
 			await expect(controller.update(base64TripId, updateTripDto, mockResponse)).rejects.toThrow(
 				NotFoundException,
@@ -156,8 +156,8 @@ describe('TripsController', () => {
 		it('should delete a trip with the given ID', async () => {
 			const base64TripId = randomBytes(16).toString('base64url')
 
-			mockTripsService.find.mockReturnValue({ id: base64TripId })
-			mockTripsService.remove.mockReturnValue(true)
+			mockTripsService.find.mockResolvedValue({ id: base64TripId })
+			mockTripsService.remove.mockResolvedValue(true)
 
 			await controller.remove(base64TripId, mockResponse)
 
@@ -171,8 +171,8 @@ describe('TripsController', () => {
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
 			const base64TripId = randomBytes(16).toString('base64url')
 
-			mockTripsService.find.mockReturnValue(null)
-			mockTripsService.remove.mockReturnValue(false)
+			mockTripsService.find.mockResolvedValue(null)
+			mockTripsService.remove.mockResolvedValue(false)
 
 			await expect(controller.remove(base64TripId, mockResponse)).rejects.toThrow(NotFoundException)
 		})
