@@ -76,7 +76,7 @@ describe('TripsController', () => {
 			mockTripsService.find.mockReturnValue(expectedTrip)
 
 			expect(await controller.find(base64TripId)).toEqual(expectedTrip)
-			expect(service.find).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripsService.find).toHaveBeenCalledWith(base64TripId)
 		})
 
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
@@ -84,9 +84,9 @@ describe('TripsController', () => {
 
 			mockTripsService.find.mockReturnValue(null)
 
-			await expect(controller.find(base64TripId)).rejects.toThrowError(NotFoundException)
+			await expect(controller.find(base64TripId)).rejects.toThrow(NotFoundException)
 
-			expect(service.find).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripsService.find).toHaveBeenCalledWith(base64TripId)
 		})
 	})
 
@@ -152,7 +152,7 @@ describe('TripsController', () => {
 
 			mockTripsService.find.mockReturnValue(null)
 
-			await expect(controller.update(base64TripId, updateTripDto, mockResponse)).rejects.toThrowError(
+			await expect(controller.update(base64TripId, updateTripDto, mockResponse)).rejects.toThrow(
 				NotFoundException,
 			)
 
@@ -169,6 +169,7 @@ describe('TripsController', () => {
 				send: jest.fn(),
 			} as unknown as Response
 
+			mockTripsService.find.mockReturnValue({ id: base64TripId })
 			mockTripsService.remove.mockReturnValue(true)
 
 			await controller.remove(base64TripId, mockResponse)
@@ -188,11 +189,10 @@ describe('TripsController', () => {
 				send: jest.fn(),
 			} as unknown as Response
 
+			mockTripsService.find.mockReturnValue(null)
 			mockTripsService.remove.mockReturnValue(false)
 
-			await expect(controller.remove(base64TripId, mockResponse)).rejects.toThrowError(NotFoundException)
-
-			expect(mockTripsService.remove).toHaveBeenCalledWith(base64TripId)
+			await expect(controller.remove(base64TripId, mockResponse)).rejects.toThrow(NotFoundException)
 		})
 	})
 })
