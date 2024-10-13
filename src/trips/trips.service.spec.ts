@@ -105,6 +105,15 @@ describe('TripsService', () => {
 
 			expect(mockTripsRepository.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
 		})
+		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
+			const updateTripDto: UpdateTripDto = {
+				participants: ['Alice', 'Bob', 'Charlie'],
+			}
+
+			mockTripsRepository.findOne.mockResolvedValue(null)
+
+			await expect(service.update(base64TripId, updateTripDto)).rejects.toBeInstanceOf(NotFoundException)
+		})
 	})
 	describe('delete', () => {
 		it('should delete an existing trip', async () => {
