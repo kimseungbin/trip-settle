@@ -7,7 +7,7 @@ export class TripsService {
 	constructor(@Inject('TripsRepository') private readonly tripsRepository: any) {}
 
 	create(createTripDto: CreateTripDto) {
-		return 'This action adds a new trip'
+		return this.tripsRepository.create(createTripDto)
 	}
 
 	async find(id: string) {
