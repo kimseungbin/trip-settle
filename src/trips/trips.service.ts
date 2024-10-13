@@ -8,12 +8,8 @@ export class TripsService {
 		return 'This action adds a new trip'
 	}
 
-	findAll() {
-		return `This action returns all trips`
-	}
-
-	findOne(id: number) {
-		return `This action returns a #${id} trip`
+	find(id: string) {
+		return {}
 	}
 
 	update(id: number, updateTripDto: UpdateTripDto) {
