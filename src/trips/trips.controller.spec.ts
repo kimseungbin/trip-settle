@@ -4,7 +4,7 @@ import { TripsController } from './trips.controller'
 import { TripsService } from './trips.service'
 
 const mockTripsService = {
-	find: jest.fn().mockReturnValue({}),
+	find: jest.fn(),
 }
 
 describe('TripsController', () => {
@@ -33,8 +33,12 @@ describe('TripsController', () => {
 	describe('find', () => {
 		it('should return a trip with a given ID', async () => {
 			const base64TripId = randomBytes(16).toString('base64url')
-			expect(await controller.find(base64TripId)).toEqual({})
-			expect(service.find).toHaveBeenCalled()
+			const expectedTrip = { id: base64TripId }
+
+			mockTripsService.find.mockReturnValue(expectedTrip)
+
+			expect(await controller.find(base64TripId)).toEqual(expectedTrip)
+			expect(service.find).toHaveBeenCalledWith(base64TripId)
 		})
 	})
 })
