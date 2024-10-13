@@ -25,6 +25,10 @@ const mockResponse = {
 describe('TripsController', () => {
 	let controller: TripsController
 	let service: TripsService
+	let base64TripId: string
+	let participants: string[]
+	let expenses: ExpenseDto[]
+	let createTripDto: CreateTripDto
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -41,6 +45,37 @@ describe('TripsController', () => {
 		service = module.get<TripsService>(TripsService)
 
 		jest.clearAllMocks()
+
+		base64TripId = randomBytes(16).toString('base64url')
+		participants = ['Alice', 'Bob', 'Charlie']
+		expenses = [
+			{
+				amount: 100,
+				currency: 'USD',
+				description: 'Dinner at a restaurant',
+				note: 'Shared meal',
+				participants: ['Alice', 'Bob'],
+				payer: 'Alice',
+			},
+			{
+				amount: 50,
+				currency: 'USD',
+				description: 'Taxi ride',
+				note: 'Airport transfer',
+				participants: ['Bob', 'Charlie'],
+				payer: 'Bob',
+			},
+
+			{
+				amount: 75,
+				currency: 'EUR',
+				description: 'Museum tickets',
+				note: 'Entrance fees',
+				participants: ['Alice', 'Charlie'],
+				payer: 'Bob',
+			},
+		]
+		createTripDto = { participants }
 	})
 
 	it('should be defined', () => {
@@ -49,36 +84,6 @@ describe('TripsController', () => {
 
 	describe('find', () => {
 		it('should return a trip with a given ID', async () => {
-			const base64TripId = randomBytes(16).toString('base64url')
-			const participants = ['Alice', 'Bob', 'Charlie']
-			const expenses: ExpenseDto[] = [
-				{
-					amount: 100,
-					currency: 'USD',
-					description: 'Dinner at a restaurant',
-					note: 'Shared meal',
-					participants: ['Alice', 'Bob'],
-					payer: 'Alice',
-				},
-				{
-					amount: 50,
-					currency: 'USD',
-					description: 'Taxi ride',
-					note: 'Airport transfer',
-					participants: ['Bob', 'Charlie'],
-					payer: 'Bob',
-				},
-
-				{
-					amount: 75,
-					currency: 'EUR',
-					description: 'Museum tickets',
-					note: 'Entrance fees',
-					participants: ['Alice', 'Charlie'],
-					payer: 'Bob',
-				},
-			]
-
 			const expectedTrip: FindTripDto = { id: base64TripId, participants, expenses }
 
 			mockTripsService.find.mockResolvedValue(expectedTrip)
@@ -88,8 +93,6 @@ describe('TripsController', () => {
 		})
 
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			const base64TripId = randomBytes(16).toString('base64url')
-
 			mockTripsService.find.mockResolvedValue(null)
 
 			await expect(controller.find(base64TripId)).rejects.toThrow(NotFoundException)
@@ -100,10 +103,6 @@ describe('TripsController', () => {
 
 	describe('create', () => {
 		it('should create a new trip with participants and return a Location header', async () => {
-			const createTripDto: CreateTripDto = {
-				participants: ['Alice', 'Bob', 'Charlie'],
-			}
-
 			const newTrip = { id: 'newBase64TripId', participants: ['Alice', 'Bob', 'Charlie'], expenses: [] }
 			mockTripsService.create.mockResolvedValue(newTrip)
 
@@ -119,7 +118,6 @@ describe('TripsController', () => {
 
 	describe('update', () => {
 		it('should update participants to an existing trip.', async () => {
-			const base64TripId = randomBytes(16).toString('base64url')
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
@@ -137,7 +135,6 @@ describe('TripsController', () => {
 		})
 
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			const base64TripId = randomBytes(16).toString('base64url')
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice'],
 			}
@@ -154,8 +151,6 @@ describe('TripsController', () => {
 
 	describe('delete', () => {
 		it('should delete a trip with the given ID', async () => {
-			const base64TripId = randomBytes(16).toString('base64url')
-
 			mockTripsService.find.mockResolvedValue({ id: base64TripId })
 			mockTripsService.remove.mockResolvedValue(true)
 
@@ -169,8 +164,6 @@ describe('TripsController', () => {
 		})
 
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			const base64TripId = randomBytes(16).toString('base64url')
-
 			mockTripsService.find.mockResolvedValue(null)
 			mockTripsService.remove.mockResolvedValue(false)
 
