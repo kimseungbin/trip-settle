@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto'
 import { NotFoundException } from '@nestjs/common'
 import { Trip } from './entities/trip.entity'
 import { CreateTripDto } from './dto/create-trip.dto'
+import { UpdateTripDto } from './dto/update-trip.dto'
 
 const mockTripsRepository = {
 	findOne: jest.fn(),
@@ -82,6 +83,28 @@ describe('TripsService', () => {
 			expect(mockTripsRepository.findOne).toHaveBeenCalledWith(base64TripId)
 		})
 	})
-	describe('update', () => {})
+	describe('update', () => {
+		it('should update participants to an existing trip', async () => {
+			const updateTripDto: UpdateTripDto = {
+				participants: ['Alice', 'Bob', 'Charlie'],
+			}
+			const tripEntity: Trip = {
+				id: base64TripId,
+				participants: ['Alice', 'Bob'],
+				expenses: [],
+			}
+			const updatedTripEntity: Trip = {
+				...tripEntity,
+				participants: ['Alice', 'Bob', 'Charlie'],
+			}
+
+			mockTripsRepository.findOne.mockResolvedValue(tripEntity)
+			mockTripsRepository.save.mockResolvedValue(updatedTripEntity)
+
+			await service.update(base64TripId, updateTripDto)
+
+			expect(mockTripsRepository.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
+		})
+	})
 	describe('delete', () => {})
 })
