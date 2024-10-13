@@ -179,5 +179,20 @@ describe('TripsController', () => {
 
 			expect(mockTripsService.remove).toHaveBeenCalledWith(base64TripId)
 		})
+
+		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
+			const base64TripId = randomBytes(16).toString('base64url')
+			const mockResponse = {
+				status: jest.fn().mockReturnThis(),
+				location: jest.fn().mockReturnThis(),
+				send: jest.fn(),
+			} as unknown as Response
+
+			mockTripsService.remove.mockReturnValue(false)
+
+			await expect(controller.remove(base64TripId, mockResponse)).rejects.toThrowError(NotFoundException)
+
+			expect(mockTripsService.remove).toHaveBeenCalledWith(base64TripId)
+		})
 	})
 })
