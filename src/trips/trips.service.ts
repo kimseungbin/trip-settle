@@ -30,7 +30,7 @@ export class TripsService {
 	}
 
 	private async getTripById(id: string): Promise<Trip> {
-		const trip = await this.tripModel.findOne(id)
+		const trip = await this.tripModel.findById(id)
 		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
 
 		return trip
