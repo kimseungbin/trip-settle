@@ -11,7 +11,7 @@ export class IsPayerInTripParticipantsConstraint implements ValidatorConstraintI
 		return tripParticipants.includes(payer)
 	}
 
-	defaultMessage(validationArguments?: ValidationArguments): string {
+	defaultMessage(): string {
 		return 'Payer ust be one of the trip participants'
 	}
 }
@@ -26,7 +26,7 @@ export class AreParticipantsInTripParticipantsConstraint implements ValidatorCon
 		return participants.every(p => tripParticipants.includes(p))
 	}
 
-	defaultMessage(validationArguments?: ValidationArguments): string {
+	defaultMessage(): string {
 		return 'All participants must be among the trip participants.'
 	}
 }
