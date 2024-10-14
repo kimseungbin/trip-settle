@@ -17,7 +17,7 @@ import {
 
 export class ExpenseDto {
 	/**
-	 * The amount of money spend for this particular expense.
+	 * The amount of money spent for this particular expense.
 	 * Example: 180 (in specified currency)
 	 */
 	@IsNumber()
@@ -40,7 +40,7 @@ export class ExpenseDto {
 	 * Example: "Dinner at a restaurant" or "Taxi to the hotel"
 	 */
 	@IsString()
-	@Length(1, 255, { message: 'Description must be between 1 and 256 characters long.' })
+	@Length(1, 255, { message: 'Description must be between 1 and 255 characters long.' })
 	description: string
 
 	/**
