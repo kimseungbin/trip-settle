@@ -1,5 +1,4 @@
-import { Prop, Schema } from '@nestjs/mongoose'
-import { Types } from 'mongoose'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 
 @Schema()
 export class Expense {
@@ -21,3 +20,5 @@ export class Expense {
 	@Prop({ required: true })
 	payer: string
 }
+
+export const ExpenseSchema = SchemaFactory.createForClass(Expense)
