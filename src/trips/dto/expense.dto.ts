@@ -75,5 +75,6 @@ export class ExpenseDto {
 	 */
 	@IsArray()
 	@IsOptional()
+	@IsString({ each: true })
 	tripParticipants?: string[]
 }
