@@ -7,8 +7,13 @@ import { Expense, ExpenseSchema } from './schemas/expense.schema'
 
 @Module({
 	imports: [
-		MongooseModule.forFeature([{ name: Trip.name, schema: TripSchema }]),
-		MongooseModule.forFeature([{ name: Expense.name, schema: ExpenseSchema }]),
+		MongooseModule.forFeature([
+			{ name: Trip.name, schema: TripSchema },
+			{
+				name: Expense.name,
+				schema: ExpenseSchema,
+			},
+		]),
 	],
 	controllers: [TripsController],
 	providers: [TripsService, { provide: 'TripsRepository', useValue: {} }],
