@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Module, OnApplicationShutdown } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { TripsModule } from './trips/trips.module'
@@ -22,8 +22,8 @@ let mongoMemoryServer: MongoMemoryServer
 	controllers: [AppController],
 	providers: [AppService],
 })
-export class AppModule {}
-
-export async function closeMongooseConnection() {
-	if (mongoMemoryServer) await mongoMemoryServer.stop()
+export class AppModule implements OnApplicationShutdown {
+	async onApplicationShutdown() {
+		await mongoMemoryServer?.stop()
+	}
 }

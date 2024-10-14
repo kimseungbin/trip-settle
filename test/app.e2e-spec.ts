@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
-import { AppModule, closeMongooseConnection } from './../src/app.module'
+import { AppModule } from './../src/app.module'
 import { Connection } from 'mongoose'
 import { getConnectionToken } from '@nestjs/mongoose'
 
@@ -30,11 +30,6 @@ describe('AppController (e2e)', () => {
 			await connection.close()
 		} catch (error) {
 			console.error('Error closing connection:', error)
-		}
-		try {
-			await closeMongooseConnection()
-		} catch (error) {
-			console.error('Error closing mongoose connection:', error)
 		}
 		try {
 			await app.close()
