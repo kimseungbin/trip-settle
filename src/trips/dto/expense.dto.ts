@@ -8,7 +8,12 @@ import {
 	Length,
 	Matches,
 	MaxLength,
+	Validate,
 } from 'class-validator'
+import {
+	AreParticipantsInTripParticipantsConstraint,
+	IsPayerInTripParticipantsConstraint,
+} from '../validators/expense.validators'
 
 export class ExpenseDto {
 	/**
@@ -54,6 +59,7 @@ export class ExpenseDto {
 	@IsArray()
 	@ArrayMinSize(1, { message: 'At least one participant is required.' })
 	@IsString({ each: true, message: 'Each participant must be a string' })
+	@Validate(AreParticipantsInTripParticipantsConstraint)
 	participants: string[]
 
 	/**
@@ -61,5 +67,13 @@ export class ExpenseDto {
 	 * Example: "Alice"
 	 */
 	@IsString()
+	@Validate(IsPayerInTripParticipantsConstraint)
 	payer: string
+
+	/**
+	 * The list of trip-level participants for validation purposes.
+	 */
+	@IsArray()
+	@IsOptional()
+	tripParticipants?: string[]
 }
