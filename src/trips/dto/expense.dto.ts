@@ -1,4 +1,4 @@
-import { ArrayNotEmpty, IsArray, IsNumber, IsOptional, IsString, Length, Matches } from 'class-validator'
+import { ArrayNotEmpty, IsArray, IsNumber, IsOptional, IsString, Length, Matches, Min } from 'class-validator'
 
 export class ExpenseDto {
 	/**
@@ -6,6 +6,7 @@ export class ExpenseDto {
 	 * Example: 180 (in specified currency)
 	 */
 	@IsNumber()
+	@Min(0, { message: 'Amount must be a positive number' })
 	amount: number
 
 	/**
