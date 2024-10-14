@@ -16,6 +16,6 @@ import { Expense, ExpenseSchema } from './schemas/expense.schema'
 		]),
 	],
 	controllers: [TripsController],
-	providers: [TripsService, { provide: 'TripsRepository', useValue: {} }],
+	providers: [TripsService],
 })
 export class TripsModule {}
