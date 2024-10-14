@@ -5,13 +5,15 @@ import { TripsModule } from './trips/trips.module'
 import { MongooseModule } from '@nestjs/mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 
+let mongoMemoryServer: MongoMemoryServer
+
 @Module({
 	imports: [
 		MongooseModule.forRootAsync({
 			useFactory: async () => {
-				const server = await MongoMemoryServer.create()
+				mongoMemoryServer = await MongoMemoryServer.create()
 				return {
-					uri: server.getUri(),
+					uri: mongoMemoryServer.getUri(),
 				}
 			},
 		}),
@@ -21,3 +23,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 	providers: [AppService],
 })
 export class AppModule {}
+
+export async function closeMongooseConnection() {
+	if (mongoMemoryServer) await mongoMemoryServer.stop()
+}
