@@ -3,18 +3,18 @@ import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
-import { Trip, TripDocument } from './schemas/trip.schema'
+import { Trip } from './schemas/trip.schema'
 
 @Injectable()
 export class TripsService {
-	constructor(@InjectModel(Trip.name) private readonly tripModel: Model<TripDocument>) {}
+	constructor(@InjectModel(Trip.name) private readonly tripModel: Model<Trip>) {}
 
 	create(createTripDto: CreateTripDto) {
 		return this.tripModel.create(createTripDto)
 	}
 
 	async find(id: string): Promise<Trip> {
-		const trip = await this.tripModel.findById(this.convertBase64ToObjectId(id))
+		const trip = await this.tripModel.findById(this.convertBase64ToObjectId(id)).populate('expenses').exec()
 		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
 
 		return trip

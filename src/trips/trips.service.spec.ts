@@ -15,6 +15,13 @@ const mockTripModel = {
 	findByIdAndDelete: jest.fn(),
 }
 
+function createQueryMock(result: any) {
+	return {
+		populate: jest.fn().mockReturnThis(),
+		exec: jest.fn().mockResolvedValue(result),
+	}
+}
+
 describe('TripsService', () => {
 	let service: TripsService
 	let base64TripId: string
@@ -70,7 +77,9 @@ describe('TripsService', () => {
 				expenses: [],
 			}
 
-			mockTripModel.findById.mockResolvedValue(tripEntity)
+			mockTripModel.findById.mockImplementation(() => ({
+				populate: () => ({ exec: jest.fn().mockReturnValue(tripEntity) }),
+			}))
 
 			const trip = await service.find(base64TripId)
 
@@ -78,7 +87,9 @@ describe('TripsService', () => {
 			expect(mockTripModel.findById).toHaveBeenCalledWith(objectId)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			mockTripModel.findById.mockResolvedValue(null)
+			mockTripModel.findById.mockImplementation(() => ({
+				populate: () => ({ exec: jest.fn().mockReturnValue(null) }),
+			}))
 
 			await expect(service.find(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
 			expect(mockTripModel.findById).toHaveBeenCalledWith(objectId)
