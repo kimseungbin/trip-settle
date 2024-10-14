@@ -11,9 +11,14 @@ let mongoMemoryServer: MongoMemoryServer
 	imports: [
 		MongooseModule.forRootAsync({
 			useFactory: async () => {
-				mongoMemoryServer = await MongoMemoryServer.create()
-				return {
-					uri: mongoMemoryServer.getUri(),
+				try {
+					mongoMemoryServer = await MongoMemoryServer.create()
+					return {
+						uri: mongoMemoryServer.getUri(),
+					}
+				} catch (error) {
+					console.error('Failed to create MongoMemoryServer:', error)
+					throw error
 				}
 			},
 		}),
