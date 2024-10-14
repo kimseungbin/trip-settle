@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document, ObjectId, Types } from 'mongoose'
+import { Document, Types } from 'mongoose'
 
 export type TripDocument = Trip & Document
 
 @Schema()
 export class Trip {
-	_id: ObjectId
+	_id: Types.ObjectId
 
 	@Prop({ required: true, type: [String] })
 	participants: string[]
