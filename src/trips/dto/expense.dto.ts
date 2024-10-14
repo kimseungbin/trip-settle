@@ -1,4 +1,14 @@
-import { ArrayNotEmpty, IsArray, IsNumber, IsOptional, IsPositive, IsString, Length, Matches } from 'class-validator'
+import {
+	ArrayMinSize,
+	IsArray,
+	IsNumber,
+	IsOptional,
+	IsPositive,
+	IsString,
+	Length,
+	Matches,
+	MaxLength,
+} from 'class-validator'
 
 export class ExpenseDto {
 	/**
@@ -25,6 +35,7 @@ export class ExpenseDto {
 	 * Example: "Dinner at a restaurant" or "Taxi to the hotel"
 	 */
 	@IsString()
+	@Length(1, 255, { message: 'Description must be between 1 and 256 characters long.' })
 	description: string
 
 	/**
@@ -33,6 +44,7 @@ export class ExpenseDto {
 	 */
 	@IsString()
 	@IsOptional()
+	@MaxLength(1000, { message: 'Note must not exceed 1000 characters.' })
 	note?: string
 
 	/**
@@ -40,7 +52,8 @@ export class ExpenseDto {
 	 * Example: ["Alice", "Bob", "Charlie"]
 	 */
 	@IsArray()
-	@ArrayNotEmpty()
+	@ArrayMinSize(1, { message: 'At least one participant is required.' })
+	@IsString({ each: true, message: 'Each participant must be a string' })
 	participants: string[]
 
 	/**
