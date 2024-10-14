@@ -5,8 +5,6 @@ export type TripDocument = Trip & Document
 
 @Schema()
 export class Trip {
-	_id: Types.ObjectId
-
 	@Prop({ required: true, type: [String] })
 	participants: string[]
 
