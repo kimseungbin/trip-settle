@@ -1,14 +1,16 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
-import { Trip } from './entities/trip.entity'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { Trip, TripDocument } from './schemas/trip.schema'
 
 @Injectable()
 export class TripsService {
-	constructor(@Inject('TripsRepository') private readonly tripsRepository: any) {}
+	constructor(@InjectModel(Trip.name) private readonly tripModel: Model<TripDocument>) {}
 
 	create(createTripDto: CreateTripDto) {
-		return this.tripsRepository.create(createTripDto)
+		return this.tripModel.create(createTripDto)
 	}
 
 	async find(id: string): Promise<Trip> {
@@ -18,17 +20,17 @@ export class TripsService {
 	async update(id: string, updateTripDto: UpdateTripDto): Promise<void> {
 		await this.getTripById(id)
 
-		await this.tripsRepository.update(id, updateTripDto)
+		await this.tripModel.update(id, updateTripDto)
 	}
 
 	async remove(id: string): Promise<void> {
 		await this.getTripById(id)
 
-		await this.tripsRepository.remove(id)
+		await this.tripModel.remove(id)
 	}
 
 	private async getTripById(id: string): Promise<Trip> {
-		const trip = await this.tripsRepository.findOne(id)
+		const trip = await this.tripModel.findOne(id)
 		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
 
 		return trip

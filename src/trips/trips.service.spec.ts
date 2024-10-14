@@ -2,11 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { TripsService } from './trips.service'
 import { randomBytes } from 'crypto'
 import { NotFoundException } from '@nestjs/common'
-import { Trip } from './entities/trip.entity'
 import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
+import { Trip } from './schemas/trip.schema'
+import { getModelToken } from '@nestjs/mongoose'
 
-const mockTripsRepository = {
+const mockTripModel = {
 	findOne: jest.fn(),
 	create: jest.fn(),
 	save: jest.fn(),
@@ -23,8 +24,8 @@ describe('TripsService', () => {
 			providers: [
 				TripsService,
 				{
-					provide: 'TripsRepository',
-					useValue: mockTripsRepository,
+					provide: getModelToken(Trip.name),
+					useValue: mockTripModel,
 				},
 			],
 		}).compile()
@@ -50,14 +51,14 @@ describe('TripsService', () => {
 				expenses: [],
 			}
 
-			mockTripsRepository.create.mockReturnValue(tripEntity)
-			mockTripsRepository.create.mockResolvedValue(tripEntity)
+			mockTripModel.create.mockReturnValue(tripEntity)
+			mockTripModel.create.mockResolvedValue(tripEntity)
 
 			const trip = await service.create(createTripDto)
 
 			expect(trip).toEqual(tripEntity)
 
-			expect(mockTripsRepository.create).toHaveBeenCalledWith(createTripDto)
+			expect(mockTripModel.create).toHaveBeenCalledWith(createTripDto)
 		})
 	})
 
@@ -69,18 +70,18 @@ describe('TripsService', () => {
 				expenses: [],
 			}
 
-			mockTripsRepository.findOne.mockResolvedValue(tripEntity)
+			mockTripModel.findOne.mockResolvedValue(tripEntity)
 
 			const trip = await service.find(base64TripId)
 
 			expect(trip).toEqual(tripEntity)
-			expect(mockTripsRepository.findOne).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findOne).toHaveBeenCalledWith(base64TripId)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			mockTripsRepository.findOne.mockResolvedValue(null)
+			mockTripModel.findOne.mockResolvedValue(null)
 
 			await expect(service.find(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
-			expect(mockTripsRepository.findOne).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findOne).toHaveBeenCalledWith(base64TripId)
 		})
 	})
 	describe('update', () => {
@@ -98,19 +99,19 @@ describe('TripsService', () => {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
-			mockTripsRepository.findOne.mockResolvedValue(tripEntity)
-			mockTripsRepository.update.mockResolvedValue(updatedTripEntity)
+			mockTripModel.findOne.mockResolvedValue(tripEntity)
+			mockTripModel.update.mockResolvedValue(updatedTripEntity)
 
 			await service.update(base64TripId, updateTripDto)
 
-			expect(mockTripsRepository.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
+			expect(mockTripModel.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
-			mockTripsRepository.findOne.mockResolvedValue(null)
+			mockTripModel.findOne.mockResolvedValue(null)
 
 			await expect(service.update(base64TripId, updateTripDto)).rejects.toBeInstanceOf(NotFoundException)
 		})
@@ -123,17 +124,17 @@ describe('TripsService', () => {
 				expenses: [],
 			}
 
-			mockTripsRepository.findOne.mockResolvedValue(trip)
+			mockTripModel.findOne.mockResolvedValue(trip)
 
 			await service.remove(base64TripId)
 
-			expect(mockTripsRepository.remove).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.remove).toHaveBeenCalledWith(base64TripId)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			mockTripsRepository.findOne.mockResolvedValue(null)
+			mockTripModel.findOne.mockResolvedValue(null)
 
 			await expect(service.remove(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
-			expect(mockTripsRepository.findOne).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findOne).toHaveBeenCalledWith(base64TripId)
 		})
 	})
 })
