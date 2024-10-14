@@ -8,7 +8,7 @@ import { Trip } from './schemas/trip.schema'
 import { getModelToken } from '@nestjs/mongoose'
 
 const mockTripModel = {
-	findOne: jest.fn(),
+	findById: jest.fn(),
 	create: jest.fn(),
 	save: jest.fn(),
 	update: jest.fn(),
@@ -51,13 +51,11 @@ describe('TripsService', () => {
 				expenses: [],
 			}
 
-			mockTripModel.create.mockReturnValue(tripEntity)
 			mockTripModel.create.mockResolvedValue(tripEntity)
 
 			const trip = await service.create(createTripDto)
 
 			expect(trip).toEqual(tripEntity)
-
 			expect(mockTripModel.create).toHaveBeenCalledWith(createTripDto)
 		})
 	})
@@ -70,18 +68,18 @@ describe('TripsService', () => {
 				expenses: [],
 			}
 
-			mockTripModel.findOne.mockResolvedValue(tripEntity)
+			mockTripModel.findById.mockResolvedValue(tripEntity)
 
 			const trip = await service.find(base64TripId)
 
 			expect(trip).toEqual(tripEntity)
-			expect(mockTripModel.findOne).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findById).toHaveBeenCalledWith(base64TripId)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			mockTripModel.findOne.mockResolvedValue(null)
+			mockTripModel.findById.mockResolvedValue(null)
 
 			await expect(service.find(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
-			expect(mockTripModel.findOne).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findById).toHaveBeenCalledWith(base64TripId)
 		})
 	})
 	describe('update', () => {
@@ -99,7 +97,7 @@ describe('TripsService', () => {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
-			mockTripModel.findOne.mockResolvedValue(tripEntity)
+			mockTripModel.findById.mockResolvedValue(tripEntity)
 			mockTripModel.update.mockResolvedValue(updatedTripEntity)
 
 			await service.update(base64TripId, updateTripDto)
@@ -111,7 +109,7 @@ describe('TripsService', () => {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
-			mockTripModel.findOne.mockResolvedValue(null)
+			mockTripModel.findById.mockResolvedValue(null)
 
 			await expect(service.update(base64TripId, updateTripDto)).rejects.toBeInstanceOf(NotFoundException)
 		})
@@ -124,17 +122,17 @@ describe('TripsService', () => {
 				expenses: [],
 			}
 
-			mockTripModel.findOne.mockResolvedValue(trip)
+			mockTripModel.findById.mockResolvedValue(trip)
 
 			await service.remove(base64TripId)
 
 			expect(mockTripModel.remove).toHaveBeenCalledWith(base64TripId)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			mockTripModel.findOne.mockResolvedValue(null)
+			mockTripModel.findById.mockResolvedValue(null)
 
 			await expect(service.remove(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
-			expect(mockTripModel.findOne).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findById).toHaveBeenCalledWith(base64TripId)
 		})
 	})
 })
