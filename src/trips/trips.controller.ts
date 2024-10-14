@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Res } from '@nestjs/common'
+import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Patch, Post, Res } from '@nestjs/common'
 import { TripsService } from './trips.service'
 import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
@@ -11,9 +11,9 @@ export class TripsController {
 	constructor(private readonly tripsService: TripsService) {}
 
 	@Post()
-	async create(@Body() createTripDto: CreateTripDto, @Res() res: Response): Promise<void> {
+	async create(@Body() createTripDto: CreateTripDto, @Res({ passthrough: true }) res: Response): Promise<void> {
 		const trip = await this.tripsService.create(createTripDto)
-		res.status(201).location(`/trips/${trip.id}`).send()
+		res.location(`/trips/${trip.id}`)
 	}
 
 	@Get(':id')
@@ -22,21 +22,27 @@ export class TripsController {
 	}
 
 	@Patch(':id')
-	async update(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto, @Res() res: Response): Promise<void> {
+	@HttpCode(204)
+	async update(
+		@Param('id') id: string,
+		@Body() updateTripDto: UpdateTripDto,
+		@Res({ passthrough: true }) res: Response,
+	): Promise<void> {
 		await this.getTripOrFail(id)
 
 		await this.tripsService.update(id, updateTripDto)
 
-		res.status(204).location(`/trips/${id}`).send()
+		res.location(`/trips/${id}`)
 	}
 
 	@Delete(':id')
-	async remove(@Param('id') id: string, @Res() res: Response): Promise<void> {
+	@HttpCode(204)
+	async remove(@Param('id') id: string, @Res({ passthrough: true }) res: Response): Promise<void> {
 		await this.getTripOrFail(id)
 
 		await this.tripsService.remove(id)
 
-		res.status(204).location('/trips').send()
+		res.location('/trips')
 	}
 
 	private async getTripOrFail(id: string): Promise<Trip> {
