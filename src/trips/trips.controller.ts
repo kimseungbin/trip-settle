@@ -4,7 +4,7 @@ import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
 import { FindTripDto } from './dto/find-trip.dto'
 import { Response } from 'express'
-import { Trip } from './entities/trip.entity'
+import { Trip } from './schemas/trip.schema'
 
 @Controller('trips')
 export class TripsController {
