@@ -17,6 +17,7 @@ describe('AppController (e2e)', () => {
 		app = moduleFixture.createNestApplication()
 		await app.init()
 
+		// Initialize a new MongoDB connection for each test
 		connection = moduleFixture.get<Connection>(getConnectionToken())
 	})
 
@@ -25,8 +26,20 @@ describe('AppController (e2e)', () => {
 	})
 
 	afterAll(async () => {
-		await connection.close()
-		await closeMongooseConnection()
-		await app.close()
+		try {
+			await connection.close()
+		} catch (error) {
+			console.error('Error closing connection:', error)
+		}
+		try {
+			await closeMongooseConnection()
+		} catch (error) {
+			console.error('Error closing mongoose connection:', error)
+		}
+		try {
+			await app.close()
+		} catch (error) {
+			console.error('Error closing app:', error)
+		}
 	})
 })
