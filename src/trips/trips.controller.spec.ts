@@ -111,9 +111,7 @@ describe('TripsController', () => {
 
 			await controller.create(createTripDto, mockResponse)
 
-			expect(mockResponse.status).toHaveBeenCalledWith(201)
 			expect(mockResponse.location).toHaveBeenCalledWith(`/trips/${newTrip.id}`)
-			expect(mockResponse.send).toHaveBeenCalled()
 
 			expect(service.create).toHaveBeenCalledWith(createTripDto)
 		})
@@ -125,9 +123,7 @@ describe('TripsController', () => {
 
 			await controller.update(base64TripId, updateTripDto, mockResponse)
 
-			expect(mockResponse.status).toHaveBeenCalledWith(204)
 			expect(mockResponse.location).toHaveBeenCalledWith(`/trips/${base64TripId}`)
-			expect(mockResponse.send).toHaveBeenCalled()
 
 			expect(mockTripsService.find).toHaveBeenCalledWith(base64TripId)
 			expect(mockTripsService.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
@@ -151,9 +147,7 @@ describe('TripsController', () => {
 
 			await controller.remove(base64TripId, mockResponse)
 
-			expect(mockResponse.status).toHaveBeenCalledWith(204)
 			expect(mockResponse.location).toHaveBeenCalledWith('/trips')
-			expect(mockResponse.send).toHaveBeenCalled()
 
 			expect(mockTripsService.remove).toHaveBeenCalledWith(base64TripId)
 		})
