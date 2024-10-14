@@ -11,8 +11,8 @@ const mockTripModel = {
 	findById: jest.fn(),
 	create: jest.fn(),
 	save: jest.fn(),
-	update: jest.fn(),
-	remove: jest.fn(),
+	findByIdAndUpdate: jest.fn(),
+	findByIdAndDelete: jest.fn(),
 }
 
 describe('TripsService', () => {
@@ -97,19 +97,18 @@ describe('TripsService', () => {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
-			mockTripModel.findById.mockResolvedValue(tripEntity)
-			mockTripModel.update.mockResolvedValue(updatedTripEntity)
+			mockTripModel.findByIdAndUpdate.mockResolvedValue(updatedTripEntity)
 
 			await service.update(base64TripId, updateTripDto)
 
-			expect(mockTripModel.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
+			expect(mockTripModel.findByIdAndUpdate).toHaveBeenCalledWith(base64TripId, updateTripDto)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
-			mockTripModel.findById.mockResolvedValue(null)
+			mockTripModel.findByIdAndUpdate.mockResolvedValue(null)
 
 			await expect(service.update(base64TripId, updateTripDto)).rejects.toBeInstanceOf(NotFoundException)
 		})
@@ -122,17 +121,17 @@ describe('TripsService', () => {
 				expenses: [],
 			}
 
-			mockTripModel.findById.mockResolvedValue(trip)
+			mockTripModel.findByIdAndDelete.mockResolvedValue(trip)
 
 			await service.remove(base64TripId)
 
-			expect(mockTripModel.remove).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findByIdAndDelete).toHaveBeenCalledWith(base64TripId)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			mockTripModel.findById.mockResolvedValue(null)
+			mockTripModel.findByIdAndDelete.mockResolvedValue(null)
 
 			await expect(service.remove(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
-			expect(mockTripModel.findById).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findByIdAndDelete).toHaveBeenCalledWith(base64TripId)
 		})
 	})
 })
