@@ -66,7 +66,7 @@ describe('IsPayerInTripParticipantsConstraint', () => {
 	})
 
 	it('should return correct error message', () => {
-		expect(validator.defaultMessage()).toBe('Payer ust be one of the trip participants')
+		expect(validator.defaultMessage()).toBe('Payer must be one of the trip participants')
 	})
 })
 

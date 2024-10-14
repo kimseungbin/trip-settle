@@ -12,7 +12,7 @@ export class IsPayerInTripParticipantsConstraint implements ValidatorConstraintI
 	}
 
 	defaultMessage(): string {
-		return 'Payer ust be one of the trip participants'
+		return 'Payer must be one of the trip participants'
 	}
 }
 
