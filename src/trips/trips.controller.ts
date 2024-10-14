@@ -4,6 +4,7 @@ import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
 import { FindTripDto } from './dto/find-trip.dto'
 import { Response } from 'express'
+import { Trip } from './entities/trip.entity'
 
 @Controller('trips')
 export class TripsController {
@@ -17,16 +18,12 @@ export class TripsController {
 
 	@Get(':id')
 	async find(@Param('id') id: string): Promise<FindTripDto> {
-		const trip = await this.tripsService.find(id)
-		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
-
-		return trip
+		return this.getTripOrFail(id)
 	}
 
 	@Patch(':id')
 	async update(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto, @Res() res: Response): Promise<void> {
-		const trip = await this.tripsService.find(id)
-		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
+		await this.getTripOrFail(id)
 
 		await this.tripsService.update(id, updateTripDto)
 
@@ -35,11 +32,17 @@ export class TripsController {
 
 	@Delete(':id')
 	async remove(@Param('id') id: string, @Res() res: Response): Promise<void> {
-		const trip = await this.tripsService.find(id)
-		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
+		await this.getTripOrFail(id)
 
 		await this.tripsService.remove(id)
 
 		res.status(204).location('/trips').send()
+	}
+
+	private async getTripOrFail(id: string): Promise<Trip> {
+		const trip = await this.tripsService.find(id)
+		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
+
+		return trip
 	}
 }
