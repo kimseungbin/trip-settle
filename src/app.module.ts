@@ -5,14 +5,12 @@ import { TripsModule } from './trips/trips.module'
 import { MongooseModule } from '@nestjs/mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 
-let mongoMemoryServer: MongoMemoryServer
-
 @Module({
 	imports: [
 		MongooseModule.forRootAsync({
 			useFactory: async () => {
 				try {
-					mongoMemoryServer = await MongoMemoryServer.create()
+					const mongoMemoryServer = await AppModule.getMongoMemoryServer()
 					return {
 						uri: mongoMemoryServer.getUri(),
 					}
@@ -28,7 +26,16 @@ let mongoMemoryServer: MongoMemoryServer
 	providers: [AppService],
 })
 export class AppModule implements OnApplicationShutdown {
+	private static mongoMemoryServer: MongoMemoryServer
+
+	static async getMongoMemoryServer(): Promise<MongoMemoryServer> {
+		if (!this.mongoMemoryServer) {
+			this.mongoMemoryServer = await MongoMemoryServer.create()
+		}
+		return this.mongoMemoryServer
+	}
+
 	async onApplicationShutdown() {
-		await mongoMemoryServer?.stop()
+		await AppModule.mongoMemoryServer?.stop()
 	}
 }
