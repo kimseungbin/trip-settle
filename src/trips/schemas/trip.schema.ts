@@ -12,7 +12,9 @@ export class Trip {
 	expenses: Types.ObjectId[]
 
 	get id(): string {
-		return '' // Placeholder to satisfy TypeScript, virtual will override
+		// This is a placeholder to satisfy TypeScript.
+		// The actual implementation is provided by a virtual property defined later.
+		return ''
 	}
 }
 
