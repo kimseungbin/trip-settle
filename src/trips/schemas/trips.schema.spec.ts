@@ -1,4 +1,4 @@
-import { Trip, TripDocument, TripSchema } from './trip.schema'
+import { TripDocument, TripSchema } from './trip.schema'
 import { model, Model } from 'mongoose'
 
 describe('TripSchema', () => {
