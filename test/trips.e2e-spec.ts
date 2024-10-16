@@ -14,6 +14,10 @@ describe('Trips', () => {
 		await app.init()
 	})
 
+	afterAll(async () => {
+		await app.close()
+	})
+
 	it.todo('POST /trips')
 	it.todo('GET /trips/:id')
 	it.todo('PATCH /trips/:id')
