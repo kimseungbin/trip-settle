@@ -10,12 +10,6 @@ export class Trip {
 
 	@Prop({ type: [Types.ObjectId], ref: 'Expense' })
 	expenses: Types.ObjectId[]
-
-	get id(): string {
-		// This is a placeholder to satisfy TypeScript.
-		// The actual implementation is provided by a virtual property defined later.
-		return ''
-	}
 }
 
 const TripSchema = SchemaFactory.createForClass(Trip)
