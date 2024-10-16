@@ -14,9 +14,11 @@ export class Trip {
 
 const TripSchema = SchemaFactory.createForClass(Trip)
 
+TripSchema.set('id', false)
+
 // Add a virtual property for `id` that converts the `_id` to Base64URL string
 TripSchema.virtual('id').get(function (this: TripDocument) {
-	return Buffer.from(this._id.toString(), 'hex').toString('base64url')
+	return Buffer.from(this._id.id).toString('base64url')
 })
 
 TripSchema.set('toJSON', { virtuals: true })
