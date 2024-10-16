@@ -15,13 +15,6 @@ const mockTripModel = {
 	findByIdAndDelete: jest.fn(),
 }
 
-function createQueryMock(result: any) {
-	return {
-		populate: jest.fn().mockReturnThis(),
-		exec: jest.fn().mockResolvedValue(result),
-	}
-}
-
 describe('TripsService', () => {
 	let service: TripsService
 	let base64TripId: string
