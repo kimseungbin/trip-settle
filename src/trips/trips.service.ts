@@ -4,6 +4,9 @@ import { UpdateTripDto } from './dto/update-trip.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 import { Trip } from './schemas/trip.schema'
+import { FindTripDto } from './dto/find-trip.dto'
+import { ExpenseDto } from './dto/expense.dto'
+import { Expense } from './schemas/expense.schema'
 
 @Injectable()
 export class TripsService {
@@ -13,11 +16,16 @@ export class TripsService {
 		return this.tripModel.create(createTripDto)
 	}
 
-	async find(id: string): Promise<Trip> {
+	async find(id: string): Promise<FindTripDto> {
 		const trip = await this.tripModel.findById(this.convertBase64ToObjectId(id)).populate('expenses').exec()
 		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
 
-		return trip
+		const populatedExpenses = trip.expenses as unknown as Expense[]
+
+		return new FindTripDto({
+			...trip,
+			expenses: populatedExpenses.map(e => new ExpenseDto({ ...e })),
+		})
 	}
 
 	async update(id: string, updateTripDto: UpdateTripDto): Promise<void> {
