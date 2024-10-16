@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
 import { InjectModel } from '@nestjs/mongoose'
@@ -39,7 +39,12 @@ export class TripsService {
 	}
 
 	private convertBase64ToObjectId(id: string) {
-		const hexId = Buffer.from(id, 'base64url').toString('hex')
-		return new Types.ObjectId(hexId)
+		try {
+			const hexId = Buffer.from(id, 'base64url').toString('hex')
+			return new Types.ObjectId(hexId)
+		} catch (e) {
+			console.error(e)
+			throw new BadRequestException(`Invalid ID format: ${id}`)
+		}
 	}
 }
