@@ -77,4 +77,8 @@ export class ExpenseDto {
 	@IsOptional()
 	@IsString({ each: true })
 	tripParticipants?: string[]
+
+	constructor(partial: Partial<ExpenseDto>) {
+		Object.assign(this, partial)
+	}
 }

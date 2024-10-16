@@ -1,30 +1,32 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { TripsService } from './trips.service'
-import { randomBytes } from 'crypto'
 import { NotFoundException } from '@nestjs/common'
-import { Trip } from './entities/trip.entity'
 import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
+import { Trip } from './schemas/trip.schema'
+import { getModelToken } from '@nestjs/mongoose'
+import { Types } from 'mongoose'
 
-const mockTripsRepository = {
-	findOne: jest.fn(),
+const mockTripModel = {
+	findById: jest.fn(),
 	create: jest.fn(),
 	save: jest.fn(),
-	update: jest.fn(),
-	remove: jest.fn(),
+	findByIdAndUpdate: jest.fn(),
+	findByIdAndDelete: jest.fn(),
 }
 
 describe('TripsService', () => {
 	let service: TripsService
 	let base64TripId: string
+	let objectId: Types.ObjectId
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				TripsService,
 				{
-					provide: 'TripsRepository',
-					useValue: mockTripsRepository,
+					provide: getModelToken(Trip.name),
+					useValue: mockTripModel,
 				},
 			],
 		}).compile()
@@ -32,7 +34,8 @@ describe('TripsService', () => {
 		jest.clearAllMocks()
 
 		service = module.get<TripsService>(TripsService)
-		base64TripId = randomBytes(16).toString('base64url')
+		objectId = new Types.ObjectId()
+		base64TripId = Buffer.from(objectId.toHexString(), 'hex').toString('base64url')
 	})
 
 	it('should be defined', () => {
@@ -45,42 +48,44 @@ describe('TripsService', () => {
 				participants: ['Alice', 'Bob'],
 			}
 			const tripEntity: Trip = {
-				id: base64TripId,
+				_id: objectId,
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 			}
 
-			mockTripsRepository.create.mockReturnValue(tripEntity)
-			mockTripsRepository.create.mockResolvedValue(tripEntity)
+			mockTripModel.create.mockResolvedValue(tripEntity)
 
 			const trip = await service.create(createTripDto)
 
 			expect(trip).toEqual(tripEntity)
-
-			expect(mockTripsRepository.create).toHaveBeenCalledWith(createTripDto)
+			expect(mockTripModel.create).toHaveBeenCalledWith(createTripDto)
 		})
 	})
 
 	describe('find', () => {
 		it('should return the trip object with a given ID', async () => {
 			const tripEntity: Trip = {
-				id: base64TripId,
+				_id: objectId,
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 			}
 
-			mockTripsRepository.findOne.mockResolvedValue(tripEntity)
+			mockTripModel.findById.mockImplementation(() => ({
+				populate: () => ({ exec: jest.fn().mockReturnValue(tripEntity) }),
+			}))
 
 			const trip = await service.find(base64TripId)
 
 			expect(trip).toEqual(tripEntity)
-			expect(mockTripsRepository.findOne).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findById).toHaveBeenCalledWith(objectId)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			mockTripsRepository.findOne.mockResolvedValue(null)
+			mockTripModel.findById.mockImplementation(() => ({
+				populate: () => ({ exec: jest.fn().mockReturnValue(null) }),
+			}))
 
 			await expect(service.find(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
-			expect(mockTripsRepository.findOne).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findById).toHaveBeenCalledWith(objectId)
 		})
 	})
 	describe('update', () => {
@@ -89,7 +94,7 @@ describe('TripsService', () => {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 			const tripEntity: Trip = {
-				id: base64TripId,
+				_id: objectId,
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 			}
@@ -98,19 +103,18 @@ describe('TripsService', () => {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
-			mockTripsRepository.findOne.mockResolvedValue(tripEntity)
-			mockTripsRepository.update.mockResolvedValue(updatedTripEntity)
+			mockTripModel.findByIdAndUpdate.mockResolvedValue(updatedTripEntity)
 
 			await service.update(base64TripId, updateTripDto)
 
-			expect(mockTripsRepository.update).toHaveBeenCalledWith(base64TripId, updateTripDto)
+			expect(mockTripModel.findByIdAndUpdate).toHaveBeenCalledWith(objectId, updateTripDto)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
-			mockTripsRepository.findOne.mockResolvedValue(null)
+			mockTripModel.findByIdAndUpdate.mockResolvedValue(null)
 
 			await expect(service.update(base64TripId, updateTripDto)).rejects.toBeInstanceOf(NotFoundException)
 		})
@@ -118,22 +122,22 @@ describe('TripsService', () => {
 	describe('delete', () => {
 		it('should delete an existing trip', async () => {
 			const trip: Trip = {
-				id: base64TripId,
+				_id: objectId,
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 			}
 
-			mockTripsRepository.findOne.mockResolvedValue(trip)
+			mockTripModel.findByIdAndDelete.mockResolvedValue(trip)
 
 			await service.remove(base64TripId)
 
-			expect(mockTripsRepository.remove).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findByIdAndDelete).toHaveBeenCalledWith(objectId)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
-			mockTripsRepository.findOne.mockResolvedValue(null)
+			mockTripModel.findByIdAndDelete.mockResolvedValue(null)
 
 			await expect(service.remove(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
-			expect(mockTripsRepository.findOne).toHaveBeenCalledWith(base64TripId)
+			expect(mockTripModel.findByIdAndDelete).toHaveBeenCalledWith(objectId)
 		})
 	})
 })

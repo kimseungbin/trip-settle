@@ -4,7 +4,6 @@ import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
 import { FindTripDto } from './dto/find-trip.dto'
 import { Response } from 'express'
-import { Trip } from './entities/trip.entity'
 
 @Controller('trips')
 export class TripsController {
@@ -45,7 +44,7 @@ export class TripsController {
 		res.location('/trips')
 	}
 
-	private async getTripOrFail(id: string): Promise<Trip> {
+	private async getTripOrFail(id: string): Promise<FindTripDto> {
 		const trip = await this.tripsService.find(id)
 		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
 
