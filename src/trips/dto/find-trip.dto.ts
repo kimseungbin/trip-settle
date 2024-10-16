@@ -23,4 +23,8 @@ export class FindTripDto {
 	@ValidateNested({ each: true })
 	@Type(() => ExpenseDto)
 	expenses: ExpenseDto[]
+
+	constructor(partial: Partial<FindTripDto>) {
+		Object.assign(this, partial)
+	}
 }

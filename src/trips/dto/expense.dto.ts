@@ -14,6 +14,7 @@ import {
 	AreParticipantsInTripParticipantsConstraint,
 	IsPayerInTripParticipantsConstraint,
 } from '../validators/expense.validators'
+import { FindTripDto } from './find-trip.dto'
 
 export class ExpenseDto {
 	/**
@@ -77,4 +78,8 @@ export class ExpenseDto {
 	@IsOptional()
 	@IsString({ each: true })
 	tripParticipants?: string[]
+
+	constructor(partial: Partial<FindTripDto>) {
+		Object.assign(this, partial)
+	}
 }
