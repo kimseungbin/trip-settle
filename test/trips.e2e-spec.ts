@@ -3,13 +3,15 @@ import { Test } from '@nestjs/testing'
 import { TripsModule } from '../src/trips/trips.module'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { MongooseModule } from '@nestjs/mongoose'
-import mongoose, { connection, Types } from 'mongoose'
+import mongoose, { connection } from 'mongoose'
 import { CreateTripDto } from '../src/trips/dto/create-trip.dto'
 import * as request from 'supertest'
+import { TripsService } from '../src/trips/trips.service'
 
 describe('Trips', () => {
 	let app: INestApplication
 	let mongod: MongoMemoryServer
+	let tripsService: TripsService
 
 	beforeAll(async () => {
 		mongod = await MongoMemoryServer.create()
@@ -22,6 +24,8 @@ describe('Trips', () => {
 
 		app = module.createNestApplication()
 		await app.init()
+
+		tripsService = module.get<TripsService>(TripsService)
 	})
 
 	afterAll(async () => {
@@ -41,12 +45,11 @@ describe('Trips', () => {
 			expect(locationHeader).toMatch(/^\/trips\/[a-zA-Z0-9-_]+$/)
 
 			const tripId = locationHeader.split('/').pop()
-			const _id = new Types.ObjectId(Buffer.from(tripId, 'base64url').toString('hex'))
 
-			const tripInDb = await connection.collection('trips').findOne({ _id })
+			const findTripDto = await tripsService.find(tripId)
 
-			expect(tripInDb).not.toBeNull()
-			expect(tripInDb.participants).toEqual(createTripDto.participants)
+			expect(findTripDto).not.toBeNull()
+			expect(findTripDto.participants).toEqual(createTripDto.participants)
 		})
 	})
 	it.todo('GET /trips/:id')
