@@ -16,6 +16,13 @@ export class TripsService {
 		return this.tripModel.create(createTripDto)
 	}
 
+	/**
+	 * Finds a trip by its ID, populates its expenses, and returns a DTO object.
+	 *
+	 * @param {string} id - The base64-encoded ID of the trip to find.
+	 * @return {Promise<FindTripDto>} A promise that resolves to a FindTripDto object containing the trip details and expenses.
+	 * @throws {NotFoundException} If no trip with the given ID is found.
+	 */
 	async find(id: string): Promise<FindTripDto> {
 		const trip = await this.tripModel.findById(this.convertBase64ToObjectId(id)).populate('expenses').exec()
 		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
@@ -23,7 +30,7 @@ export class TripsService {
 		const populatedExpenses = trip.expenses as unknown as Expense[]
 
 		return new FindTripDto({
-			...trip,
+			...trip.toObject(),
 			expenses: populatedExpenses.map(e => new ExpenseDto({ ...e })),
 		})
 	}
