@@ -1,13 +1,19 @@
 import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { TripsModule } from '../src/trips/trips.module'
+import { MongoMemoryServer } from 'mongodb-memory-server'
+import { MongooseModule } from '@nestjs/mongoose'
+import { connection } from 'mongoose'
 
 describe('Trips', () => {
 	let app: INestApplication
+	let mongod: MongoMemoryServer
 
 	beforeAll(async () => {
+		mongod = await MongoMemoryServer.create()
+
 		const module = await Test.createTestingModule({
-			imports: [TripsModule],
+			imports: [TripsModule, MongooseModule.forRoot(mongod.getUri())],
 		}).compile()
 
 		app = module.createNestApplication()
@@ -15,6 +21,8 @@ describe('Trips', () => {
 	})
 
 	afterAll(async () => {
+		await connection.close()
+		await mongod.stop()
 		await app.close()
 	})
 
