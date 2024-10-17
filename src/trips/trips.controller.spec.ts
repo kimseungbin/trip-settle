@@ -147,7 +147,7 @@ describe('TripsController', () => {
 
 			await controller.remove(base64TripId, mockResponse)
 
-			expect(mockResponse.location).toHaveBeenCalledWith('/trips')
+			expect(mockResponse.location).toHaveBeenCalledWith('/')
 
 			expect(mockTripsService.remove).toHaveBeenCalledWith(base64TripId)
 		})
