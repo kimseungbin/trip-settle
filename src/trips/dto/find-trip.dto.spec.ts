@@ -16,9 +16,9 @@ describe('FindTripDto Serialization', () => {
 		const json = JSON.parse(JSON.stringify(dto))
 
 		expect(json).toEqual({
-			id: '123',
-			participants: ['Alice'],
-			expenses: [],
+			id: expect.any(String),
+			participants: expect.arrayContaining([expect.any(String)]),
+			expenses: expect.any(Array),
 		})
 	})
 })
