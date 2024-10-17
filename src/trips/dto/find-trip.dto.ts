@@ -28,6 +28,10 @@ export class FindTripDto {
 	@Type(() => ExpenseDto)
 	expenses: ExpenseDto[]
 
+	/**
+	 * Creates an instance of FindTripDto.
+	 * @param {Partial<FindTripDto>} partial - Partial object to initiate the DTO.
+	 */
 	constructor(partial: Partial<FindTripDto>) {
 		Object.assign(this, partial)
 	}
