@@ -67,5 +67,17 @@ describe('Trips', () => {
 		})
 	})
 	it.todo('PATCH /trips/:id')
-	it.todo('DELETE /trips/:id')
+	describe('DELETE /trips/:id', () => {
+		it('should delete a trip', async () => {
+			const createTripDto: CreateTripDto = {
+				participants: ['Alice', 'Bob'],
+			}
+
+			const { id } = await tripsService.create(createTripDto)
+
+			const response = await request(app.getHttpServer()).delete(`/trips/${id}`).expect(204)
+			const locationHeader = response.header['location']
+			expect(locationHeader).toEqual('/')
+		})
+	})
 })
