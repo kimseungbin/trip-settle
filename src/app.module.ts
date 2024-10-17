@@ -9,7 +9,8 @@ import { DevtoolsModule } from '@nestjs/devtools-integration'
 @Module({
 	imports: [
 		DevtoolsModule.register({
-			http: true, // Todo refactor this using Config module
+			http: true, // Todo refactor this using Config module,
+			port: 3001,
 		}),
 		MongooseModule.forRootAsync({
 			useFactory: async () => {
