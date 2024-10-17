@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common'
+import { ClassSerializerInterceptor, INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { TripsModule } from '../src/trips/trips.module'
 import { MongoMemoryServer } from 'mongodb-memory-server'
@@ -7,6 +7,7 @@ import mongoose, { connection } from 'mongoose'
 import { CreateTripDto } from '../src/trips/dto/create-trip.dto'
 import * as request from 'supertest'
 import { TripsService } from '../src/trips/trips.service'
+import { Reflector } from '@nestjs/core'
 
 describe('Trips', () => {
 	let app: INestApplication
@@ -23,6 +24,7 @@ describe('Trips', () => {
 		}).compile()
 
 		app = module.createNestApplication()
+		app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
 		await app.init()
 
 		tripsService = module.get<TripsService>(TripsService)
