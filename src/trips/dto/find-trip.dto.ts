@@ -1,17 +1,20 @@
 import { ExpenseDto } from './expense.dto'
 import { IsArray, IsString, ValidateNested } from 'class-validator'
-import { Type } from 'class-transformer'
+import { Exclude, Expose, Type } from 'class-transformer'
 
+@Exclude()
 export class FindTripDto {
 	/**
 	 * Unique Base64URL format ID of the trip.
 	 */
+	@Expose()
 	@IsString()
 	id: string
 
 	/**
 	 * Array of all participants in the trip.
 	 */
+	@Expose()
 	@IsArray()
 	@IsString({ each: true })
 	participants: string[]
@@ -19,6 +22,7 @@ export class FindTripDto {
 	/**
 	 * Array of expenses associated with the trip.
 	 */
+	@Expose()
 	@IsArray()
 	@ValidateNested({ each: true })
 	@Type(() => ExpenseDto)
