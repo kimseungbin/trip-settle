@@ -26,38 +26,6 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Project setup
-
-```bash
-$ npm install
-```
-
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
 ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:
@@ -94,3 +62,59 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 ## Coverage Graph
 
 ![coverage-graph](https://codecov.io/github/kimseungbin/trip-settle/graphs/sunburst.svg?token=E6P5UWDAQ6)
+
+# Getting Started
+
+This guide will help you set up, build, run, and test the application.
+
+## Prerequisites
+
+- **Node.js**: Ensure you have Node.js installed
+- **npm**: Comes bundled with Node.js
+- **Nest CLI** (optional for development): Install globally using `npm install -g @nestjs/cli`
+
+## Installation
+
+1. Clone the Repository
+
+```bash
+git clone https://github.com/kimseungbin/trip-settle
+```
+
+2. Navigate to the Project Directory
+
+```bash
+cd <project-directory>
+```
+
+3. Install Dependencies
+
+```bash
+npm install
+```
+
+## Compile and run the project
+
+```bash
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+
+# production mode
+$ npm run start:prod
+```
+
+## Run tests
+
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
