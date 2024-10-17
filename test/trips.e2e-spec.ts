@@ -71,6 +71,17 @@ describe('Trips', () => {
 
 			await request(app.getHttpServer()).get(`/trips/${nonExistentId}`).expect(404)
 		})
+		it('should properly serialize the response (exclude _id)', async () => {
+			const createTripDto: CreateTripDto = {
+				participants: ['Alice', 'Bob'],
+			}
+
+			const { id } = await tripsService.create(createTripDto)
+
+			const response = await request(app.getHttpServer()).get(`/trips/${id}`).expect(200)
+
+			expect(response.body).not.toHaveProperty('_id')
+		})
 	})
 	describe('PATCH /trips/:id', () => {
 		it('should update a trip', async () => {
