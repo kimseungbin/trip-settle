@@ -1,7 +1,7 @@
 import { Module, OnApplicationShutdown } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { TripsModule } from './trips/trips.module'
+import { TripsModule } from '@trips/trips.module'
 import { MongooseModule } from '@nestjs/mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 

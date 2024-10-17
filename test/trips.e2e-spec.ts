@@ -1,14 +1,14 @@
 import { ClassSerializerInterceptor, INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
-import { TripsModule } from '../src/trips/trips.module'
+import { TripsModule } from '@trips/trips.module'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { MongooseModule } from '@nestjs/mongoose'
 import mongoose, { connection, Types } from 'mongoose'
-import { CreateTripDto } from '../src/trips/dto/create-trip.dto'
+import { CreateTripDto } from '@trips/dto/create-trip.dto'
 import * as request from 'supertest'
-import { TripsService } from '../src/trips/trips.service'
+import { TripsService } from '@trips/trips.service'
 import { Reflector } from '@nestjs/core'
-import { UpdateTripDto } from '../src/trips/dto/update-trip.dto'
+import { UpdateTripDto } from '@trips/dto/update-trip.dto'
 
 describe('Trips', () => {
 	let app: INestApplication
