@@ -8,6 +8,7 @@ import { CreateTripDto } from '../src/trips/dto/create-trip.dto'
 import * as request from 'supertest'
 import { TripsService } from '../src/trips/trips.service'
 import { Reflector } from '@nestjs/core'
+import { UpdateTripDto } from '../src/trips/dto/update-trip.dto'
 
 describe('Trips', () => {
 	let app: INestApplication
@@ -66,7 +67,23 @@ describe('Trips', () => {
 			expect(response.body).toEqual({ ...createTripDto, id, expenses: [] })
 		})
 	})
-	it.todo('PATCH /trips/:id')
+	describe('PATCH /trips/:id', () => {
+		it('should update a trip', async () => {
+			const createTripDto: CreateTripDto = {
+				participants: ['Alice', 'Bob'],
+			}
+
+			const updateTripDto: UpdateTripDto = {
+				participants: ['Alice', 'Bob', 'Charlie'],
+			}
+
+			const { id } = await tripsService.create(createTripDto)
+
+			const response = await request(app.getHttpServer()).patch(`/trips/${id}`).send(updateTripDto).expect(204)
+			const locationHeader = response.header['location']
+			expect(locationHeader).toMatch(/^\/trips\/[a-zA-Z0-9-_]+$/)
+		})
+	})
 	describe('DELETE /trips/:id', () => {
 		it('should delete a trip', async () => {
 			const createTripDto: CreateTripDto = {
