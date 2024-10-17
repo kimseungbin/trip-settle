@@ -4,9 +4,13 @@ import { AppService } from './app.service'
 import { TripsModule } from '@trips/trips.module'
 import { MongooseModule } from '@nestjs/mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
+import { DevtoolsModule } from '@nestjs/devtools-integration'
 
 @Module({
 	imports: [
+		DevtoolsModule.register({
+			http: true, // Todo refactor this using Config module
+		}),
 		MongooseModule.forRootAsync({
 			useFactory: async () => {
 				try {
