@@ -113,9 +113,7 @@ describe('Trips', () => {
 
 			const { id } = await tripsService.create(createTripDto)
 
-			const response = await request(app.getHttpServer()).delete(`/trips/${id}`).expect(204)
-			const locationHeader = response.header['location']
-			expect(locationHeader).toEqual('/')
+			await request(app.getHttpServer()).delete(`/trips/${id}`).expect(204)
 		})
 		it('should return 404 for non-existent trip', async () => {
 			const nonExistentId = Buffer.from(new Types.ObjectId().toHexString(), 'hex').toString('base64url')

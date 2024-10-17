@@ -36,12 +36,10 @@ export class TripsController {
 
 	@Delete(':id')
 	@HttpCode(204)
-	async remove(@Param('id') id: string, @Res({ passthrough: true }) res: Response): Promise<void> {
+	async remove(@Param('id') id: string): Promise<void> {
 		await this.getTripOrFail(id)
 
 		await this.tripsService.remove(id)
-
-		res.location('/')
 	}
 
 	private async getTripOrFail(id: string): Promise<FindTripDto> {
