@@ -88,6 +88,11 @@ describe('Trips', () => {
 			const locationHeader = response.header['location']
 			expect(locationHeader).toMatch(/^\/trips\/[a-zA-Z0-9-_]+$/)
 		})
+		it('should return 404 for non-existent trip', async () => {
+			const nonExistentId = Buffer.from(new Types.ObjectId().toHexString(), 'hex').toString('base64url')
+
+			await request(app.getHttpServer()).patch(`/trips/${nonExistentId}`).expect(404)
+		})
 	})
 	describe('DELETE /trips/:id', () => {
 		it('should delete a trip', async () => {
@@ -100,6 +105,11 @@ describe('Trips', () => {
 			const response = await request(app.getHttpServer()).delete(`/trips/${id}`).expect(204)
 			const locationHeader = response.header['location']
 			expect(locationHeader).toEqual('/')
+		})
+		it('should return 404 for non-existent trip', async () => {
+			const nonExistentId = Buffer.from(new Types.ObjectId().toHexString(), 'hex').toString('base64url')
+
+			await request(app.getHttpServer()).delete(`/trips/${nonExistentId}`).expect(404)
 		})
 	})
 })
