@@ -64,11 +64,11 @@ describe('TripsService', () => {
 
 	describe('find', () => {
 		it('should return the trip object with a given ID', async () => {
-			const tripEntity: Trip = {
-				_id: objectId,
+			const tripEntity = {
 				participants: ['Alice', 'Bob'],
 				expenses: [],
-			}
+				toObject: jest.fn().mockReturnThis(),
+			} as Trip
 
 			mockTripModel.findById.mockImplementation(() => ({
 				populate: () => ({ exec: jest.fn().mockReturnValue(tripEntity) }),
