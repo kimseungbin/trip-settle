@@ -2,7 +2,7 @@ import { Config } from 'jest'
 
 const config: Config = {
 	moduleFileExtensions: ['js', 'json', 'ts'],
-	rootDir: '../src',
+	rootDir: '../src', // Assumes this config is in 'infra' directory, one level up from 'src'
 	transform: {
 		'^.+\\.(t|j)s?$': '@swc/jest',
 	},
