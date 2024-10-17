@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing'
 import { TripsModule } from '../src/trips/trips.module'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { MongooseModule } from '@nestjs/mongoose'
-import mongoose, { connection } from 'mongoose'
+import mongoose, { connection, Types } from 'mongoose'
 import { CreateTripDto } from '../src/trips/dto/create-trip.dto'
 import * as request from 'supertest'
 import { TripsService } from '../src/trips/trips.service'
@@ -65,6 +65,11 @@ describe('Trips', () => {
 
 			const response = await request(app.getHttpServer()).get(`/trips/${id}`).expect(200)
 			expect(response.body).toEqual({ ...createTripDto, id, expenses: [] })
+		})
+		it('should return 404 for non-existent trip', async () => {
+			const nonExistentId = Buffer.from(new Types.ObjectId().toHexString(), 'hex').toString('base64url')
+
+			await request(app.getHttpServer()).get(`/trips/${nonExistentId}`).expect(404)
 		})
 	})
 	describe('PATCH /trips/:id', () => {
