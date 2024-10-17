@@ -41,7 +41,7 @@ export class TripsController {
 
 		await this.tripsService.remove(id)
 
-		res.location('/trips')
+		res.location('/')
 	}
 
 	private async getTripOrFail(id: string): Promise<FindTripDto> {
