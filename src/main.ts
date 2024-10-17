@@ -4,7 +4,11 @@ import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/
 import { ClassSerializerInterceptor } from '@nestjs/common'
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule)
+	const isDev = true // Todo refactor this by using Config module
+
+	const app = await NestFactory.create(AppModule, {
+		snapshot: isDev,
+	})
 
 	app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
 
