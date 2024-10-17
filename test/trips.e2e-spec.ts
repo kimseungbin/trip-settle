@@ -52,7 +52,18 @@ describe('Trips', () => {
 			expect(findTripDto.participants).toEqual(createTripDto.participants)
 		})
 	})
-	it.todo('GET /trips/:id')
+	describe('GET /trips/:id', () => {
+		it('should return a trip', async () => {
+			const createTripDto: CreateTripDto = {
+				participants: ['Alice', 'Bob'],
+			}
+
+			const { id } = await tripsService.create(createTripDto)
+
+			const response = await request(app.getHttpServer()).get(`/trips/${id}`).expect(200)
+			expect(response.body).toEqual({ ...createTripDto, id, expenses: [] })
+		})
+	})
 	it.todo('PATCH /trips/:id')
 	it.todo('DELETE /trips/:id')
 })
