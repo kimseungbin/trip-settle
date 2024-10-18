@@ -30,7 +30,7 @@ export class TripsController {
 			},
 		},
 	})
-	@ApiBadRequestResponse({ description: 'Trip with ID ${id} not found' })
+	@ApiBadRequestResponse({ description: 'Invalid input' })
 	async create(@Body() createTripDto: CreateTripDto, @Res({ passthrough: true }) res: Response): Promise<void> {
 		const trip = await this.tripsService.create(createTripDto)
 		res.location(`/trips/${trip.id}`)
