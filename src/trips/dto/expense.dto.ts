@@ -14,6 +14,7 @@ import {
 	AreParticipantsInTripParticipantsConstraint,
 	IsPayerInTripParticipantsConstraint,
 } from '../validators/expense.validators'
+import { ApiProperty } from '@nestjs/swagger'
 
 export class ExpenseDto {
 	/**
@@ -22,6 +23,12 @@ export class ExpenseDto {
 	 */
 	@IsNumber()
 	@IsPositive({ message: 'Amount must be a positive number.' })
+	@ApiProperty({
+		description: 'The amount of money spend for this particular expense',
+		minimum: 0,
+		exclusiveMinimum: true,
+		example: 36900,
+	})
 	amount: number
 
 	/**
@@ -33,6 +40,13 @@ export class ExpenseDto {
 	@IsString()
 	@Length(3, 3, { message: 'Currency must be a 3-character ISO 4217 code.' })
 	@Matches(/^[A-Z]{3}$/, { message: 'Currency must be uppercase alphabetic characters only.' })
+	@ApiProperty({
+		description: 'The currency in which the expense is recorded, following the ISO 4217 standard',
+		minimum: 3,
+		maxLength: 3,
+		pattern: '^[A-Z]{3}$',
+		example: 'USD',
+	})
 	currency: string
 
 	/**
@@ -41,6 +55,11 @@ export class ExpenseDto {
 	 */
 	@IsString()
 	@Length(1, 255, { message: 'Description must be between 1 and 255 characters long.' })
+	@ApiProperty({
+		description: 'A short description of what the expense was for',
+		minLength: 1,
+		maxLength: 255,
+	})
 	description: string
 
 	/**
@@ -50,6 +69,10 @@ export class ExpenseDto {
 	@IsString()
 	@IsOptional()
 	@MaxLength(1000, { message: 'Note must not exceed 1000 characters.' })
+	@ApiProperty({
+		description: 'An optional detailed note providing more information about the expense',
+		maxLength: 1000,
+	})
 	note?: string
 
 	/**
@@ -60,6 +83,11 @@ export class ExpenseDto {
 	@ArrayMinSize(1, { message: 'At least one participant is required.' })
 	@IsString({ each: true, message: 'Each participant must be a string' })
 	@Validate(AreParticipantsInTripParticipantsConstraint)
+	@ApiProperty({
+		description: 'A list of participants involved in the expense, who will divide the cost',
+		minLength: 1,
+		uniqueItems: true,
+	})
 	participants: string[]
 
 	/**
@@ -68,6 +96,9 @@ export class ExpenseDto {
 	 */
 	@IsString()
 	@Validate(IsPayerInTripParticipantsConstraint)
+	@ApiProperty({
+		description: 'The person who paid for the expense',
+	})
 	payer: string
 
 	/**
