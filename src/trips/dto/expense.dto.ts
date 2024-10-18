@@ -1,5 +1,6 @@
 import {
 	ArrayMinSize,
+	ArrayUnique,
 	IsArray,
 	IsNumber,
 	IsOptional,
@@ -81,12 +82,14 @@ export class ExpenseDto {
 	 */
 	@IsArray()
 	@ArrayMinSize(1, { message: 'At least one participant is required.' })
+	@ArrayUnique({ message: 'Each participant must be unique.' })
 	@IsString({ each: true, message: 'Each participant must be a string' })
 	@Validate(AreParticipantsInTripParticipantsConstraint)
 	@ApiProperty({
 		description: 'A list of participants involved in the expense, who will divide the cost',
-		minLength: 1,
+		minItems: 1,
 		uniqueItems: true,
+		example: ['Alice', 'Bob', 'Charlie'],
 	})
 	participants: string[]
 
