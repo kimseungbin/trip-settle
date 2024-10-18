@@ -2,6 +2,8 @@ import { NestFactory, Reflector } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/swagger'
 import { ClassSerializerInterceptor } from '@nestjs/common'
+import * as path from 'node:path'
+import { mkdir, writeFile } from 'fs/promises'
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
@@ -19,7 +21,11 @@ async function bootstrap() {
 	}
 
 	const document = SwaggerModule.createDocument(app, config, options)
-	SwaggerModule.setup('api', app, document)
+
+	// todo update it to not do it in production
+	const outputPath = path.resolve(process.cwd(), 'docs', 'openapi.json')
+	await mkdir(path.dirname(outputPath), { recursive: true })
+	await writeFile(outputPath, JSON.stringify(document), { encoding: 'utf8' })
 
 	await app.listen(3000)
 }
