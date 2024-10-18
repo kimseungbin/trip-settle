@@ -1,6 +1,7 @@
 import { ExpenseDto } from './expense.dto'
 import { IsArray, IsString, ValidateNested } from 'class-validator'
 import { Exclude, Expose, Type } from 'class-transformer'
+import { ApiProperty } from '@nestjs/swagger'
 
 @Exclude()
 export class FindTripDto {
@@ -9,6 +10,10 @@ export class FindTripDto {
 	 */
 	@Expose()
 	@IsString()
+	// todo add example, min, and max length after adding a test checking the id property's length
+	@ApiProperty({
+		description: 'Unique Base64URL format ID of the trip',
+	})
 	id: string
 
 	/**
@@ -17,6 +22,12 @@ export class FindTripDto {
 	@Expose()
 	@IsArray()
 	@IsString({ each: true })
+	@ApiProperty({
+		description: 'Array of all participants in the trip',
+		minLength: 1,
+		example: ['Alice', 'Bob', 'Charlie'],
+		uniqueItems: true,
+	})
 	participants: string[]
 
 	/**
@@ -26,6 +37,10 @@ export class FindTripDto {
 	@IsArray()
 	@ValidateNested({ each: true })
 	@Type(() => ExpenseDto)
+	@ApiProperty({
+		description: 'Array of expenses associated with the trip',
+		type: [ExpenseDto],
+	})
 	expenses: ExpenseDto[]
 
 	/**

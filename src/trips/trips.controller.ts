@@ -4,23 +4,53 @@ import { CreateTripDto } from './dto/create-trip.dto'
 import { UpdateTripDto } from './dto/update-trip.dto'
 import { FindTripDto } from './dto/find-trip.dto'
 import { Response } from 'express'
+import {
+	ApiBadRequestResponse,
+	ApiCreatedResponse,
+	ApiNoContentResponse,
+	ApiNotFoundResponse,
+	ApiOkResponse,
+	ApiOperation,
+	ApiTags,
+} from '@nestjs/swagger'
 
 @Controller('trips')
+@ApiTags('Trips')
 export class TripsController {
 	constructor(private readonly tripsService: TripsService) {}
 
 	@Post()
+	@ApiOperation({ summary: 'Create a new trip', description: 'Create a new trip with the provided participants.' })
+	@ApiCreatedResponse({
+		description: 'Trip successfully created.',
+		headers: {
+			Location: {
+				description: 'URL of the created trip',
+				schema: { type: 'string' },
+			},
+		},
+	})
+	@ApiBadRequestResponse({ description: 'Invalid input' })
 	async create(@Body() createTripDto: CreateTripDto, @Res({ passthrough: true }) res: Response): Promise<void> {
 		const trip = await this.tripsService.create(createTripDto)
 		res.location(`/trips/${trip.id}`)
 	}
 
 	@Get(':id')
+	@ApiOperation({ summary: 'Retrieve a trip', description: 'Gets the details of a trip by its ID.' })
+	@ApiOkResponse({ description: 'Trip successfully retrieved.', type: FindTripDto })
+	@ApiNotFoundResponse({ description: 'Trip not found' })
 	async find(@Param('id') id: string): Promise<FindTripDto> {
 		return this.getTripOrFail(id)
 	}
 
 	@Patch(':id')
+	@ApiOperation({ summary: 'Update a trip', description: 'Updates an existing tip with new details.' })
+	@ApiNoContentResponse({
+		description: 'Trip successfully updated.',
+		headers: { Location: { description: 'URL of the updated trip', schema: { type: 'string' } } },
+	})
+	@ApiNotFoundResponse({ description: 'Trip not found' })
 	@HttpCode(204)
 	async update(
 		@Param('id') id: string,
@@ -35,6 +65,9 @@ export class TripsController {
 	}
 
 	@Delete(':id')
+	@ApiOperation({ summary: 'Delete a trip', description: 'Deletes a trip by its ID.' })
+	@ApiNoContentResponse({ description: 'Trip successfully deleted.' })
+	@ApiNotFoundResponse({ description: 'Trip not found' })
 	@HttpCode(204)
 	async remove(@Param('id') id: string): Promise<void> {
 		await this.getTripOrFail(id)
