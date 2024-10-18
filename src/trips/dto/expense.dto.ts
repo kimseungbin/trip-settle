@@ -60,6 +60,7 @@ export class ExpenseDto {
 		description: 'A short description of what the expense was for',
 		minLength: 1,
 		maxLength: 255,
+		example: 'Dinner at a restaurant.',
 	})
 	description: string
 
@@ -73,6 +74,7 @@ export class ExpenseDto {
 	@ApiProperty({
 		description: 'An optional detailed note providing more information about the expense',
 		maxLength: 1000,
+		example: '10% tip included.',
 	})
 	note?: string
 
@@ -101,6 +103,8 @@ export class ExpenseDto {
 	@Validate(IsPayerInTripParticipantsConstraint)
 	@ApiProperty({
 		description: 'The person who paid for the expense',
+		minLength: 1,
+		example: 'Alice',
 	})
 	payer: string
 
