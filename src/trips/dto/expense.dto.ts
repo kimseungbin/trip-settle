@@ -28,7 +28,7 @@ export class ExpenseDto {
 		description: 'The amount of money spend for this particular expense',
 		minimum: 0,
 		exclusiveMinimum: true,
-		example: 36900,
+		example: 50.0,
 	})
 	amount: number
 
