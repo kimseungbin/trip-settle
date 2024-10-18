@@ -12,7 +12,7 @@ handles all the calculations for you.
 - **Automatic Calculation**: The app automatically calculates how much each person owes or is owed.
 - **Transparent Overview**: Get a clear summary of all expenses and settlements in one place.
 
-Whether it's a weekend getaway with friends of a long-term group expedition, the app ensures that everyone pays their
+Whether it's a weekend getaway with friends or a long-term group expedition, the app ensures that everyone pays their
 fair share without the headache.
 
 # Tech Stacks
