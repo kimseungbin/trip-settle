@@ -25,7 +25,7 @@ export class ExpenseDto {
 	@IsNumber()
 	@IsPositive({ message: 'Amount must be a positive number.' })
 	@ApiProperty({
-		description: 'The amount of money spend for this particular expense',
+		description: 'The amount of money spent for this particular expense',
 		minimum: 0,
 		exclusiveMinimum: true,
 		example: 50.0,
@@ -43,7 +43,7 @@ export class ExpenseDto {
 	@Matches(/^[A-Z]{3}$/, { message: 'Currency must be uppercase alphabetic characters only.' })
 	@ApiProperty({
 		description: 'The currency in which the expense is recorded, following the ISO 4217 standard',
-		minimum: 3,
+		minLength: 3,
 		maxLength: 3,
 		pattern: '^[A-Z]{3}$',
 		example: 'USD',
