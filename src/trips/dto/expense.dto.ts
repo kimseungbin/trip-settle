@@ -100,10 +100,12 @@ export class ExpenseDto {
 	 * Example: "Alice"
 	 */
 	@IsString()
+	@Length(1, 255, { message: 'Payer must be between 1 and 255 characters long.' })
 	@Validate(IsPayerInTripParticipantsConstraint)
 	@ApiProperty({
 		description: 'The person who paid for the expense',
 		minLength: 1,
+		maxLength: 255,
 		example: 'Alice',
 	})
 	payer: string
