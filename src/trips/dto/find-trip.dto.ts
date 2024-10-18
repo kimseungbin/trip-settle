@@ -10,7 +10,7 @@ export class FindTripDto {
 	 */
 	@Expose()
 	@IsString()
-	// todd add example, min, and max length after adding a test checking the id property's length
+	// todo add example, min, and max length after adding a test checking the id property's length
 	@ApiProperty({
 		description: 'Unique Base64URL format ID of the trip',
 	})
