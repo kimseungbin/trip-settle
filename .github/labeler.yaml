@@ -1,4 +1,5 @@
 # Automatically label PRs based on file changes
 
 oas-change:
-  - docs/openapi.json
+    - changed-files:
+          - docs/openapi.json
