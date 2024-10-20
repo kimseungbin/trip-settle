@@ -45,10 +45,11 @@ describe('TripsService', () => {
 	describe('create', () => {
 		it('should create and return a new trip entity with base64url id', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 			const tripEntity: Trip = {
-				_id: objectId,
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 			}
@@ -94,7 +95,6 @@ describe('TripsService', () => {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 			const tripEntity: Trip = {
-				_id: objectId,
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 			}
@@ -122,7 +122,6 @@ describe('TripsService', () => {
 	describe('delete', () => {
 		it('should delete an existing trip', async () => {
 			const trip: Trip = {
-				_id: objectId,
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 			}
