@@ -6,6 +6,8 @@ import { UpdateTripDto } from './dto/update-trip.dto'
 import { Trip } from './schemas/trip.schema'
 import { getModelToken } from '@nestjs/mongoose'
 import { Types } from 'mongoose'
+import { CreateExpenseDto } from '@trips/dto/create-expense.dto'
+import { Expense } from '@trips/schemas/expense.schema'
 
 const mockTripModel = {
 	findById: jest.fn(),
@@ -13,6 +15,10 @@ const mockTripModel = {
 	save: jest.fn(),
 	findByIdAndUpdate: jest.fn(),
 	findByIdAndDelete: jest.fn(),
+}
+
+const mockExpenseModel = {
+	create: jest.fn(),
 }
 
 describe('TripsService', () => {
@@ -27,6 +33,10 @@ describe('TripsService', () => {
 				{
 					provide: getModelToken(Trip.name),
 					useValue: mockTripModel,
+				},
+				{
+					provide: getModelToken(Expense.name),
+					useValue: mockExpenseModel,
 				},
 			],
 		}).compile()
@@ -168,6 +178,21 @@ describe('TripsService', () => {
 
 			await expect(service.remove(base64TripId)).rejects.toBeInstanceOf(NotFoundException)
 			expect(mockTripModel.findByIdAndDelete).toHaveBeenCalledWith(objectId)
+		})
+	})
+	describe('addExpense', () => {
+		it('should create a new expense to the trip', async () => {
+			mockTripModel.findById.mockResolvedValue({ expenses: [], save: jest.fn() })
+			mockExpenseModel.create.mockResolvedValue({ _id: objectId })
+
+			const createExpenseDto: CreateExpenseDto = {
+				amount: 72,
+				participants: ['Alice', 'Bob', 'Charlie'],
+				payer: 'Alice',
+				description: 'Dinner at a restaurant',
+				currency: 'USD',
+			}
+			await service.addExpense(base64TripId, createExpenseDto)
 		})
 	})
 })
