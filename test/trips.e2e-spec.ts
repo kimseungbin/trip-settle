@@ -171,10 +171,7 @@ describe('Trips', () => {
 				payer: 'Charlie',
 			}
 
-			const response = await request(app.getHttpServer())
-				.post(`/trips/${id}/expenses`)
-				.send(createExpenseDto)
-				.expect(201)
+			await request(app.getHttpServer()).post(`/trips/${id}/expenses`).send(createExpenseDto).expect(201)
 		})
 	})
 	describe('PUT /trips/:id/expense/:id', () => {
