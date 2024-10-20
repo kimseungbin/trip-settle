@@ -182,8 +182,14 @@ describe('TripsService', () => {
 	})
 	describe('addExpense', () => {
 		it('should create a new expense to the trip', async () => {
-			mockTripModel.findById.mockResolvedValue({ expenses: [], save: jest.fn() })
-			mockExpenseModel.create.mockResolvedValue({ _id: objectId })
+			const mockTrip = {
+				expenses: [],
+				save: jest.fn(),
+			}
+			mockTripModel.findById.mockResolvedValue(mockTrip)
+
+			const mockExpense = { _id: objectId }
+			mockExpenseModel.create.mockResolvedValue(mockExpense)
 
 			const createExpenseDto: CreateExpenseDto = {
 				amount: 72,
@@ -193,6 +199,11 @@ describe('TripsService', () => {
 				currency: 'USD',
 			}
 			await service.addExpense(base64TripId, createExpenseDto)
+
+			expect(mockTripModel.findById).toHaveBeenCalledWith(objectId)
+			expect(mockExpenseModel.create).toHaveBeenCalledWith(createExpenseDto)
+			expect(mockTrip.expenses).toContain(mockExpense._id)
+			expect(mockTrip.save).toHaveBeenCalled()
 		})
 	})
 })
