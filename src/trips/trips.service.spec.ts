@@ -205,5 +205,13 @@ describe('TripsService', () => {
 			expect(mockTrip.expenses).toContain(mockExpense._id)
 			expect(mockTrip.save).toHaveBeenCalled()
 		})
+		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
+			mockTripModel.findById.mockResolvedValue(null)
+
+			await expect(service.addExpense(base64TripId, {} as unknown as CreateExpenseDto)).rejects.toBeInstanceOf(
+				NotFoundException,
+			)
+			expect(mockTripModel.findById).toHaveBeenCalledWith(objectId)
+		})
 	})
 })
