@@ -1,5 +1,5 @@
 import { ExpenseDto } from './expense.dto'
-import { IsArray, IsString, MinLength, ValidateNested } from 'class-validator'
+import { IsArray, IsString, MaxLength, MinLength, ValidateNested } from 'class-validator'
 import { Exclude, Expose, Type } from 'class-transformer'
 import { ApiProperty } from '@nestjs/swagger'
 
@@ -16,16 +16,26 @@ export class FindTripDto {
 	})
 	id: string
 
+	@Expose()
+	@IsString({ message: 'Title must be a string.' })
 	@MinLength(1, { message: 'Title must be at least 1 character long.' })
+	@MaxLength(100, { message: 'Title must not exceed 100 characters.' })
 	@ApiProperty({
 		description: 'The title of the trip',
 		minLength: 1,
+		maxLength: 100,
 		example: 'Summer Vacation',
 	})
 	title: string
 
+	@Expose()
+	@IsString({ message: 'Description must be a string.' })
+	@MinLength(1, { message: 'Description must not be empty if provided.' })
+	@MaxLength(500, { message: 'Description must not exceed 500 characters.' })
 	@ApiProperty({
 		description: 'The description of the trip',
+		minLength: 1,
+		maxLength: 500,
 		example: 'A trip to the beach with friends.',
 	})
 	description?: string

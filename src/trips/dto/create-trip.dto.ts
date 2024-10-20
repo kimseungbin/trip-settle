@@ -10,6 +10,7 @@ export class CreateTripDto {
 	})
 	title: string
 
+	@IsString()
 	@ApiProperty({
 		description: 'The description of the trip',
 		example: 'A trip to the beach with friends.',

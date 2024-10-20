@@ -246,11 +246,14 @@
 						"type": "string",
 						"description": "The title of the trip",
 						"minLength": 1,
+						"maxLength": 100,
 						"example": "Summer Vacation"
 					},
 					"description": {
 						"type": "string",
 						"description": "The description of the trip",
+						"minLength": 1,
+						"maxLength": 500,
 						"example": "A trip to the beach with friends."
 					},
 					"participants": {

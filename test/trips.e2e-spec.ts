@@ -40,6 +40,8 @@ describe('Trips', () => {
 	describe('POST /trips', () => {
 		it('should create a new trip', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 
@@ -58,6 +60,8 @@ describe('Trips', () => {
 	describe('GET /trips/:id', () => {
 		it('should return a trip', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 
@@ -73,6 +77,8 @@ describe('Trips', () => {
 		})
 		it('should properly serialize the response (exclude _id)', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 
@@ -86,6 +92,8 @@ describe('Trips', () => {
 	describe('PATCH /trips/:id', () => {
 		it('should update a trip', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 
@@ -108,6 +116,8 @@ describe('Trips', () => {
 	describe('DELETE /trips/:id', () => {
 		it('should delete a trip', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 
