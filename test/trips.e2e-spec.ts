@@ -9,6 +9,7 @@ import * as request from 'supertest'
 import { TripsService } from '@trips/trips.service'
 import { Reflector } from '@nestjs/core'
 import { UpdateTripDto } from '@trips/dto/update-trip.dto'
+import { CreateExpenseDto } from '@trips/dto/create-expense.dto'
 
 describe('Trips', () => {
 	let app: INestApplication
@@ -153,7 +154,28 @@ describe('Trips', () => {
 		})
 	})
 	describe('POST /trips/:id/expenses', () => {
-		it.todo('should create a new expense')
+		it('should create a new expense', async () => {
+			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip of the beach with friends.',
+				participants: ['Alice', 'Bob', 'Charlie'],
+			}
+
+			const { id } = await tripsService.create(createTripDto)
+
+			const createExpenseDto: CreateExpenseDto = {
+				amount: 270,
+				currency: 'USD',
+				description: 'Dinner with friends',
+				participants: ['Alice', 'Bob', 'Charlie'],
+				payer: 'Charlie',
+			}
+
+			const response = await request(app.getHttpServer())
+				.post(`/trips/${id}/expenses`)
+				.send(createExpenseDto)
+				.expect(201)
+		})
 	})
 	describe('PUT /trips/:id/expense/:id', () => {
 		it.todo('should update an expense')
