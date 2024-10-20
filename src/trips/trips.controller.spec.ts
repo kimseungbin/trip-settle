@@ -77,8 +77,14 @@ describe('TripsController', () => {
 				payer: 'Bob',
 			},
 		]
-		createTripDto = { participants }
-		newTrip = { id: 'newBase64TripId', participants, expenses: [] }
+		createTripDto = { participants, title: 'Summer Vacation', description: 'A trip to the beach with friends' }
+		newTrip = {
+			id: 'newBase64TripId',
+			participants,
+			expenses: [],
+			title: 'Summer Vacation',
+			description: 'A trip to the beach with friends',
+		}
 		updateTripDto = { participants }
 	})
 
