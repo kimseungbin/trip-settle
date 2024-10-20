@@ -23,11 +23,15 @@ async function bootstrap() {
 	const document = SwaggerModule.createDocument(app, config, options)
 
 	// todo update it to not do it in production
+	await generateOpenAPIDocumentation(document)
+
+	await app.listen(3000)
+}
+
+async function generateOpenAPIDocumentation(document: any) {
 	const outputPath = path.resolve(process.cwd(), 'docs', 'openapi.json')
 	await mkdir(path.dirname(outputPath), { recursive: true })
 	await writeFile(outputPath, JSON.stringify(document), { encoding: 'utf8' })
-
-	await app.listen(3000)
 }
 
 bootstrap()
