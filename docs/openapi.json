@@ -137,7 +137,7 @@
 		},
 		"/trips/{id}/expenses": {
 			"post": {
-				"operationId": "createExpense",
+				"operationId": "addExpense",
 				"summary": "Create an expense",
 				"description": "Creates an expense for a trip.",
 				"parameters": [
@@ -150,6 +150,16 @@
 						}
 					}
 				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateExpenseDto"
+							}
+						}
+					}
+				},
 				"responses": {
 					"201": {
 						"description": "Expense successfully created."
@@ -308,6 +318,57 @@
 			"UpdateTripDto": {
 				"type": "object",
 				"properties": {}
+			},
+			"CreateExpenseDto": {
+				"type": "object",
+				"properties": {
+					"amount": {
+						"type": "number",
+						"description": "The amount of money spent for this particular expense",
+						"minimum": 0,
+						"exclusiveMinimum": true,
+						"example": 50
+					},
+					"currency": {
+						"type": "string",
+						"description": "The currency in which the expense is recorded, following the ISO 4217 standard",
+						"minLength": 3,
+						"maxLength": 3,
+						"pattern": "^[A-Z]{3}$",
+						"example": "USD"
+					},
+					"description": {
+						"type": "string",
+						"description": "A short description of what the expense was for",
+						"minLength": 1,
+						"maxLength": 255,
+						"example": "Dinner at a restaurant."
+					},
+					"note": {
+						"type": "string",
+						"description": "An optional detailed note providing more information about the expense",
+						"maxLength": 1000,
+						"example": "10% tip included."
+					},
+					"participants": {
+						"description": "A list of participants involved in the expense, who will divide the cost",
+						"minItems": 1,
+						"uniqueItems": true,
+						"example": ["Alice", "Bob", "Charlie"],
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"payer": {
+						"type": "string",
+						"description": "The person who paid for the expense",
+						"minLength": 1,
+						"maxLength": 255,
+						"example": "Alice"
+					}
+				},
+				"required": ["amount", "currency", "description", "note", "participants", "payer"]
 			}
 		}
 	}
