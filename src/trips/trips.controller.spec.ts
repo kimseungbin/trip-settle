@@ -8,12 +8,14 @@ import { ExpenseDto } from './dto/expense.dto'
 import { CreateTripDto } from './dto/create-trip.dto'
 import { Response } from 'express'
 import { UpdateTripDto } from './dto/update-trip.dto'
+import { CreateExpenseDto } from '@trips/dto/create-expense.dto'
 
 const mockTripsService = {
 	create: jest.fn().mockResolvedValue(null),
 	find: jest.fn().mockResolvedValue(null),
 	update: jest.fn().mockResolvedValue(null),
 	remove: jest.fn().mockResolvedValue(null),
+	addExpense: jest.fn().mockResolvedValue(null),
 }
 
 const mockResponse = {
@@ -161,6 +163,23 @@ describe('TripsController', () => {
 			mockTripsService.remove.mockResolvedValue(false)
 
 			await expect(controller.remove(base64TripId)).rejects.toThrow(NotFoundException)
+		})
+	})
+	describe('addExpense', () => {
+		it('should add a new expense to the trip with the given ID', async () => {
+			const createExpenseDto: CreateExpenseDto = {
+				description: 'Dinner at a restaurant',
+				amount: 82,
+				currency: 'USD',
+				payer: 'Charlie',
+				participants: ['Alice', 'Bob', 'Charlie'],
+			}
+
+			mockTripsService.find.mockResolvedValue({ id: base64TripId })
+
+			await controller.addExpense(base64TripId, createExpenseDto)
+
+			expect(mockTripsService.addExpense).toHaveBeenCalledWith(base64TripId, createExpenseDto)
 		})
 	})
 })
