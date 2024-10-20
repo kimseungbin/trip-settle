@@ -1,7 +1,7 @@
 name: PR Labeling
 run-name: Labeling PR based on file changes by @${{ github.actor }}
 on:
-  pull_request_target:
+  pull_request:
     types: [ opened, synchronize, reopened ]
 jobs:
   prLabeling:
