@@ -73,21 +73,13 @@ describe('TripsService', () => {
 			participants: ['Alice', 'Bob'],
 		}
 
-		it('should create and return a new trip entity with base64url id', async () => {
-			mockTripModel.create.mockResolvedValue(tripDocument)
+		it('should create and return a new trip', async () => {
+			mockTripModel.create.mockReturnValue(tripDocument)
 
 			const trip = await service.create(createTripDto)
 
 			expect(trip).toEqual(tripDocument)
 			expect(mockTripModel.create).toHaveBeenCalledWith(createTripDto)
-			assertTrip(trip, createTripDto)
-		})
-		it('should create and return a new trip entity with title, description, and expenses', async () => {
-			mockTripModel.create.mockResolvedValue(tripDocument)
-
-			const trip = await service.create(createTripDto)
-
-			expect(trip).toEqual(tripDocument)
 			assertTrip(trip, createTripDto)
 		})
 	})
