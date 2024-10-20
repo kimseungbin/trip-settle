@@ -21,6 +21,13 @@ const mockExpenseModel = {
 	create: jest.fn(),
 }
 
+function assertTrip(trip: Trip, createTripDto: CreateTripDto) {
+	expect(trip.title).toBe(createTripDto.title)
+	expect(trip.description).toBe(createTripDto.description)
+	expect(trip.participants).toEqual(createTripDto.participants)
+	expect(trip.expenses).toEqual([])
+}
+
 describe('TripsService', () => {
 	let service: TripsService
 	let base64TripId: string
@@ -73,6 +80,7 @@ describe('TripsService', () => {
 
 			expect(trip).toEqual(tripDocument)
 			expect(mockTripModel.create).toHaveBeenCalledWith(createTripDto)
+			assertTrip(trip, createTripDto)
 		})
 		it('should create and return a new trip entity with title, description, and expenses', async () => {
 			mockTripModel.create.mockResolvedValue(tripDocument)
@@ -80,10 +88,7 @@ describe('TripsService', () => {
 			const trip = await service.create(createTripDto)
 
 			expect(trip).toEqual(tripDocument)
-			expect(trip.title).toBe('Summer Vacation')
-			expect(trip.description).toBe('A trip to the beach with friends.')
-			expect(trip.participants).toEqual(['Alice', 'Bob'])
-			expect(trip.expenses).toEqual([])
+			assertTrip(trip, createTripDto)
 		})
 	})
 
