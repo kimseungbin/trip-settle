@@ -7,7 +7,7 @@ import { Trip } from './schemas/trip.schema'
 import { FindTripDto } from './dto/find-trip.dto'
 import { ExpenseDto } from './dto/expense.dto'
 import { Expense } from './schemas/expense.schema'
-import { CreateExpenseDto } from '@trips/dto/create-expense.dto'
+import { CreateExpenseDto } from './dto/create-expense.dto'
 
 @Injectable()
 export class TripsService {
