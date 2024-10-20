@@ -160,6 +160,17 @@
 			"CreateTripDto": {
 				"type": "object",
 				"properties": {
+					"title": {
+						"type": "string",
+						"description": "The title of the trip",
+						"minLength": 1,
+						"example": "Summer Vacation"
+					},
+					"description": {
+						"type": "string",
+						"description": "The description of the trip",
+						"example": "A trip to the beach with friends."
+					},
 					"participants": {
 						"description": "Participants of the trip",
 						"example": ["Alice", "Bob", "Charlie"],
@@ -171,7 +182,7 @@
 						}
 					}
 				},
-				"required": ["participants"]
+				"required": ["title", "description", "participants"]
 			},
 			"ExpenseDto": {
 				"type": "object",
@@ -231,6 +242,17 @@
 						"type": "string",
 						"description": "Unique Base64URL format ID of the trip"
 					},
+					"title": {
+						"type": "string",
+						"description": "The title of the trip",
+						"minLength": 1,
+						"example": "Summer Vacation"
+					},
+					"description": {
+						"type": "string",
+						"description": "The description of the trip",
+						"example": "A trip to the beach with friends."
+					},
 					"participants": {
 						"description": "Array of all participants in the trip",
 						"example": ["Alice", "Bob", "Charlie"],
@@ -249,7 +271,7 @@
 						}
 					}
 				},
-				"required": ["id", "participants", "expenses"]
+				"required": ["id", "title", "description", "participants", "expenses"]
 			},
 			"UpdateTripDto": {
 				"type": "object",
