@@ -59,7 +59,7 @@ describe('Trips', () => {
 		})
 		const testCases = [
 			{
-				createTripDot: { description: 'Test', participants: ['Alice', 'Bob'] },
+				createTripDto: { description: 'Test', participants: ['Alice', 'Bob'] },
 				missingProperty: 'title',
 				errorMessage: 'Title is required.',
 			},
