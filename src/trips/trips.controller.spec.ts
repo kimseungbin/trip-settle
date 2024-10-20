@@ -145,7 +145,7 @@ describe('TripsController', () => {
 			mockTripsService.find.mockResolvedValue({ id: base64TripId })
 			mockTripsService.remove.mockResolvedValue(true)
 
-			await controller.remove(base64TripId, mockResponse)
+			await controller.remove(base64TripId)
 
 			expect(mockTripsService.remove).toHaveBeenCalledWith(base64TripId)
 		})
@@ -154,7 +154,7 @@ describe('TripsController', () => {
 			mockTripsService.find.mockResolvedValue(null)
 			mockTripsService.remove.mockResolvedValue(false)
 
-			await expect(controller.remove(base64TripId, mockResponse)).rejects.toThrow(NotFoundException)
+			await expect(controller.remove(base64TripId)).rejects.toThrow(NotFoundException)
 		})
 	})
 })
