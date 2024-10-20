@@ -1,12 +1,14 @@
-name: Continuous Integration
-run-name: CI - Test and Coverage Check by @${{ github.actor }}
+name: PR Labeling
+run-name: Labeling PR based on file changes by @${{ github.actor }}
 on:
-  pull_request:
-    types: [ opened, synchronize, reopened ]
+    pull_request:
+        types: [opened, synchronize, reopened]
 jobs:
-  apiDocumentation:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Label PR based on file changes
-        uses: actions/labeler@v5
+    prLabeling:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Label PR based on file changes
+              uses: actions/labeler@v5
+              with:
+                  configuration-path: '.github/labeler.yaml'
