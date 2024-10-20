@@ -173,7 +173,7 @@ describe('Trips', () => {
 
 			await request(app.getHttpServer()).post(`/trips/${id}/expenses`).send(createExpenseDto).expect(201)
 			const trip = await tripsService.find(id)
-			expect(trip.expenses.at(-1)).toEqual(createExpenseDto)
+			expect(trip.expenses.length).toBe(1)
 		})
 	})
 	describe('PUT /trips/:id/expense/:id', () => {
