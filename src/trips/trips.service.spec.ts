@@ -45,38 +45,66 @@ describe('TripsService', () => {
 	describe('create', () => {
 		it('should create and return a new trip entity with base64url id', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
-			const tripEntity: Trip = {
-				_id: objectId,
+			const tripDocument: Trip = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends',
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 			}
 
-			mockTripModel.create.mockResolvedValue(tripEntity)
+			mockTripModel.create.mockResolvedValue(tripDocument)
 
 			const trip = await service.create(createTripDto)
 
-			expect(trip).toEqual(tripEntity)
+			expect(trip).toEqual(tripDocument)
 			expect(mockTripModel.create).toHaveBeenCalledWith(createTripDto)
+		})
+		it('should create and return a new trip entity with title, description, and expenses', async () => {
+			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
+				participants: ['Alice', 'Bob'],
+			}
+			const tripDocument: Trip = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
+				participants: ['Alice', 'Bob'],
+				expenses: [],
+			}
+
+			mockTripModel.create.mockResolvedValue(tripDocument)
+
+			const trip = await service.create(createTripDto)
+
+			expect(trip).toEqual(tripDocument)
+			expect(trip.title).toBe('Summer Vacation')
+			expect(trip.description).toBe('A trip to the beach with friends.')
+			expect(trip.participants).toEqual(['Alice', 'Bob'])
+			expect(trip.expenses).toEqual([])
 		})
 	})
 
 	describe('find', () => {
 		it('should return the trip object with a given ID', async () => {
-			const tripEntity = {
+			const tripDocument = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends',
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 				toObject: jest.fn().mockReturnThis(),
 			} as Trip
 
 			mockTripModel.findById.mockImplementation(() => ({
-				populate: () => ({ exec: jest.fn().mockReturnValue(tripEntity) }),
+				populate: () => ({ exec: jest.fn().mockReturnValue(tripDocument) }),
 			}))
 
 			const trip = await service.find(base64TripId)
 
-			expect(trip).toEqual(tripEntity)
+			expect(trip).toEqual(tripDocument)
 			expect(mockTripModel.findById).toHaveBeenCalledWith(objectId)
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
@@ -93,13 +121,14 @@ describe('TripsService', () => {
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
-			const tripEntity: Trip = {
-				_id: objectId,
+			const tripDocument: Trip = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends',
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 			}
 			const updatedTripEntity: Trip = {
-				...tripEntity,
+				...tripDocument,
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
@@ -121,13 +150,14 @@ describe('TripsService', () => {
 	})
 	describe('delete', () => {
 		it('should delete an existing trip', async () => {
-			const trip: Trip = {
-				_id: objectId,
+			const tripDocument: Trip = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends',
 				participants: ['Alice', 'Bob'],
 				expenses: [],
 			}
 
-			mockTripModel.findByIdAndDelete.mockResolvedValue(trip)
+			mockTripModel.findByIdAndDelete.mockResolvedValue(tripDocument)
 
 			await service.remove(base64TripId)
 

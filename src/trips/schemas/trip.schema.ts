@@ -5,6 +5,12 @@ export type TripDocument = HydratedDocument<Trip>
 
 @Schema()
 export class Trip {
+	@Prop({ required: true })
+	title: string
+
+	@Prop({ required: false })
+	description?: string
+
 	@Prop({ required: true, type: [String] })
 	participants: string[]
 

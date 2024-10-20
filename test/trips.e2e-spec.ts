@@ -1,4 +1,4 @@
-import { ClassSerializerInterceptor, INestApplication } from '@nestjs/common'
+import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { TripsModule } from '@trips/trips.module'
 import { MongoMemoryServer } from 'mongodb-memory-server'
@@ -26,6 +26,7 @@ describe('Trips', () => {
 
 		app = module.createNestApplication()
 		app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
+		app.useGlobalPipes(new ValidationPipe())
 		await app.init()
 
 		tripsService = module.get<TripsService>(TripsService)
@@ -40,6 +41,8 @@ describe('Trips', () => {
 	describe('POST /trips', () => {
 		it('should create a new trip', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 
@@ -54,10 +57,32 @@ describe('Trips', () => {
 			expect(findTripDto).not.toBeNull()
 			expect(findTripDto.participants).toEqual(createTripDto.participants)
 		})
+		const testCases = [
+			{
+				createTripDto: { description: 'Test', participants: ['Alice', 'Bob'] },
+				missingProperty: 'title',
+				errorMessage: 'Title is required.',
+			},
+			{
+				createTripDto: { title: 'Test', description: 'Test.' },
+				missingProperty: 'participants',
+				errorMessage: 'Participants is required.',
+			},
+		]
+
+		test.each(testCases)(
+			'should return 400 when $missingProperty is missing',
+			async ({ createTripDto, errorMessage }) => {
+				const response = await request(app.getHttpServer()).post('/trips').send(createTripDto).expect(400)
+				expect(response.body.message).toEqual(expect.arrayContaining([errorMessage]))
+			},
+		)
 	})
 	describe('GET /trips/:id', () => {
 		it('should return a trip', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 
@@ -73,6 +98,8 @@ describe('Trips', () => {
 		})
 		it('should properly serialize the response (exclude _id)', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 
@@ -86,6 +113,8 @@ describe('Trips', () => {
 	describe('PATCH /trips/:id', () => {
 		it('should update a trip', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 
@@ -108,6 +137,8 @@ describe('Trips', () => {
 	describe('DELETE /trips/:id', () => {
 		it('should delete a trip', async () => {
 			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob'],
 			}
 
