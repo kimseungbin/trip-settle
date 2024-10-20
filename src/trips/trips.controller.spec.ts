@@ -106,7 +106,7 @@ describe('TripsController', () => {
 
 	describe('find', () => {
 		it('should return a trip with a given ID', async () => {
-			const expectedTrip: FindTripDto = { id: base64TripId, participants, expenses }
+			const expectedTrip: FindTripDto = { id: base64TripId, title: 'Summer Vacation', participants, expenses }
 
 			mockTripsService.find.mockResolvedValue(expectedTrip)
 
