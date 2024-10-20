@@ -52,20 +52,21 @@ describe('TripsService', () => {
 		expect(service).toBeDefined()
 	})
 
-	describe('create', () => {
-		it('should create and return a new trip entity with base64url id', async () => {
-			const createTripDto: CreateTripDto = {
-				title: 'Summer Vacation',
-				description: 'A trip to the beach with friends.',
-				participants: ['Alice', 'Bob'],
-			}
-			const tripDocument: Trip = {
-				title: 'Summer Vacation',
-				description: 'A trip to the beach with friends',
-				participants: ['Alice', 'Bob'],
-				expenses: [],
-			}
+	const tripDocument: Trip = {
+		title: 'Summer Vacation',
+		description: 'A trip to the beach with friends.',
+		participants: ['Alice', 'Bob'],
+		expenses: [],
+	}
 
+	describe('create', () => {
+		const createTripDto: CreateTripDto = {
+			title: 'Summer Vacation',
+			description: 'A trip to the beach with friends.',
+			participants: ['Alice', 'Bob'],
+		}
+
+		it('should create and return a new trip entity with base64url id', async () => {
 			mockTripModel.create.mockResolvedValue(tripDocument)
 
 			const trip = await service.create(createTripDto)
@@ -74,18 +75,6 @@ describe('TripsService', () => {
 			expect(mockTripModel.create).toHaveBeenCalledWith(createTripDto)
 		})
 		it('should create and return a new trip entity with title, description, and expenses', async () => {
-			const createTripDto: CreateTripDto = {
-				title: 'Summer Vacation',
-				description: 'A trip to the beach with friends.',
-				participants: ['Alice', 'Bob'],
-			}
-			const tripDocument: Trip = {
-				title: 'Summer Vacation',
-				description: 'A trip to the beach with friends.',
-				participants: ['Alice', 'Bob'],
-				expenses: [],
-			}
-
 			mockTripModel.create.mockResolvedValue(tripDocument)
 
 			const trip = await service.create(createTripDto)
@@ -131,12 +120,7 @@ describe('TripsService', () => {
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
-			const tripDocument: Trip = {
-				title: 'Summer Vacation',
-				description: 'A trip to the beach with friends',
-				participants: ['Alice', 'Bob'],
-				expenses: [],
-			}
+
 			const updatedTripEntity: Trip = {
 				...tripDocument,
 				participants: ['Alice', 'Bob', 'Charlie'],
@@ -160,13 +144,6 @@ describe('TripsService', () => {
 	})
 	describe('delete', () => {
 		it('should delete an existing trip', async () => {
-			const tripDocument: Trip = {
-				title: 'Summer Vacation',
-				description: 'A trip to the beach with friends',
-				participants: ['Alice', 'Bob'],
-				expenses: [],
-			}
-
 			mockTripModel.findByIdAndDelete.mockResolvedValue(tripDocument)
 
 			await service.remove(base64TripId)
