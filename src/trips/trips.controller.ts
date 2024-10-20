@@ -75,6 +75,15 @@ export class TripsController {
 		await this.tripsService.remove(id)
 	}
 
+	@Post(':id/expenses')
+	@ApiOperation({ summary: 'Create an expense', description: 'Creates an expense for a trip.' })
+	@ApiCreatedResponse({
+		description: 'Expense successfully created.',
+	})
+	@ApiNotFoundResponse({ description: 'Trip not found' })
+	@ApiBadRequestResponse({ description: 'Invalid input' })
+	async createExpense(@Param('id') id: string, @Body() createExpenseDto) {}
+
 	private async getTripOrFail(id: string): Promise<FindTripDto> {
 		const trip = await this.tripsService.find(id)
 		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
