@@ -28,7 +28,7 @@ async function bootstrap() {
 	await app.listen(3000)
 }
 
-async function generateOpenAPIDocumentation(document: any) {
+async function generateOpenAPIDocumentation(document: Record<string, any>) {
 	const outputPath = path.resolve(process.cwd(), 'docs', 'openapi.json')
 	await mkdir(path.dirname(outputPath), { recursive: true })
 	await writeFile(outputPath, JSON.stringify(document), { encoding: 'utf8' })
