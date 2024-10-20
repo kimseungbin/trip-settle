@@ -86,6 +86,18 @@ describe('TripsController', () => {
 		expect(controller).toBeDefined()
 	})
 
+	describe('create', () => {
+		it('should create a new trip with participants and return a Location header', async () => {
+			mockTripsService.create.mockResolvedValue(newTrip)
+
+			await controller.create(createTripDto, mockResponse)
+
+			expect(mockResponse.location).toHaveBeenCalledWith(`/trips/${newTrip.id}`)
+
+			expect(service.create).toHaveBeenCalledWith(createTripDto)
+		})
+	})
+
 	describe('find', () => {
 		it('should return a trip with a given ID', async () => {
 			const expectedTrip: FindTripDto = { id: base64TripId, participants, expenses }
@@ -102,18 +114,6 @@ describe('TripsController', () => {
 			await expect(controller.find(base64TripId)).rejects.toThrow(NotFoundException)
 
 			expect(mockTripsService.find).toHaveBeenCalledWith(base64TripId)
-		})
-	})
-
-	describe('create', () => {
-		it('should create a new trip with participants and return a Location header', async () => {
-			mockTripsService.create.mockResolvedValue(newTrip)
-
-			await controller.create(createTripDto, mockResponse)
-
-			expect(mockResponse.location).toHaveBeenCalledWith(`/trips/${newTrip.id}`)
-
-			expect(service.create).toHaveBeenCalledWith(createTripDto)
 		})
 	})
 
