@@ -152,4 +152,13 @@ describe('Trips', () => {
 			await request(app.getHttpServer()).delete(`/trips/${nonExistentId}`).expect(404)
 		})
 	})
+	describe('POST /trips/:id/expenses', () => {
+		it.todo('should create a new expense')
+	})
+	describe('PUT /trips/:id/expense/:id', () => {
+		it.todo('should update an expense')
+	})
+	describe('DELETE /trips/:id/expenses/:id', () => {
+		it.todo('should delete an expense')
+	})
 })
