@@ -7,10 +7,14 @@ import { Trip } from './schemas/trip.schema'
 import { FindTripDto } from './dto/find-trip.dto'
 import { ExpenseDto } from './dto/expense.dto'
 import { Expense } from './schemas/expense.schema'
+import { CreateExpenseDto } from './dto/create-expense.dto'
 
 @Injectable()
 export class TripsService {
-	constructor(@InjectModel(Trip.name) private readonly tripModel: Model<Trip>) {}
+	constructor(
+		@InjectModel(Trip.name) private readonly tripModel: Model<Trip>,
+		@InjectModel(Expense.name) private readonly expenseModel: Model<Expense>,
+	) {}
 
 	create(createTripDto: CreateTripDto) {
 		return this.tripModel.create(createTripDto)
@@ -43,6 +47,16 @@ export class TripsService {
 	async remove(id: string): Promise<void> {
 		const trip = await this.tripModel.findByIdAndDelete(this.convertBase64ToObjectId(id))
 		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
+	}
+
+	async addExpense(id: string, createExpenseDto: CreateExpenseDto): Promise<void> {
+		const trip = await this.tripModel.findById(this.convertBase64ToObjectId(id))
+		if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`)
+
+		const expense = await this.expenseModel.create(createExpenseDto)
+		trip.expenses.push(expense._id)
+
+		await trip.save()
 	}
 
 	private convertBase64ToObjectId(id: string) {

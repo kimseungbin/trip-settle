@@ -13,6 +13,7 @@ import {
 	ApiOperation,
 	ApiTags,
 } from '@nestjs/swagger'
+import { CreateExpenseDto } from '@trips/dto/create-expense.dto'
 
 @Controller('trips')
 @ApiTags('Trips')
@@ -73,6 +74,19 @@ export class TripsController {
 		await this.getTripOrFail(id)
 
 		await this.tripsService.remove(id)
+	}
+
+	@Post(':id/expenses')
+	@ApiOperation({ summary: 'Create an expense', description: 'Creates an expense for a trip.' })
+	@ApiCreatedResponse({
+		description: 'Expense successfully created.',
+	})
+	@ApiNotFoundResponse({ description: 'Trip not found' })
+	@ApiBadRequestResponse({ description: 'Invalid input' })
+	async addExpense(@Param('id') id: string, @Body() createExpenseDto: CreateExpenseDto): Promise<void> {
+		await this.getTripOrFail(id)
+
+		await this.tripsService.addExpense(id, createExpenseDto)
 	}
 
 	private async getTripOrFail(id: string): Promise<FindTripDto> {

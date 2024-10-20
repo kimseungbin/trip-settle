@@ -9,6 +9,7 @@ import * as request from 'supertest'
 import { TripsService } from '@trips/trips.service'
 import { Reflector } from '@nestjs/core'
 import { UpdateTripDto } from '@trips/dto/update-trip.dto'
+import { CreateExpenseDto } from '@trips/dto/create-expense.dto'
 
 describe('Trips', () => {
 	let app: INestApplication
@@ -151,5 +152,34 @@ describe('Trips', () => {
 
 			await request(app.getHttpServer()).delete(`/trips/${nonExistentId}`).expect(404)
 		})
+	})
+	describe('POST /trips/:id/expenses', () => {
+		it('should create a new expense', async () => {
+			const createTripDto: CreateTripDto = {
+				title: 'Summer Vacation',
+				description: 'A trip of the beach with friends.',
+				participants: ['Alice', 'Bob', 'Charlie'],
+			}
+
+			const { id } = await tripsService.create(createTripDto)
+
+			const createExpenseDto: CreateExpenseDto = {
+				amount: 270,
+				currency: 'USD',
+				description: 'Dinner with friends',
+				participants: ['Alice', 'Bob', 'Charlie'],
+				payer: 'Charlie',
+			}
+
+			await request(app.getHttpServer()).post(`/trips/${id}/expenses`).send(createExpenseDto).expect(201)
+			const trip = await tripsService.find(id)
+			expect(trip.expenses.length).toBe(1)
+		})
+	})
+	describe('PUT /trips/:id/expense/:id', () => {
+		it.todo('should update an expense')
+	})
+	describe('DELETE /trips/:id/expenses/:id', () => {
+		it.todo('should delete an expense')
 	})
 })
