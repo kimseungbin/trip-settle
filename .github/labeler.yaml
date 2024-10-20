@@ -2,4 +2,4 @@
 
 oas-change:
     - changed-files:
-          - docs/openapi.json
+          - any-glob-to-any-file: 'docs/openapi.json'
