@@ -11,6 +11,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
+          cache: 'npm'
       - name: Install required dependency
         run: npm i -D @eslint/eslintrc
       - name: Run lint check
