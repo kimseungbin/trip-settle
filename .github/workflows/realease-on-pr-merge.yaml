@@ -38,7 +38,7 @@ jobs:
       - name: Bump version
         run: |
           BUMP_TYPE="${{ steps.version_type.outputs.bump_type }}"
-          if [ "$BUMP_TYPE" = "major" [; then
+          if [ "$BUMP_TYPE" = "major" ]; then
             npm version major
           elif [ "$BUMP_TYPE" = "minor" ]; then
             npm version minor
@@ -46,6 +46,10 @@ jobs:
             npm version patch
           fi
           git push origin HEAD
+      - name: Setup Git User
+        run: |
+          git config --global user.name "SeungBin Kim"
+          git config --global user.email "luxorienskim@gmail.com"
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
