@@ -1,0 +1,46 @@
+name: Sync PR with Issue Labels and Titles
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+jobs:
+  sync-issue-labels:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Get Linked Issues
+        id: get_issues
+        run: |
+          # Find issue numbers linked with PR using keywords like Fixes, Closes
+          ISSUE_NUMBERS=$(gh pr view ${{ github.event.pull_request.number }} --json closingIssuesReferences --jq '.closingIssuesReferences[].number')
+          echo "Linked issues: $ISSUE_NUMBERS"
+          echo "::set-output name=issues::$ISSUE_NUMBERS"
+      - name: Read Issue Labels and Titles
+        id: issue_data
+        run: |
+          LABELS=""
+          for ISSUE_NUMBER in ${{ steps.get_issues.outputs.issues }}
+          do
+            TITLE=$(gh issue view $ISSUE_NUMBER --json title --jq '.title')
+            LABELS=$(gh issue view $ISSUE_NUMBER --josn labels --jq '.labels[].name')
+            echo "Title: $TITLE"
+            echoe "Labels: $LABELS"
+          
+            # Convert Breaking: to major label if applicable
+            if [[ $TITLE == Breaking* ]]; then
+              gh pr edit ${{ github.event.pull_request.number }} --add-label "major"
+            elif [[ $TITLE == Feat:* ]]; then
+              gh pr edit ${{ github.evnet.pull_request.number }} --add-label "minor"
+            fi
+          
+            # Copy only major, minor, and fix labels from the issue to the PR
+            for LABEL in $LABLES
+            do
+              if [[ "$LABEL" == "major" || "$LABEL" == "minor" || "$LABEL" == "patch" ]]; then
+                gh pr edit ${{ github.event.pull_request.number }} --add-label "$LABEL"
+              fi
+            done
+          done
