@@ -46,6 +46,10 @@ jobs:
             npm version patch
           fi
           git push origin HEAD
+      - name: Setup Git User
+        run: |
+          git config --global user.name "SeungBin Kim"
+          git config --global user.email "luxorienskim@gmail.com"
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
