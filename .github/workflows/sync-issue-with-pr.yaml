@@ -36,6 +36,8 @@ jobs:
       - name: Read Issue Labels and Titles
         id: issue_data
         run: |
+          PATCH_PREFIXES=("Fix:" "Infra:" "Chore:") # Add more patch-related prefixes here
+          
           for ISSUE_NUMBER in ${{ env.issues }}
           do
             TITLE=$(gh issue view $ISSUE_NUMBER --json title --jq '.title')
@@ -49,7 +51,7 @@ jobs:
               echo "No labels found for issue #$ISSUE_NUMBER"
               continue
             fi
-
+          
             # Convert Breaking: to major label if applicable
             if [[ $TITLE == Breaking* ]]; then
               gh pr edit ${{ github.event.pull_request.number }} --add-label "major"
@@ -65,17 +67,18 @@ jobs:
                 fi
               done
             fi
-
+          
             # Copy only major, minor, and patch labels from the issue to the PR
-          while IFS= read -r LABEL; do
-            if [[ "$LABEL" == "major" || "$LABEL" == "minor" || "$LABEL" == "patch" ]]; then
-              echo "Adding label $LABEL to PR"
-              if ! gh pr edit ${{ github.event.pull_request.number }} --add-label "$LABEL"; then
-                echo "Failed ot add label '$LABEL' to PR"
+            while IFS= read -r LABEL; do
+              if [[ "$LABEL" == "major" || "$LABEL" == "minor" || "$LABEL" == "patch" ]]; then
+                echo "Adding label $LABEL to PR"
+                if ! gh pr edit ${{ github.event.pull_request.number }} --add-label "$LABEL"; then
+                  echo "Failed to add label '$LABEL' to PR"
+                fi
               fi
-            fi
-          done <<< "$LABELS"
-          echo >> .github/workflows/sync-issue-with-pr.yaml
+            done <<< "$LABELS"
+          
+          done
 
 
 
