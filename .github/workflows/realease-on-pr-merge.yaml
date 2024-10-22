@@ -1,0 +1,47 @@
+name: Release on PR Merge
+on:
+  pull_request:
+    types: [ closed ]
+jobs:
+  release-on-merge:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+      - name: Get PR Labels
+        id: get_labels
+        run: |
+          LABELS=$(gh pr view ${{ github.event.pull_request.number }} --json labels --jq '.lables[].name')
+          echo "Labels: $LABELS"
+          echo "::set-output name=labels::$LABELS"
+      - name: Determine Version Bump
+        id: version_type
+        run: |
+          LABELS="${{ steps.get_labels.outputs.labels }}"
+          if [[ "$LABELS" == *"major"* ]]; then
+            echo "::set-output name=bump_type::mjaor"
+          elif [[ "LABELS" == *"minor"* ]]; then
+            echo "::set-output name=bump_type::minor"
+          elif [[ "$LABELS" == *"patch"* ]]; then
+            echo "::set-output name=bump_type::patch"
+          else
+            echo "No applicable label found for version bump."
+            exit 1
+      - name: Bump version
+        run: |
+          BUMP_TYPE="${{ steps.version_type.outputs.bump_type }}"
+          if [ "$BUMP_TYPE" = "major" [; then
+            npm version major
+          elif [ "$BUMP_TYPE" = "minor" ]; then
+            npm version minor
+          elif [ "$BUMP_TYPE" = "patch" ]; then
+            npm version patch
+          fi
+          git push origin HEAD
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
