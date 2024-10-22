@@ -26,7 +26,7 @@ jobs:
           fi
 
           # Use regex to find issue numbers referenced by "Close"
-          ISSUE_NUMBERS=$(echo "$PR_BODY" | grep -oP '(?<=(Close|Closes|Fix|Fixes|Resolve|Resolves) #)[0-9]+')
+          ISSUE_NUMBERS=$(echo "$PR_BODY" | grep -oP '(?<=Close #)[0-9]+')
 
           echo "Linked issues: $ISSUE_NUMBERS"
 
@@ -36,8 +36,6 @@ jobs:
       - name: Read Issue Labels and Titles
         id: issue_data
         run: |
-          PATCH_PREFIXES=("Fix:" "Infra:" "Chore:") # Add more patch-related prefixes here
-
           for ISSUE_NUMBER in ${{ env.issues }}
           do
             TITLE=$(gh issue view $ISSUE_NUMBER --json title --jq '.title')
@@ -78,3 +76,7 @@ jobs:
             fi
           done <<< "$LABELS"
           echo >> .github/workflows/sync-issue-with-pr.yaml
+
+
+
+# todo remove major, minor, and patch labels before applying this workflow
