@@ -9,7 +9,11 @@ assignees: kimseungbin  # or assign another default user
 
 ### Feature Description
 
-Describe the feature you would like to request.
+Please provide a clear and concise description of the feature you'd like to request. Consider including:
+
+- What problem does this feature solve?
+- How would you like this feature to work?
+- Are there any alternatives you've considered?
 
 ### Why is this feature needed?
 
