@@ -7,7 +7,7 @@ assignees: kimseungbin  # or assign another default user
 
 ---
 
-### Feature Description
+# Feature Description
 
 Please provide a clear and concise description of the feature you'd like to request. Consider including:
 
@@ -15,7 +15,7 @@ Please provide a clear and concise description of the feature you'd like to requ
 - How would you like this feature to work?
 - Are there any alternatives you've considered?
 
-### Why is this feature needed?
+# Why is this feature needed?
 
 Please explain the importance of this feature request:
 
@@ -23,7 +23,7 @@ Please explain the importance of this feature request:
 - How does this feature align with the project's goals or user needs?
 - What are the expected benefits or improvements after implementing this feature?
 
-### Additional Context
+# Additional Context
 
 Please provide any additional information that could help us understand and evaluate your feature request:
 
