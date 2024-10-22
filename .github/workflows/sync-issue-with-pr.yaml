@@ -2,6 +2,7 @@ name: Sync PR with Issue Labels and Titles
 on:
   pull_request:
     types: [ opened, synchronize, reopened ]
+
 jobs:
   sync-issue-labels:
     permissions:
@@ -13,6 +14,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Get Linked Issues
         id: get_issues
         run: |
@@ -23,19 +25,28 @@ jobs:
           ISSUE_NUMBERS=$(echo "$PR_BODY" | grep -oP '(?<=Close #)[0-9]+')
 
           echo "Linked issues: $ISSUE_NUMBERS"
-          echo "::set-output name=issues::$ISSUE_NUMBERS"
+
+          # Use environment file to pass the issue numbers to the next step
+          echo "issues=$ISSUE_NUMBERS" >> $GITHUB_ENV
 
       - name: Read Issue Labels and Titles
         id: issue_data
         run: |
           PATCH_PREFIXES=("Fix:" "Infra:" "Chore:") # Add more patch-related prefixes here
 
-          for ISSUE_NUMBER in ${{ steps.get_issues.outputs.issues }}
+          for ISSUE_NUMBER in ${{ env.issues }}
           do
             TITLE=$(gh issue view $ISSUE_NUMBER --json title --jq '.title')
             LABELS=$(gh issue view $ISSUE_NUMBER --json labels --jq '.labels[].name')
+          
             echo "Title: $TITLE"
             echo "Labels: $LABELS"
+          
+            # Ensure LABELS is not empty
+            if [ -z "$LABELS" ]; then
+              echo "No labels found for issue #$ISSUE_NUMBER"
+              continue
+            fi
 
             # Convert Breaking: to major label if applicable
             if [[ $TITLE == Breaking* ]]; then
@@ -46,6 +57,7 @@ jobs:
               # Check if title starts with any of the patch-related prefixes
               for PREFIX in "${PATCH_PREFIXES[@]}"; do
                 if [[ $TITLE == "$PREFIX"* ]]; then
+                  echo "Adding patch label due to $PREFIX prefix"
                   gh pr edit ${{ github.event.pull_request.number }} --add-label "patch"
                   break # Once a match is found, break
                 fi
@@ -56,6 +68,7 @@ jobs:
             for LABEL in $LABELS
             do
               if [[ "$LABEL" == "major" || "$LABEL" == "minor" || "$LABEL" == "patch" ]]; then
+                echo "Adding label $LABEL to PR"
                 gh pr edit ${{ github.event.pull_request.number }} --add-label "$LABEL"
               fi
             done
