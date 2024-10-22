@@ -2,57 +2,61 @@ name: Continuous Integration
 run-name: CI - Test and Coverage Check by @${{ github.actor }}
 on: push
 jobs:
-    lint:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - name: Use Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 'lts/*'
-            - name: Install required dependency
-              run: npm i -D @eslint/eslintrc
-            - name: Run lint check
-              run: npm run lint:check
-    build:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                node-version:
-                    - 'lts/*'
-                    - 'latest'
-        steps:
-            - uses: actions/checkout@v4
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: 'npm'
-            - name: Install dependencies
-              run: npm ci
-            - name: Build app
-              run: npm run build
-    test:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                node-version:
-                    - 'lts/*'
-                    - 'latest'
-        steps:
-            - uses: actions/checkout@v4
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: 'npm'
-            - name: Install dependencies
-              run: npm ci
-            - name: Run unit tests with coverage
-              run: npm run test:cov
-            - name: Run E2E tests
-              run: npm run test:e2e
-            - name: Upload results to Codecov
-              uses: codecov/codecov-action@v4
-              with:
-                  token: ${{ secrets.CODECOV_TOKEN }}
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+      - name: Install required dependency
+        run: npm i -D @eslint/eslintrc
+      - name: Run lint check
+        run: npm run lint:check
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+          - 'lts/*'
+          - 'latest'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build app
+        run: npm run build
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+          - 'lts/*'
+          - 'latest'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run unit tests with coverage
+        run: npm run test:cov
+      - name: Run E2E tests
+        run: npm run test:e2e
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
