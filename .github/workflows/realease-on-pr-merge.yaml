@@ -38,7 +38,7 @@ jobs:
       - name: Bump version
         run: |
           BUMP_TYPE="${{ steps.version_type.outputs.bump_type }}"
-          if [ "$BUMP_TYPE" = "major" [; then
+          if [ "$BUMP_TYPE" = "major" ]; then
             npm version major
           elif [ "$BUMP_TYPE" = "minor" ]; then
             npm version minor
