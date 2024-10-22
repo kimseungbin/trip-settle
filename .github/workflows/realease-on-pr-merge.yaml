@@ -24,14 +24,15 @@ jobs:
         run: |
           LABELS="${{ steps.get_labels.outputs.labels }}"
           if [[ "$LABELS" == *"major"* ]]; then
-            echo "::set-output name=bump_type::mjaor"
-          elif [[ "LABELS" == *"minor"* ]]; then
-            echo "::set-output name=bump_type::minor"
+            echo "bump_type=major" >> $GITHUB_OUTPUT
+          elif [[ "$LABELS" == *"minor"* ]]; then
+            echo "bump_type=minor" >> $GITHUB_OUTPUT
           elif [[ "$LABELS" == *"patch"* ]]; then
-            echo "::set-output name=bump_type::patch"
+            echo "bump_type=patch" >> $GITHUB_OUTPUT
           else
             echo "No applicable label found for version bump."
             exit 1
+          fi
       - name: Bump version
         run: |
           BUMP_TYPE="${{ steps.version_type.outputs.bump_type }}"
