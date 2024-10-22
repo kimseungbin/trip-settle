@@ -17,8 +17,19 @@ Please provide a clear and concise description of the feature you'd like to requ
 
 ### Why is this feature needed?
 
-Explain the problem this feature will solve or the benefit it will provide.
+Please explain the importance of this feature request:
+
+- What specific problem or pain point does this feature address?
+- How does this feature align with the project's goals or user needs?
+- What are the expected benefits or improvements after implementing this feature?
 
 ### Additional Context
 
-Add any additional context, screenshots, or examples related to the feature request.
+Please provide any additional information that could help us understand and evaluate your feature request:
+
+- Are there any specific use cases or scenarios where this feature would be particularly useful?
+- Do you have any mockups, diagrams, or examples from other projects that illustrate your idea?
+- Are there any potential challenges or considerations we should be aware of when implementing this feature?
+- How does this feature request related to or impact existing functionality?
+
+Feel free to attach screenshots, links or any other relevant resources.
