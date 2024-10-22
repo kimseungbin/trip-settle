@@ -39,17 +39,25 @@ jobs:
         run: |
           git config --global user.name "SeungBin Kim"
           git config --global user.email "luxorienskim@gmail.com"
-      - name: Bump version
+      - name: Bump version and push tag
+        id: bump_version
         run: |
           BUMP_TYPE="${{ steps.version_type.outputs.bump_type }}"
           if [ "$BUMP_TYPE" = "major" ]; then
-            npm version major
+            NEW_TAG=$(npm version major)
           elif [ "$BUMP_TYPE" = "minor" ]; then
-            npm version minor
+            NEW_TAG=$(npm version minor)
           elif [ "$BUMP_TYPE" = "patch" ]; then
-            npm version patch
+            NEW_TAG=$(npm version patch)
           fi
+          
+          # Extract tag from npm version output
+          NEW_TAG=$(echo $NEW_TAG | tr -d 'v')
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          
           git push origin HEAD
+          git put origin "refs/tags/$NEW_TAG"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
