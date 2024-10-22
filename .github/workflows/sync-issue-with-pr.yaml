@@ -20,14 +20,18 @@ jobs:
         run: |
           # Get the PR body
           PR_BODY=$(gh pr view ${{ github.event.pull_request.number }} --json body --jq '.body')
+          if [ -z "$PR_BODY" ]; then
+            echo "Failed to fetch PR body"
+            exit 1
+          fi
 
           # Use regex to find issue numbers referenced by "Close"
-          ISSUE_NUMBERS=$(echo "$PR_BODY" | grep -oP '(?<=Close #)[0-9]+')
+          ISSUE_NUMBERS=$(echo "$PR_BODY" | grep -oP '(?<=(Close|Closes|Fix|Fixes|Resolve|Resolves) #)[0-9]+')
 
           echo "Linked issues: $ISSUE_NUMBERS"
 
           # Use environment file to pass the issue numbers to the next step
-          echo "issues=$ISSUE_NUMBERS" >> $GITHUB_ENV
+          echo "issues=$ISSUE_NUMBERS" >> "$GITHUB_ENV"
 
       - name: Read Issue Labels and Titles
         id: issue_data
