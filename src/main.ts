@@ -4,9 +4,11 @@ import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common'
 import * as path from 'node:path'
 import { mkdir, writeFile } from 'fs/promises'
+import { ConfigService } from '@nestjs/config'
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
+	const configService = app.get(ConfigService)
 
 	app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
 	app.useGlobalPipes(new ValidationPipe())
@@ -26,7 +28,8 @@ async function bootstrap() {
 	// todo update it to not do it in production
 	await generateOpenAPIDocumentation(document)
 
-	await app.listen(3000)
+	const port = configService.get<number>('port')
+	await app.listen(port)
 }
 
 async function generateOpenAPIDocumentation(document: Record<string, any>) {
