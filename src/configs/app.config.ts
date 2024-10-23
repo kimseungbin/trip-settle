@@ -12,8 +12,8 @@ export interface AppConfig {
 }
 
 export const validationSchema = Joi.object({
-	port: Joi.number().default(3000),
-	environment: Joi.string()
+	PORT: Joi.number().default(3000),
+	NODE_ENV: Joi.string()
 		.valid(...Object.values(Environment))
 		.default(Environment.Development),
 })
