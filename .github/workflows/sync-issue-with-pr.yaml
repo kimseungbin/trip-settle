@@ -28,6 +28,12 @@ jobs:
           # Use regex to find issue numbers referenced by "Close"
           ISSUE_NUMBERS=$(echo "$PR_BODY" | grep -oP '(?<=Close #)[0-9]+')
 
+          # Warn if no "Close" keyword is found in the PR body
+          if [ -z "$ISSUE_NUMBERS" ]; then
+            echo "::warning::No 'Close' keyword found in the PR body. Please mention issues using 'Close #<issue_number>'."
+            exit 1
+          fi
+
           echo "Linked issues: $ISSUE_NUMBERS"
 
           # Use environment file to pass the issue numbers to the next step
@@ -79,7 +85,3 @@ jobs:
             done <<< "$LABELS"
           
           done
-
-
-
-# todo remove major, minor, and patch labels before applying this workflow
