@@ -2,6 +2,9 @@ name: Release on PR Merge
 on:
   pull_request:
     types: [ closed ]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   release-on-merge:
     if: github.event.pull_request.merged == true
@@ -39,30 +42,35 @@ jobs:
         run: |
           git config --global user.name "SeungBin Kim"
           git config --global user.email "luxorienskim@gmail.com"
-      - name: Bump version and push tag
+      - name: Bump NPM Version (Without Commit)
         id: bump_version
         run: |
           BUMP_TYPE="${{ steps.version_type.outputs.bump_type }}"
           if [ "$BUMP_TYPE" = "major" ]; then
-            NEW_TAG=$(npm version major)
+            NEW_TAG=$(npm version major --no-git-tag-version)
           elif [ "$BUMP_TYPE" = "minor" ]; then
-            NEW_TAG=$(npm version minor)
+            NEW_TAG=$(npm version minor --no-git-tag-version)
           elif [ "$BUMP_TYPE" = "patch" ]; then
-            NEW_TAG=$(npm version patch)
+            NEW_TAG=$(npm version patch --no-git-tag-version)
           fi
-          
-          # Extract tag from npm version output
-          NEW_TAG=$(echo $NEW_TAG | tr -d 'v')
+
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
           
-          git push origin HEAD
+          # Git tag the merge commit with the new version
+          git tag "$NEW_TAG" ${{ github.event.pull_request.merge_commit_sha }}
           git push origin "$NEW_TAG"
-
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          echo "# What's Changed" > release_notes.md
+          echo "" >> release_notes.md
+          gh pr list --search "merged:>=$(git describe --tags --abbrev=0)" --json title,number,labels --jq '.[] | "* \(.title) (#\(.number))"' >> release_notes.md
+          if [ ! -s release_notes.md ]; then
+            echo "No changes found since last release" >> release_notes.md
+          fi
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.bump_version.outputs.new_tag }}
           name: Release ${{ steps.bump_version.outputs.new_tag }}
-          body: |
-            Changes in this Release:
-            ${{ github.event.pull_request.body }}
+          body_path: release_notes.md
