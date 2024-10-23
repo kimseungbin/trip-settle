@@ -63,8 +63,11 @@ jobs:
         id: release_notes
         run: |
           echo "# What's Changed" > release_notes.md
-          echo "" >> release notes.md
+          echo "" >> release_notes.md
           gh pr list --search "merged:>=$(git describe --tags --abbrev=0)" --json title,number,labels --jq '.[] | "* \(.title) (#\(.number))"' >> release_notes.md
+          if [ ! -s release_notes.md ]; then
+            echo "No changes found since last release" >> release_notes.md
+          fi
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
