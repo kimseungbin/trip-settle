@@ -10,23 +10,23 @@ async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
 	const configService = app.get(ConfigService)
 
-	app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
-	app.useGlobalPipes(new ValidationPipe())
-
-	const config = new DocumentBuilder()
-		.setTitle('Trip Settle')
-		.setDescription('The Trip Settle API Documentation')
-		.setVersion('1.0')
-		.build()
-	const options: SwaggerDocumentOptions = {
-		deepScanRoutes: true,
-		operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
+	const environment = configService.get<string>('environment')
+	if (environment === 'development') {
+		const config = new DocumentBuilder()
+			.setTitle('Trip Settle')
+			.setDescription('The Trip Settle API Documentation')
+			.setVersion('1.0')
+			.build()
+		const options: SwaggerDocumentOptions = {
+			deepScanRoutes: true,
+			operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
+		}
+		const document = SwaggerModule.createDocument(app, config, options)
+		await generateOpenAPIDocumentation(document)
 	}
 
-	const document = SwaggerModule.createDocument(app, config, options)
-
-	// todo update it to not do it in production
-	await generateOpenAPIDocumentation(document)
+	app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
+	app.useGlobalPipes(new ValidationPipe())
 
 	const port = configService.get<number>('port')
 	await app.listen(port)
