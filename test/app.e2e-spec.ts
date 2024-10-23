@@ -5,6 +5,17 @@ import { AppModule } from '@src/app.module'
 import { Connection } from 'mongoose'
 import { getConnectionToken } from '@nestjs/mongoose'
 
+// Mock the validationSchema from app.config.ts
+jest.mock('../src/configs/app.config', () => ({
+	validationSchema: {
+		validate: jest.fn(() => ({ error: null, value: {} })), // Bypass Joi validation
+	},
+	default: jest.fn(() => ({
+		port: 3000,
+		environment: 'test',
+	})),
+}))
+
 describe('AppController (e2e)', () => {
 	let app: INestApplication
 	let connection: Connection

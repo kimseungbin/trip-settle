@@ -4,9 +4,17 @@ import { AppService } from './app.service'
 import { TripsModule } from '@trips/trips.module'
 import { MongooseModule } from '@nestjs/mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
+import { ConfigModule } from '@nestjs/config'
+import appConfig, { validationSchema } from '@src/configs/app.config'
 
 @Module({
 	imports: [
+		ConfigModule.forRoot({
+			cache: true,
+			isGlobal: true,
+			load: [appConfig],
+			validationSchema,
+		}),
 		MongooseModule.forRootAsync({
 			useFactory: async () => {
 				try {
