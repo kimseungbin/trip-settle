@@ -2,6 +2,9 @@ name: Release on PR Merge
 on:
   pull_request:
     types: [ closed ]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   release-on-merge:
     if: github.event.pull_request.merged == true
