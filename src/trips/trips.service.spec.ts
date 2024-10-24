@@ -8,6 +8,7 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Types } from 'mongoose'
 import { CreateExpenseDto } from '@trips/dto/create-expense.dto'
 import { Expense } from '@trips/schemas/expense.schema'
+import { PaymentMethod } from '@trips/dto/expense.dto'
 
 const mockTripModel = {
 	findById: jest.fn(),
@@ -187,8 +188,8 @@ describe('TripsService', () => {
 		})
 		describe('with various payment methods', () => {
 			const testCases = [
-				{ paymentMethod: 'cash', description: 'with cash' },
-				{ paymentMethod: 'card', description: 'with card' },
+				{ paymentMethod: PaymentMethod.CASH, description: 'with cash' },
+				{ paymentMethod: PaymentMethod.CARD, description: 'with card' },
 				{ paymentMethod: undefined, description: 'without payment method' },
 			]
 
