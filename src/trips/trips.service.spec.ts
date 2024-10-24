@@ -163,8 +163,8 @@ describe('TripsService', () => {
 			currency: 'USD',
 		}
 
-		let mockTrip: any
-		let mockExpense: any
+		let mockTrip: Partial<Trip & { save: jest.Mock }>
+		let mockExpense: Partial<Expense & { _id: Types.ObjectId }>
 
 		beforeEach(() => {
 			mockTrip = {
