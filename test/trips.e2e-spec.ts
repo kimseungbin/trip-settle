@@ -134,6 +134,15 @@ describe('Trips', () => {
 
 			await request(app.getHttpServer()).patch(`/trips/${nonExistentId}`).expect(404)
 		})
+		it('should return 400 when deleting all participants', async () => {
+			const updateTripDto: UpdateTripDto = {
+				participants: [],
+			}
+
+			const { id } = await tripsService.create(createTripDto)
+
+			await request(app.getHttpServer()).patch(`/trips/${id}`).send(updateTripDto).expect(400)
+		})
 	})
 	describe('DELETE /trips/:id', () => {
 		it('should delete a trip', async () => {
