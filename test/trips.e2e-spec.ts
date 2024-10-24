@@ -113,13 +113,12 @@ describe('Trips', () => {
 		})
 	})
 	describe('PATCH /trips/:id', () => {
+		const createTripDto: CreateTripDto = {
+			title: 'Summer Vacation',
+			description: 'A trip to the beach with friends.',
+			participants: ['Alice', 'Bob'],
+		}
 		it('should update a trip', async () => {
-			const createTripDto: CreateTripDto = {
-				title: 'Summer Vacation',
-				description: 'A trip to the beach with friends.',
-				participants: ['Alice', 'Bob'],
-			}
-
 			const updateTripDto: UpdateTripDto = {
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
