@@ -1,0 +1,16 @@
+name: CloudFormation Lint
+run-name: Lint CloudFormation template by @${{ github.actor}}
+on:
+  push:
+    paths:
+      - 'infra/cloudformation.yaml'
+jobs:
+  cloudformation-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install cfn-lint
+        run: pip install cfn-lint
+      - name: Run cfn-lint
+        run: cfn-lint infra/cloudformation.yaml
