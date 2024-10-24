@@ -2,6 +2,7 @@ import {
 	ArrayMinSize,
 	ArrayUnique,
 	IsArray,
+	IsEnum,
 	IsNumber,
 	IsOptional,
 	IsPositive,
@@ -16,6 +17,15 @@ import {
 	IsPayerInTripParticipantsConstraint,
 } from '../validators/expense.validators'
 import { ApiProperty } from '@nestjs/swagger'
+
+/**
+ * Represents the method of payment used for an expense.
+ * Used to track whether expenses were paid in cash or by card.
+ */
+export enum PaymentMethod {
+	CASH = 'cash',
+	CARD = 'card',
+}
 
 export class ExpenseDto {
 	/**
@@ -109,6 +119,21 @@ export class ExpenseDto {
 		example: 'Alice',
 	})
 	payer: string
+
+	/**
+	 * The method of payment used for this expense.
+	 * Example: "cash" or "card"
+	 */
+	@IsOptional()
+	@IsString()
+	@IsEnum(PaymentMethod, { message: 'Payment method must be either `cash` or `card`.' })
+	@ApiProperty({
+		description: 'The method of payment used for this expense',
+		enum: PaymentMethod,
+		example: 'cash',
+		required: false,
+	})
+	paymentMethod?: string
 
 	/**
 	 * The list of trip-level participants for validation purposes.

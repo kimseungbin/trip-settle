@@ -10,6 +10,7 @@ import { TripsService } from '@trips/trips.service'
 import { Reflector } from '@nestjs/core'
 import { UpdateTripDto } from '@trips/dto/update-trip.dto'
 import { CreateExpenseDto } from '@trips/dto/create-expense.dto'
+import { PaymentMethod } from '@trips/dto/expense.dto'
 
 describe('Trips', () => {
 	let app: INestApplication
@@ -154,27 +155,55 @@ describe('Trips', () => {
 		})
 	})
 	describe('POST /trips/:id/expenses', () => {
+		const createTripDto: CreateTripDto = {
+			title: 'Summer Vacation',
+			description: 'A trip to the beach with friends.',
+			participants: ['Alice', 'Bob', 'Charlie'],
+		}
+		const createExpenseDto: CreateExpenseDto = {
+			amount: 270,
+			currency: 'USD',
+			description: 'Dinner with friends',
+			participants: ['Alice', 'Bob', 'Charlie'],
+			payer: 'Charlie',
+			paymentMethod: PaymentMethod.CASH,
+		}
 		it('should create a new expense', async () => {
-			const createTripDto: CreateTripDto = {
-				title: 'Summer Vacation',
-				description: 'A trip of the beach with friends.',
-				participants: ['Alice', 'Bob', 'Charlie'],
-			}
-
 			const { id } = await tripsService.create(createTripDto)
 
-			const createExpenseDto: CreateExpenseDto = {
-				amount: 270,
-				currency: 'USD',
-				description: 'Dinner with friends',
-				participants: ['Alice', 'Bob', 'Charlie'],
-				payer: 'Charlie',
-			}
-
 			await request(app.getHttpServer()).post(`/trips/${id}/expenses`).send(createExpenseDto).expect(201)
+
 			const trip = await tripsService.find(id)
 			expect(trip.expenses.length).toBe(1)
 		})
+		const paymentMethodTestCases = [
+			{ method: PaymentMethod.CASH, expectedStatus: 201 },
+			{ method: PaymentMethod.CARD, expectedStatus: 201 },
+			{ method: 'invalid', expectedStatus: 400 },
+			{ method: undefined, expectedStatus: 201 },
+		]
+
+		test.each(paymentMethodTestCases)(
+			'should handle $method payment method with status $expectedStatus',
+			async ({ method, expectedStatus }) => {
+				const createExpenseDtoWithPaymentMethod: CreateExpenseDto = {
+					...createExpenseDto,
+					paymentMethod: method,
+				}
+
+				const { id } = await tripsService.create(createTripDto)
+
+				await request(app.getHttpServer())
+					.post(`/trips/${id}/expenses`)
+					.send(createExpenseDtoWithPaymentMethod)
+					.expect(expectedStatus)
+
+				if (expectedStatus === 201) {
+					const trip = await tripsService.find(id)
+					expect(trip.expenses.length).toBe(1)
+				}
+			},
+		)
 	})
 	describe('PUT /trips/:id/expense/:id', () => {
 		it.todo('should update an expense')

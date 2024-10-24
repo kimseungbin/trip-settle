@@ -8,6 +8,7 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Types } from 'mongoose'
 import { CreateExpenseDto } from '@trips/dto/create-expense.dto'
 import { Expense } from '@trips/schemas/expense.schema'
+import { PaymentMethod } from '@trips/dto/expense.dto'
 
 const mockTripModel = {
 	findById: jest.fn(),
@@ -155,29 +156,52 @@ describe('TripsService', () => {
 		})
 	})
 	describe('addExpense', () => {
-		it('should create a new expense to the trip', async () => {
-			const mockTrip = {
+		const createExpenseDto: CreateExpenseDto = {
+			amount: 72,
+			participants: ['Alice', 'Bob', 'Charlie'],
+			payer: 'Alice',
+			description: 'Dinner at a restaurant',
+			currency: 'USD',
+		}
+
+		let mockTrip: Partial<Trip & { save: jest.Mock }>
+		let mockExpense: Partial<Expense & { _id: Types.ObjectId }>
+
+		beforeEach(() => {
+			mockTrip = {
 				expenses: [],
 				save: jest.fn(),
 			}
+			mockExpense = { _id: objectId }
+
 			mockTripModel.findById.mockResolvedValue(mockTrip)
-
-			const mockExpense = { _id: objectId }
 			mockExpenseModel.create.mockResolvedValue(mockExpense)
+		})
 
-			const createExpenseDto: CreateExpenseDto = {
-				amount: 72,
-				participants: ['Alice', 'Bob', 'Charlie'],
-				payer: 'Alice',
-				description: 'Dinner at a restaurant',
-				currency: 'USD',
-			}
+		it('should create a new expense to the trip', async () => {
 			await service.addExpense(base64TripId, createExpenseDto)
 
 			expect(mockTripModel.findById).toHaveBeenCalledWith(objectId)
 			expect(mockExpenseModel.create).toHaveBeenCalledWith(createExpenseDto)
 			expect(mockTrip.expenses).toContain(mockExpense._id)
 			expect(mockTrip.save).toHaveBeenCalled()
+		})
+		describe('with various payment methods', () => {
+			const testCases = [
+				{ paymentMethod: PaymentMethod.CASH, description: 'with cash' },
+				{ paymentMethod: PaymentMethod.CARD, description: 'with card' },
+				{ paymentMethod: undefined, description: 'without payment method' },
+			]
+
+			test.each(testCases)('should create a new expense $description', async ({ paymentMethod }) => {
+				const createExpenseDtoWithPaymentMethod = { ...createExpenseDto, paymentMethod }
+
+				await service.addExpense(base64TripId, createExpenseDtoWithPaymentMethod)
+
+				expect(mockTripModel.findById).toHaveBeenCalledWith(objectId)
+				expect(mockExpenseModel.create).toHaveBeenCalledWith(createExpenseDtoWithPaymentMethod)
+				expect(mockTrip.expenses).toContain(mockExpense._id)
+			})
 		})
 		it('should throw NotFoundException if trip with the given ID does not exist', async () => {
 			mockTripModel.findById.mockResolvedValue(null)
