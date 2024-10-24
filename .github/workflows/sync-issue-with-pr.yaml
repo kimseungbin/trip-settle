@@ -35,9 +35,11 @@ jobs:
           fi
 
           echo "Linked issues: $ISSUE_NUMBERS"
+          
+          FLATTENED_ISSUE_NUMBERS=$(echo "$ISSUE_NUMBERS" | tr '\n' ' ')
 
           # Use environment file to pass the issue numbers to the next step
-          echo "issues=$ISSUE_NUMBERS" >> "$GITHUB_ENV"
+          echo "issues=$FLATTENED_ISSUE_NUMBERS" >> "$GITHUB_ENV"
 
       - name: Read Issue Labels and Titles
         id: issue_data
