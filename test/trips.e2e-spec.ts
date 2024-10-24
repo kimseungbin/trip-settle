@@ -154,23 +154,21 @@ describe('Trips', () => {
 		})
 	})
 	describe('POST /trips/:id/expenses', () => {
+		const createTripDto: CreateTripDto = {
+			title: 'Summer Vacation',
+			description: 'A trip to the beach with friends.',
+			participants: ['Alice', 'Bob', 'Charlie'],
+		}
+		const createExpenseDto: CreateExpenseDto = {
+			amount: 270,
+			currency: 'USD',
+			description: 'Dinner with friends',
+			participants: ['Alice', 'Bob', 'Charlie'],
+			payer: 'Charlie',
+			paymentMethod: 'cash',
+		}
 		it('should create a new expense', async () => {
-			const createTripDto: CreateTripDto = {
-				title: 'Summer Vacation',
-				description: 'A trip to the beach with friends.',
-				participants: ['Alice', 'Bob', 'Charlie'],
-			}
-
 			const { id } = await tripsService.create(createTripDto)
-
-			const createExpenseDto: CreateExpenseDto = {
-				amount: 270,
-				currency: 'USD',
-				description: 'Dinner with friends',
-				participants: ['Alice', 'Bob', 'Charlie'],
-				payer: 'Charlie',
-				paymentMethod: 'cash',
-			}
 
 			await request(app.getHttpServer()).post(`/trips/${id}/expenses`).send(createExpenseDto).expect(201)
 
