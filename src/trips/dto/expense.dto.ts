@@ -2,6 +2,7 @@ import {
 	ArrayMinSize,
 	ArrayUnique,
 	IsArray,
+	IsEnum,
 	IsNumber,
 	IsOptional,
 	IsPositive,
@@ -16,6 +17,11 @@ import {
 	IsPayerInTripParticipantsConstraint,
 } from '../validators/expense.validators'
 import { ApiProperty } from '@nestjs/swagger'
+
+export enum PaymentMethod {
+	CASH = 'cash',
+	CARD = 'card',
+}
 
 export class ExpenseDto {
 	/**
@@ -109,6 +115,10 @@ export class ExpenseDto {
 		example: 'Alice',
 	})
 	payer: string
+
+	@IsString()
+	@IsEnum(PaymentMethod, { message: 'Payment method must be either `cash` or `card`.' })
+	paymentMethod?: string
 
 	/**
 	 * The list of trip-level participants for validation purposes.

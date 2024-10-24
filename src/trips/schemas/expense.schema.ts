@@ -19,6 +19,9 @@ export class Expense {
 
 	@Prop({ required: true })
 	payer: string
+
+	@Prop({ required: false })
+	paymentMethod: string
 }
 
 export const ExpenseSchema = SchemaFactory.createForClass(Expense)
