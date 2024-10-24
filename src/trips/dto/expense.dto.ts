@@ -124,6 +124,7 @@ export class ExpenseDto {
 	 * The method of payment used for this expense.
 	 * Example: "cash" or "card"
 	 */
+	@IsOptional()
 	@IsString()
 	@IsEnum(PaymentMethod, { message: 'Payment method must be either `cash` or `card`.' })
 	@ApiProperty({
