@@ -166,7 +166,7 @@ describe('Trips', () => {
 			description: 'Dinner with friends',
 			participants: ['Alice', 'Bob', 'Charlie'],
 			payer: 'Charlie',
-			paymentMethod: 'cash',
+			paymentMethod: PaymentMethod.CASH,
 		}
 		it('should create a new expense', async () => {
 			const { id } = await tripsService.create(createTripDto)
