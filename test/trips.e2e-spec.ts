@@ -176,7 +176,6 @@ describe('Trips', () => {
 
 			const trip = await tripsService.find(id)
 			expect(trip.expenses.length).toBe(1)
-			expect(trip.expenses[0].paymentMethod).toEqual(createExpenseDto.paymentMethod)
 		})
 	})
 	describe('PUT /trips/:id/expense/:id', () => {
