@@ -157,7 +157,7 @@ describe('Trips', () => {
 		it('should create a new expense', async () => {
 			const createTripDto: CreateTripDto = {
 				title: 'Summer Vacation',
-				description: 'A trip of the beach with friends.',
+				description: 'A trip to the beach with friends.',
 				participants: ['Alice', 'Bob', 'Charlie'],
 			}
 
@@ -169,11 +169,14 @@ describe('Trips', () => {
 				description: 'Dinner with friends',
 				participants: ['Alice', 'Bob', 'Charlie'],
 				payer: 'Charlie',
+				paymentMethod: 'cash',
 			}
 
 			await request(app.getHttpServer()).post(`/trips/${id}/expenses`).send(createExpenseDto).expect(201)
+
 			const trip = await tripsService.find(id)
 			expect(trip.expenses.length).toBe(1)
+			expect(trip.expenses[0].paymentMethod).toEqual(createExpenseDto.paymentMethod)
 		})
 	})
 	describe('PUT /trips/:id/expense/:id', () => {
