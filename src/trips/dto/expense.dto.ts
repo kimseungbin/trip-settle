@@ -18,6 +18,10 @@ import {
 } from '../validators/expense.validators'
 import { ApiProperty } from '@nestjs/swagger'
 
+/**
+ * Represents the method of payment used for an expense.
+ * Used to track whether expenses were paid in cash or by card.
+ */
 export enum PaymentMethod {
 	CASH = 'cash',
 	CARD = 'card',
@@ -116,8 +120,18 @@ export class ExpenseDto {
 	})
 	payer: string
 
+	/**
+	 * The method of payment used for this expense.
+	 * Example: "cash" or "card"
+	 */
 	@IsString()
 	@IsEnum(PaymentMethod, { message: 'Payment method must be either `cash` or `card`.' })
+	@ApiProperty({
+		description: 'The method of payment used for this expense',
+		enum: PaymentMethod,
+		example: 'cash',
+		required: false,
+	})
 	paymentMethod?: string
 
 	/**
