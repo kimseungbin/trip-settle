@@ -22,8 +22,10 @@ jobs:
         id: get_labels
         run: |
           LABELS=$(gh pr view ${{ github.event.pull_request.number }} --json labels --jq '.labels[].name')
-          echo "Labels: $LABELS"
-          echo "labels=$LABELS" >> $GITHUB_OUTPUT
+          FLATTENED_ISSUE_LABELS=$(echo "$LABELS" | tr '\n' ' ')
+
+          echo "Labels: $FLATTENED_ISSUE_LABELS"
+          echo "labels=$FLATTENED_ISSUE_LABELS" >> $GITHUB_OUTPUT
       - name: Determine Version Bump
         id: version_type
         run: |
