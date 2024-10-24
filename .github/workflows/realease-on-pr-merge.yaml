@@ -42,7 +42,7 @@ jobs:
         run: |
           git config --global user.name "SeungBin Kim"
           git config --global user.email "luxorienskim@gmail.com"
-      - name: Bump NPM Version (Without Commit)
+      - name: Bump NPM Version
         id: bump_version
         run: |
           BUMP_TYPE="${{ steps.version_type.outputs.bump_type }}"
@@ -56,9 +56,7 @@ jobs:
 
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
           
-          # Git tag the merge commit with the new version
-          git tag "$NEW_TAG" ${{ github.event.pull_request.merge_commit_sha }}
-          git push origin "$NEW_TAG"
+          git push --follow-tags origin HEAD
       - name: Generate Release Notes
         id: release_notes
         run: |
