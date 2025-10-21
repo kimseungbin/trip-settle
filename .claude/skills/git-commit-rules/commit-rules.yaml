@@ -60,7 +60,8 @@ scopes:
 conventions:
   subject:
     - "Use imperative mood: 'Add feature' not 'Added feature'"
-    - "Don't capitalize first letter unless proper noun"
+    - "Capitalize first letter when plain English (e.g., 'Add feature')"
+    - "Don't capitalize if it starts with backticks, code, or special characters"
     - "No period at the end"
     - "Be specific but concise"
 
