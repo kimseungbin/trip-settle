@@ -3,7 +3,7 @@
 
 	let {
 		visible = false,
-		onDismiss
+		onDismiss,
 	}: {
 		visible?: boolean
 		onDismiss: () => void
@@ -29,6 +29,23 @@
 		}
 	})
 
+	// Handle keyboard events
+	$effect(() => {
+		if (!visible) return
+
+		function handleKeyDown(event: KeyboardEvent) {
+			if (event.key === 'Escape') {
+				handleDismiss()
+			}
+		}
+
+		window.addEventListener('keydown', handleKeyDown)
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown)
+		}
+	})
+
 	function handleDismiss() {
 		show = false
 		// Wait for animation to complete before calling onDismiss
@@ -42,8 +59,7 @@
 	<div class="toast" class:show>
 		<span class="icon">💡</span>
 		<div class="content">
-			<strong>Keyboard tip:</strong> Press <kbd>Enter</kbd> to add, <kbd>Tab</kbd> to move between
-			fields
+			<strong>Keyboard tip:</strong> Press <kbd>Enter</kbd> to add, <kbd>Tab</kbd> to move between fields
 		</div>
 		<button class="dismiss" onclick={handleDismiss} aria-label="Dismiss tip">×</button>
 	</div>

@@ -24,6 +24,14 @@ module.exports = {
       parserOptions: {
         parser: '@typescript-eslint/parser',
       },
+      globals: {
+        $state: 'readonly',
+        $derived: 'readonly',
+        $effect: 'readonly',
+        $props: 'readonly',
+        $bindable: 'readonly',
+        $inspect: 'readonly',
+      },
     },
   ],
 };

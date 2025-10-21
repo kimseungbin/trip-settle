@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { Currency } from '../types/expense'
-	import { currencies, DEFAULT_CURRENCY, getCurrencyByCode, searchCurrencies } from '../data/currencies'
+	import { DEFAULT_CURRENCY, getCurrencyByCode, searchCurrencies } from '../data/currencies'
 
 	let {
 		value = $bindable(DEFAULT_CURRENCY),
 		sessionCurrencies = [],
-		onselect
+		onselect,
 	}: {
 		value?: string
 		sessionCurrencies?: string[]
@@ -150,7 +150,7 @@
 						aria-selected={currency.code === value}
 						onmouseenter={() => (selectedIndex = index)}
 						onclick={() => selectCurrency(currency)}
-						onkeydown={(e) => e.key === 'Enter' && selectCurrency(currency)}
+						onkeydown={e => e.key === 'Enter' && selectCurrency(currency)}
 						tabindex="0"
 					>
 						<span class="currency-code">{currency.code}</span>

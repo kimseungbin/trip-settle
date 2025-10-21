@@ -66,7 +66,6 @@ test.describe('Keyboard Navigation', () => {
 	})
 
 	test('can navigate backwards with Shift+Tab', async ({ page }) => {
-		const nameInput = page.getByPlaceholder('Expense name')
 		const addButton = page.getByRole('button', { name: 'Add' })
 
 		// Focus on Add button
@@ -213,6 +212,49 @@ test.describe('Keyboard Navigation', () => {
 
 		// All three expenses should exist
 		await expect(page.locator('.expense-item')).toHaveCount(3)
+	})
+
+	test('can dismiss keyboard hint toast with Escape key', async ({ page }) => {
+		// Clear localStorage to ensure toast shows
+		await page.evaluate(() => localStorage.clear())
+		await page.reload()
+
+		// Trigger toast by clicking Add button (mouse submission)
+		await page.getByPlaceholder('Expense name').fill('Test')
+		await page.getByPlaceholder('Amount').fill('10.00')
+		await page.getByRole('button', { name: 'Add' }).click()
+
+		// Check if toast is visible after mouse submission
+		const toast = page.locator('.toast')
+		await expect(toast).toBeVisible()
+
+		// Press Escape to dismiss
+		await page.keyboard.press('Escape')
+
+		// Toast should disappear (either immediately or after animation)
+		await expect(toast).not.toBeVisible({ timeout: 1000 })
+	})
+
+	test('can dismiss keyboard hint toast with close button', async ({ page }) => {
+		// Clear localStorage to ensure toast shows
+		await page.evaluate(() => localStorage.clear())
+		await page.reload()
+
+		// Trigger toast by clicking Add button (mouse submission)
+		await page.getByPlaceholder('Expense name').fill('Test')
+		await page.getByPlaceholder('Amount').fill('10.00')
+		await page.getByRole('button', { name: 'Add' }).click()
+
+		// Check if toast is visible
+		const toast = page.locator('.toast')
+		await expect(toast).toBeVisible()
+
+		// Click the dismiss button
+		const dismissButton = page.getByRole('button', { name: 'Dismiss tip' })
+		await dismissButton.click()
+
+		// Toast should disappear
+		await expect(toast).not.toBeVisible({ timeout: 1000 })
 	})
 })
 
