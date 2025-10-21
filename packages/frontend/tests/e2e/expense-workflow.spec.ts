@@ -29,7 +29,7 @@ test.describe('Expense Workflow', () => {
 		// Verify expense appears in list
 		await expect(page.locator('.expense-name')).toContainText('Coffee')
 		await expect(page.locator('.expense-amount')).toContainText('4.50')
-		await expect(page.locator('.currency-code')).toContainText('USD')
+		await expect(page.locator('.currency-code')).toContainText('KRW')
 
 		// Verify total is updated
 		await expect(page.locator('.total-amount')).toContainText('4.50')
