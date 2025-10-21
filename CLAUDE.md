@@ -32,6 +32,86 @@ When implementing features, always consider:
 3. Does it work well on mobile devices?
 4. Is it accessible to users with disabilities?
 
+## Feature Development Workflow (MANDATORY)
+
+**All new features must follow this Test-Driven Development (TDD) workflow:**
+
+### Workflow Steps
+
+1. **Plan**: Break down the feature into clear, testable requirements
+   - Identify affected components (frontend, backend, or both)
+   - Define success criteria
+   - Use TodoWrite tool to create and track tasks
+
+2. **Write Tests First** (Red Phase): Write failing tests before implementation
+   - **Backend**: Jest unit tests (`*.spec.ts`) and/or integration tests
+   - **Frontend**:
+     - Vitest unit tests for components/utilities
+     - Playwright E2E tests for user workflows and interactions
+     - Visual regression tests if UI changes
+     - Keyboard navigation tests for interactive elements
+   - Tests must fail initially (proving they test the feature)
+
+3. **Implement Feature** (Green Phase): Write minimum code to pass tests
+   - Follow existing code patterns and architecture
+   - Ensure type safety and proper error handling
+   - Maintain accessibility and keyboard support
+
+4. **Verify Tests Pass**: Run full test suite
+   - Backend: `npm run test --workspace=backend`
+   - Frontend: `npm run test --workspace=frontend && npm run test:e2e --workspace=frontend`
+   - Ensure no regressions in existing tests
+   - Run formatting: `npm run format`
+   - Run linting: `npm run lint`
+
+5. **Refactor** (Optional): Clean up implementation
+   - Improve code quality while keeping tests green
+   - Extract reusable components/functions
+   - Optimize performance if needed
+
+6. **Commit**: Create descriptive commit following project style
+   - Reference the feature and tests added
+   - Use conventional commit format (feat:, fix:, etc.)
+
+### Exceptions
+
+This workflow may be relaxed only for:
+- Documentation-only changes (*.md files)
+- Configuration tweaks
+- Emergency hotfixes (but tests must be added immediately after)
+
+### Example
+
+```bash
+# 1. Plan
+# User requests: "Add expense edit functionality"
+# Create todos: Research existing code -> Write tests -> Implement -> Verify -> Commit
+
+# 2. Write Tests First
+npm run test:e2e --workspace=frontend -- tests/e2e/edit-expense.spec.ts
+# ❌ Tests fail (expected - feature doesn't exist)
+
+# 3. Implement Feature
+# Add edit button, edit form, update API call, etc.
+
+# 4. Verify Tests Pass
+npm run test:e2e --workspace=frontend
+npm run test --workspace=frontend
+npm run format
+# ✅ All tests pass
+
+# 5. Commit
+git add .
+git commit -m "feat(frontend): add expense edit functionality
+
+- Add edit button to expense items
+- Create inline edit form with keyboard support
+- Add Playwright E2E tests for edit workflow
+- Ensure Escape cancels edit, Enter saves"
+```
+
+**Claude Code must follow this workflow for all feature implementations.**
+
 ## Monorepo Structure
 
 ```
