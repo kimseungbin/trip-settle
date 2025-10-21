@@ -12,6 +12,7 @@ export default defineConfig({
 	plugins: [svelte()],
 	server: {
 		port,
+		host: true, // Expose to local network
 		proxy: {
 			'/api': {
 				target: backendUrl,
