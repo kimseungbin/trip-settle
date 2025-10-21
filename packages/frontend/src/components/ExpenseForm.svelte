@@ -96,6 +96,7 @@
 	form {
 		display: flex;
 		gap: 0.5em;
+		flex-wrap: wrap;
 	}
 
 	input {
@@ -103,14 +104,15 @@
 		border: 1px solid #ddd;
 		border-radius: 4px;
 		font-size: 1em;
+		min-width: 0; /* Allow inputs to shrink below content size */
 	}
 
 	input[type='text'] {
-		flex: 2;
+		flex: 2 1 150px; /* grow, shrink, min-width */
 	}
 
 	input[type='number'] {
-		flex: 1;
+		flex: 1 1 80px; /* grow, shrink, min-width */
 	}
 
 	button {
@@ -122,9 +124,28 @@
 		border: none;
 		border-radius: 4px;
 		transition: background 0.2s;
+		flex-shrink: 0; /* Prevent button from shrinking */
+		white-space: nowrap; /* Keep text on one line */
 	}
 
 	button:hover {
 		background: #e63900;
+	}
+
+	/* Mobile responsive layout */
+	@media (max-width: 640px) {
+		form {
+			flex-direction: column;
+		}
+
+		input[type='text'],
+		input[type='number'] {
+			width: 100%;
+			flex: none;
+		}
+
+		button {
+			width: 100%;
+		}
 	}
 </style>
