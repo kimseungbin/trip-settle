@@ -4,9 +4,6 @@
  */
 
 import type { AppConfig, Environment } from './types'
-import { localConfig } from './environments/local'
-import { developmentConfig } from './environments/development'
-import { productionConfig } from './environments/production'
 
 const getEnvironment = (): Environment => {
 	const env = process.env.NODE_ENV as Environment | undefined
@@ -26,13 +23,21 @@ const getEnvironment = (): Environment => {
 const loadConfig = (): AppConfig => {
 	const environment = getEnvironment()
 
+	// Use dynamic require to only load the selected environment config
+	// This prevents other environments from executing their validation code
 	switch (environment) {
-		case 'local':
+		case 'local': {
+			const { localConfig } = require('./environments/local')
 			return localConfig
-		case 'development':
+		}
+		case 'development': {
+			const { developmentConfig } = require('./environments/development')
 			return developmentConfig
-		case 'production':
+		}
+		case 'production': {
+			const { productionConfig } = require('./environments/production')
 			return productionConfig
+		}
 	}
 }
 

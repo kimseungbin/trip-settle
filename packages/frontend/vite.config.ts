@@ -1,14 +1,20 @@
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
-import { config } from './src/config'
+
+// Vite config is evaluated at build time, so we use environment variables
+// or fallback to local development defaults
+const port = parseInt(process.env.FRONTEND_PORT || '5173')
+const backendUrl = process.env.API_URL
+	? process.env.API_URL.replace('/api', '')
+	: 'http://localhost:3000'
 
 export default defineConfig({
 	plugins: [svelte()],
 	server: {
-		port: config.port,
+		port,
 		proxy: {
 			'/api': {
-				target: config.apiUrl.replace('/api', ''),
+				target: backendUrl,
 				changeOrigin: true,
 			},
 		},

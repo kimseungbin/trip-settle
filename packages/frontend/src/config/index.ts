@@ -1,15 +1,15 @@
 /**
  * @file Frontend-specific configuration
- * Re-exports relevant config from shared config
+ * Uses hardcoded values for browser (can't access process.env)
  */
 
-import { config as sharedConfig } from '../../../../config'
-
+// In browser, we use hardcoded local development values
+// For production, these should be replaced during build with Vite's define
 export const config = {
-	environment: sharedConfig.environment,
-	url: sharedConfig.frontend.url,
-	apiUrl: sharedConfig.frontend.apiUrl,
-	port: sharedConfig.frontend.port,
+	environment: 'local' as const,
+	url: 'http://localhost:5173',
+	apiUrl: 'http://localhost:3000/api',
+	port: 5173,
 }
 
 export type FrontendConfig = typeof config
