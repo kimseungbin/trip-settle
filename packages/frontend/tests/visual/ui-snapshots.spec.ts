@@ -128,7 +128,7 @@ test.describe('Visual Regression', () => {
 
 test.describe('Visual Regression - Mobile', () => {
 	test.use({
-		viewport: { width: 375, height: 667 } // iPhone SE size
+		viewport: { width: 375, height: 667 }, // iPhone SE size
 	})
 
 	test('mobile empty state', async ({ page }) => {

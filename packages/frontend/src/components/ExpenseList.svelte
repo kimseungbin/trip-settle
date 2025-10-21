@@ -3,7 +3,7 @@
 
 	let {
 		expenses,
-		onRemove
+		onRemove,
 	}: {
 		expenses: Expense[]
 		onRemove: (id: number) => void

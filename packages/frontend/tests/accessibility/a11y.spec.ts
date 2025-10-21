@@ -24,9 +24,7 @@ test.describe('Accessibility', () => {
 	test.fixme('expense form should not have accessibility violations', async ({ page }) => {
 		await page.goto('/')
 
-		const accessibilityScanResults = await new AxeBuilder({ page })
-			.include('.form-container')
-			.analyze()
+		const accessibilityScanResults = await new AxeBuilder({ page }).include('.form-container').analyze()
 
 		expect(accessibilityScanResults.violations).toEqual([])
 	})
@@ -44,9 +42,7 @@ test.describe('Accessibility', () => {
 		await page.getByRole('button', { name: 'Add' }).click()
 
 		// Scan the list container
-		const accessibilityScanResults = await new AxeBuilder({ page })
-			.include('.list-container')
-			.analyze()
+		const accessibilityScanResults = await new AxeBuilder({ page }).include('.list-container').analyze()
 
 		expect(accessibilityScanResults.violations).toEqual([])
 	})
@@ -62,9 +58,7 @@ test.describe('Accessibility', () => {
 		await expect(amountInput).toHaveAttribute('placeholder', 'Amount')
 
 		// Check for aria-label or label association
-		const accessibilityScanResults = await new AxeBuilder({ page })
-			.include('form')
-			.analyze()
+		const accessibilityScanResults = await new AxeBuilder({ page }).include('form').analyze()
 
 		expect(accessibilityScanResults.violations).toEqual([])
 	})
@@ -86,9 +80,7 @@ test.describe('Accessibility', () => {
 		await expect(removeButton).toBeVisible()
 
 		// Scan buttons
-		const accessibilityScanResults = await new AxeBuilder({ page })
-			.include('button')
-			.analyze()
+		const accessibilityScanResults = await new AxeBuilder({ page }).include('button').analyze()
 
 		expect(accessibilityScanResults.violations).toEqual([])
 	})
@@ -102,13 +94,9 @@ test.describe('Accessibility', () => {
 		await page.getByRole('button', { name: 'Add' }).click()
 
 		// Run contrast checks
-		const accessibilityScanResults = await new AxeBuilder({ page })
-			.withTags(['wcag2aa', 'wcag21aa'])
-			.analyze()
+		const accessibilityScanResults = await new AxeBuilder({ page }).withTags(['wcag2aa', 'wcag21aa']).analyze()
 
-		const contrastViolations = accessibilityScanResults.violations.filter(
-			v => v.id === 'color-contrast'
-		)
+		const contrastViolations = accessibilityScanResults.violations.filter(v => v.id === 'color-contrast')
 
 		expect(contrastViolations).toEqual([])
 	})
@@ -121,13 +109,9 @@ test.describe('Accessibility', () => {
 		await expect(h1).toBeVisible()
 
 		// Check heading hierarchy
-		const accessibilityScanResults = await new AxeBuilder({ page })
-			.withTags(['best-practice'])
-			.analyze()
+		const accessibilityScanResults = await new AxeBuilder({ page }).withTags(['best-practice']).analyze()
 
-		const headingViolations = accessibilityScanResults.violations.filter(
-			v => v.id.includes('heading')
-		)
+		const headingViolations = accessibilityScanResults.violations.filter(v => v.id.includes('heading'))
 
 		expect(headingViolations).toEqual([])
 	})
@@ -136,9 +120,7 @@ test.describe('Accessibility', () => {
 		await page.goto('/')
 
 		// All interactive elements should be reachable by keyboard
-		const accessibilityScanResults = await new AxeBuilder({ page })
-			.withTags(['keyboard'])
-			.analyze()
+		const accessibilityScanResults = await new AxeBuilder({ page }).withTags(['keyboard']).analyze()
 
 		expect(accessibilityScanResults.violations).toEqual([])
 	})
@@ -146,9 +128,7 @@ test.describe('Accessibility', () => {
 	test.fixme('focus order is logical', async ({ page }) => {
 		await page.goto('/')
 
-		const accessibilityScanResults = await new AxeBuilder({ page })
-			.withTags(['best-practice'])
-			.analyze()
+		const accessibilityScanResults = await new AxeBuilder({ page }).withTags(['best-practice']).analyze()
 
 		const focusViolations = accessibilityScanResults.violations.filter(
 			v => v.id.includes('focus') || v.id.includes('tabindex')
@@ -166,13 +146,9 @@ test.describe('Accessibility', () => {
 		await page.getByRole('button', { name: 'Add' }).click()
 
 		// Check ARIA usage
-		const accessibilityScanResults = await new AxeBuilder({ page })
-			.withTags(['wcag2a', 'wcag2aa'])
-			.analyze()
+		const accessibilityScanResults = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
 
-		const ariaViolations = accessibilityScanResults.violations.filter(
-			v => v.id.includes('aria')
-		)
+		const ariaViolations = accessibilityScanResults.violations.filter(v => v.id.includes('aria'))
 
 		expect(ariaViolations).toEqual([])
 	})
@@ -182,9 +158,7 @@ test.describe('Accessibility', () => {
 
 		const accessibilityScanResults = await new AxeBuilder({ page }).analyze()
 
-		const imageViolations = accessibilityScanResults.violations.filter(
-			v => v.id === 'image-alt'
-		)
+		const imageViolations = accessibilityScanResults.violations.filter(v => v.id === 'image-alt')
 
 		expect(imageViolations).toEqual([])
 	})
@@ -253,9 +227,7 @@ test.describe('Accessibility - Screen Reader', () => {
 		await expect(newExpense).toBeVisible()
 
 		// Check that there are no live region issues
-		const accessibilityScanResults = await new AxeBuilder({ page })
-			.withTags(['wcag2a'])
-			.analyze()
+		const accessibilityScanResults = await new AxeBuilder({ page }).withTags(['wcag2a']).analyze()
 
 		expect(accessibilityScanResults.violations).toEqual([])
 	})

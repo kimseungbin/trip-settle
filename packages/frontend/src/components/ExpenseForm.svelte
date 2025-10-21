@@ -5,7 +5,7 @@
 	let {
 		onAdd,
 		onMouseSubmit = undefined,
-		sessionCurrencies = []
+		sessionCurrencies = [],
 	}: {
 		onAdd: (name: string, amount: number, currency: string) => void
 		onMouseSubmit?: (() => void) | undefined
@@ -58,27 +58,16 @@
 
 <div class="form-container">
 	<h3>Add Expense</h3>
-	<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} onkeydown={handleKeydown}>
-		<input
-			type="text"
-			placeholder="Expense name"
-			bind:value={expenseName}
-			bind:this={nameInput}
-			required
-		/>
-		<input
-			type="number"
-			placeholder="Amount"
-			bind:value={expenseAmount}
-			step="0.01"
-			min="0.01"
-			required
-		/>
-		<CurrencySelector
-			bind:value={selectedCurrency}
-			{sessionCurrencies}
-			onselect={handleCurrencySelect}
-		/>
+	<form
+		onsubmit={e => {
+			e.preventDefault()
+			handleSubmit()
+		}}
+		onkeydown={handleKeydown}
+	>
+		<input type="text" placeholder="Expense name" bind:value={expenseName} bind:this={nameInput} required />
+		<input type="number" placeholder="Amount" bind:value={expenseAmount} step="0.01" min="0.01" required />
+		<CurrencySelector bind:value={selectedCurrency} {sessionCurrencies} onselect={handleCurrencySelect} />
 		<button type="submit" bind:this={submitButton} onclick={handleButtonClick}>Add</button>
 	</form>
 </div>
