@@ -122,7 +122,7 @@ npm run destroy --workspace=infra
 - **API Prefix**: `/api` (all routes prefixed)
 - **CORS**: Enabled for frontend origin
 - **Validation**: Global validation pipe with class-validator
-- **Environment**: Configuration via `.env` file (only needed for production)
+- **Environment**: TypeScript configuration files (no .env files)
 
 Key backend architecture:
 - `main.ts`: Bootstrap application, configure CORS, validation, and global prefix
@@ -146,23 +146,77 @@ Key backend architecture:
 - **Entry Point**: `bin/infra.ts`
 - **Stack**: `lib/trip-settle-stack.ts`
 
+## Configuration System
+
+The project uses a TypeScript-based configuration system with **zero .env files**. Configuration is managed through
+type-safe TS files.
+
+### Structure
+
+```
+config/
+├── types.ts                  # Shared types
+├── environments/
+│   ├── local.ts             # Local development (default values)
+│   ├── development.ts       # Dev environment (reads env vars)
+│   └── production.ts        # Production (reads env vars)
+└── index.ts                 # Exports config based on NODE_ENV
+
+packages/
+├── backend/src/config/      # Backend-specific config
+├── frontend/src/config/     # Frontend-specific config
+└── infra/config/            # Infrastructure-specific config
+```
+
+### Environments
+
+- **`local`** (default, no NODE_ENV): Hardcoded safe defaults, zero configuration needed
+- **`development`**: Reads from environment variables injected by CI/CD
+- **`production`**: Reads from environment variables injected by CI/CD (strict validation)
+
+### Usage
+
+```typescript
+// Import config in any package
+import { config } from './config'
+
+// Access typed configuration
+const port = config.port
+const dbConfig = config.database
+```
+
+### Adding Config Values
+
+1. Update `config/types.ts` with new fields
+2. Add default values to `config/environments/local.ts`
+3. Add environment variable mapping to `development.ts` and `production.ts`
+4. Use in packages via their local config imports
+
 ## Database Configuration
 
 Backend uses TypeORM with PostgreSQL.
 
-### Development
-**No configuration needed!** The backend uses `pg-mem` for in-memory PostgreSQL in development mode. Simply run `npm run dev --workspace=backend` and the database will be available immediately with zero setup.
+### Local Development
 
-### Production
-Configure via environment variables (see `.env.example`):
+**No configuration needed!** The backend uses `pg-mem` for in-memory PostgreSQL in local mode. Simply run
+`npm run dev --workspace=backend` and the database will be available immediately with zero setup.
 
-```
-NODE_ENV=production
-DB_HOST=localhost
+### Development/Production
+
+Configure via environment variables injected by CI/CD (e.g., ECS):
+
+```bash
+# Required environment variables
+NODE_ENV=development  # or production
+DB_HOST=your-db-host
 DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
+DB_USERNAME=your-username
+DB_PASSWORD=your-password
 DB_NAME=trip_settle
+
+# Optional (have defaults)
+BACKEND_PORT=3000
+CORS_ORIGIN=https://your-frontend-url
 ```
 
 Entity files should follow the pattern `*.entity.ts` and will be auto-loaded by TypeORM.

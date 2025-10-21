@@ -1,14 +1,13 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { DataType, newDb } from 'pg-mem'
+import { config } from './config'
 
 let memoryDataSource: DataSource | null = null
 
 export async function getDataSource(): Promise<DataSource | null> {
-	const isDevelopment = process.env.NODE_ENV !== 'production'
-
-	if (isDevelopment && !memoryDataSource) {
-		// Use pg-mem for in-memory PostgreSQL in development
+	if (config.database.type === 'pg-mem' && !memoryDataSource) {
+		// Use pg-mem for in-memory PostgreSQL in local development
 		const db = newDb()
 
 		// Register missing PostgreSQL functions that TypeORM needs
@@ -28,7 +27,7 @@ export async function getDataSource(): Promise<DataSource | null> {
 		memoryDataSource = await db.adapters.createTypeormDataSource({
 			type: 'postgres',
 			entities: [__dirname + '/**/*.entity{.ts,.js}'],
-			synchronize: true,
+			synchronize: config.database.synchronize ?? true,
 		})
 
 		await memoryDataSource.initialize()
@@ -38,24 +37,22 @@ export async function getDataSource(): Promise<DataSource | null> {
 }
 
 export async function getDatabaseConfig(): Promise<TypeOrmModuleOptions> {
-	const isDevelopment = process.env.NODE_ENV !== 'production'
-
-	if (isDevelopment) {
+	if (config.database.type === 'pg-mem') {
 		const dataSource = await getDataSource()
 		return {
 			...dataSource.options,
 		} as TypeOrmModuleOptions
 	}
 
-	// Production PostgreSQL configuration
+	// PostgreSQL configuration for development/production
 	return {
 		type: 'postgres',
-		host: process.env.DB_HOST || 'localhost',
-		port: parseInt(process.env.DB_PORT || '5432'),
-		username: process.env.DB_USERNAME || 'postgres',
-		password: process.env.DB_PASSWORD || 'postgres',
-		database: process.env.DB_NAME || 'trip_settle',
+		host: config.database.host,
+		port: config.database.port,
+		username: config.database.username,
+		password: config.database.password,
+		database: config.database.database,
 		entities: [__dirname + '/**/*.entity{.ts,.js}'],
-		synchronize: false, // Should be false in production
+		synchronize: config.database.synchronize ?? false,
 	}
 }

@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { AppModule } from './app.module'
+import { config } from './config'
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
@@ -14,13 +15,13 @@ async function bootstrap() {
 	)
 
 	app.enableCors({
-		origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+		origin: config.corsOrigin,
 		credentials: true,
 	})
 
-	const port = process.env.PORT || 3000
-	await app.listen(port)
-	console.log(`Application is running on: http://localhost:${port}`)
+	await app.listen(config.port)
+	console.log(`Application is running on: http://localhost:${config.port}`)
+	console.log(`Environment: ${config.environment}`)
 }
 
 bootstrap()
