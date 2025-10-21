@@ -25,7 +25,7 @@
 	})
 </script>
 
-<div class="status">
+<div class="status" data-testid="system-status">
 	<h3>System Status</h3>
 	<p class="api-url">{apiUrl}</p>
 

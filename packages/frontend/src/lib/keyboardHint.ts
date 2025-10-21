@@ -8,4 +8,6 @@ export function shouldShowKeyboardHint(): boolean {
 export function dismissKeyboardHint(): void {
 	if (typeof window === 'undefined') return
 	localStorage.setItem(STORAGE_KEY, 'true')
+	// Dispatch custom event for same-window updates (storage event doesn't fire in same window)
+	window.dispatchEvent(new CustomEvent('hint-status-changed'))
 }
