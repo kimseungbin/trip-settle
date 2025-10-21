@@ -306,3 +306,152 @@ Note: The development environment uses pg-mem for zero-configuration PostgreSQL.
 - Backend: ES2021 target with CommonJS modules
 - Infra: ES2020 target with CommonJS modules
 - All packages use strict type checking (backend has relaxed settings for NestJS compatibility)
+
+## Testing & CI/CD Readiness
+
+This section tracks the implementation status of tests needed for continuous integration. Tests ensure code quality, prevent regressions, and validate functionality before deployment.
+
+### Backend Tests (NestJS + Jest)
+
+#### Unit Tests
+- [ ] AppController tests (`app.controller.spec.ts`)
+- [ ] AppService tests (`app.service.spec.ts`)
+- [ ] Database configuration tests (`database.config.spec.ts`)
+
+#### Integration Tests
+- [ ] TypeORM entity CRUD operations
+- [ ] Database connection with pg-mem
+- [ ] Environment-specific configuration loading
+
+#### E2E Tests (test/jest-e2e.json)
+- [ ] Health check endpoint (`GET /api/health`)
+- [ ] Hello endpoint (`GET /api`)
+- [ ] CORS configuration validation
+- [ ] Global validation pipe behavior
+
+#### Backend Infrastructure Tests
+- [ ] Module initialization tests
+- [ ] Dependency injection validation
+
+### Frontend Tests (Svelte + Vitest)
+
+#### Component Unit Tests
+- [ ] App.svelte component tests
+- [ ] ExpenseTracker.svelte component tests
+- [ ] ExpenseForm.svelte component tests
+- [ ] ExpenseList.svelte component tests
+- [ ] CurrencySelector.svelte component tests
+- [ ] SystemStatus.svelte component tests
+- [ ] KeyboardHint.svelte component tests
+
+#### Integration Tests
+- [ ] ExpenseTracker with form and list integration
+- [ ] Currency selection flow
+- [ ] Expense CRUD operations (add, delete)
+
+#### Accessibility Tests
+- [ ] Keyboard navigation (Enter, Escape, Arrow keys)
+- [ ] Tab order validation
+- [ ] ARIA attributes and roles
+- [ ] Screen reader compatibility
+
+#### User Interaction Tests
+- [ ] Form submission with Enter key
+- [ ] Form clearing with Escape key
+- [ ] Currency selector keyboard navigation
+- [ ] Mobile touch interactions
+
+### Infrastructure Tests (AWS CDK + Jest)
+
+#### CDK Tests
+- [ ] Stack synthesis (CloudFormation generation)
+- [ ] VPC configuration validation
+- [ ] RDS PostgreSQL configuration
+- [ ] Snapshot tests for CloudFormation templates
+- [ ] Resource tagging validation
+
+#### Infrastructure Unit Tests
+- [ ] TripSettleStack construct tests
+- [ ] Database security group rules
+- [ ] VPC subnet configuration
+
+### Cross-Cutting Tests
+
+#### Code Quality
+- [ ] ESLint validation (all packages)
+- [ ] Prettier formatting checks (all packages)
+- [ ] TypeScript compilation (all packages)
+- [ ] Type-checking (frontend with svelte-check)
+
+#### Build Validation
+- [ ] Frontend production build
+- [ ] Backend production build
+- [ ] Infrastructure CDK synth
+- [ ] All workspaces build in CI
+
+#### Security & Dependencies
+- [ ] npm audit for vulnerabilities
+- [ ] Dependency license compliance
+- [ ] No hardcoded secrets in code
+
+### Integration Tests (Frontend + Backend)
+
+#### API Contract Tests
+- [ ] Frontend API client tests
+- [ ] Backend endpoint availability
+- [ ] CORS configuration between frontend and backend
+- [ ] API response format validation
+
+#### End-to-End Scenarios
+- [ ] Full expense workflow (create, read, update, delete)
+- [ ] Multi-currency expense handling
+- [ ] System status indicator shows backend connectivity
+
+### CI Pipeline Requirements
+
+#### Pre-Commit Checks
+- [ ] Format check passes
+- [ ] Lint check passes
+- [ ] Type check passes
+- [ ] Unit tests pass
+
+#### CI Build Steps
+- [ ] Install dependencies
+- [ ] Build all packages
+- [ ] Run all tests
+- [ ] Generate test coverage reports
+- [ ] Validate test coverage thresholds
+
+#### Environment-Specific Tests
+- [ ] Tests run with NODE_ENV=local
+- [ ] Tests run with NODE_ENV=development
+- [ ] Tests run with NODE_ENV=production (mocked externals)
+
+### Test Coverage Goals
+
+- Backend: 80% coverage (lines, branches, functions, statements)
+- Frontend: 70% coverage (components, utilities)
+- Infrastructure: 90% coverage (CDK constructs)
+
+### Running Tests Locally
+
+```bash
+# Run all tests across all packages
+npm test
+
+# Run tests for specific package
+npm run test --workspace=backend
+npm run test --workspace=frontend
+npm run test --workspace=infra
+
+# Run tests with coverage
+npm run test:cov --workspace=backend
+npm run test --workspace=frontend -- --coverage
+
+# Run tests in watch mode
+npm run test:watch --workspace=backend
+npm run test --workspace=frontend -- --watch
+
+# Run E2E tests
+npm run test:e2e --workspace=backend
+```
