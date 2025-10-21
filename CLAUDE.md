@@ -80,9 +80,17 @@ npm run build --workspace=frontend
 # Preview production build
 npm run preview --workspace=frontend
 
-# Run tests
+# Run unit tests (Vitest)
 npm run test --workspace=frontend
 npm run test:ui --workspace=frontend
+
+# Run E2E tests (Playwright)
+npm run test:e2e --workspace=frontend
+npm run test:e2e:ui --workspace=frontend
+npm run test:e2e:headed --workspace=frontend
+npm run test:e2e:debug --workspace=frontend
+npm run test:e2e:report --workspace=frontend
+npm run test:e2e:update-snapshots --workspace=frontend
 
 # Type checking
 npm run type-check --workspace=frontend
@@ -260,10 +268,10 @@ Entity files should follow the pattern `*.entity.ts` and will be auto-loaded by 
 - 120 character line width, tabs (width: 4), single quotes, no semicolons, ES5 trailing commas
 
 ### Testing
-- Frontend: Vitest with jsdom
+- Frontend: Vitest with jsdom (unit tests), Playwright (E2E tests)
 - Backend: Jest with ts-jest
 - Infra: Jest with ts-jest
-- E2E tests: `test/jest-e2e.json` for backend
+- E2E tests: Playwright for frontend, Jest for backend API
 
 ## Adding New Features
 
@@ -344,22 +352,22 @@ This section tracks the implementation status of tests needed for continuous int
 - [ ] SystemStatus.svelte component tests
 - [ ] KeyboardHint.svelte component tests
 
-#### Integration Tests
-- [ ] ExpenseTracker with form and list integration
-- [ ] Currency selection flow
-- [ ] Expense CRUD operations (add, delete)
+#### Integration Tests (Playwright E2E)
+- [x] ExpenseTracker with form and list integration
+- [x] Currency selection flow
+- [x] Expense CRUD operations (add, delete)
 
-#### Accessibility Tests
-- [ ] Keyboard navigation (Enter, Escape, Arrow keys)
-- [ ] Tab order validation
-- [ ] ARIA attributes and roles
-- [ ] Screen reader compatibility
+#### Accessibility Tests (Playwright + axe-core)
+- [x] Keyboard navigation (Enter, Escape, Arrow keys)
+- [x] Tab order validation
+- [x] ARIA attributes and roles
+- [x] Screen reader compatibility
 
-#### User Interaction Tests
-- [ ] Form submission with Enter key
-- [ ] Form clearing with Escape key
-- [ ] Currency selector keyboard navigation
-- [ ] Mobile touch interactions
+#### User Interaction Tests (Playwright E2E)
+- [x] Form submission with Enter key
+- [x] Form clearing with Escape key
+- [x] Currency selector keyboard navigation
+- [x] Mobile touch interactions
 
 ### Infrastructure Tests (AWS CDK + Jest)
 
@@ -455,3 +463,222 @@ npm run test --workspace=frontend -- --watch
 # Run E2E tests
 npm run test:e2e --workspace=backend
 ```
+
+## Playwright E2E Testing Guide
+
+The frontend uses **Playwright** for end-to-end, visual regression, keyboard navigation, and accessibility testing. Playwright automates real browsers to test the application exactly as users interact with it.
+
+### Why Playwright?
+
+Playwright catches UI breakage that unit tests miss:
+- **Visual Regressions**: Screenshot comparisons detect layout shifts, CSS changes, missing elements
+- **Functional Testing**: Verifies forms, buttons, navigation, and user workflows actually work
+- **Keyboard Accessibility**: Ensures all features work without a mouse (critical for this project)
+- **WCAG Compliance**: Automated accessibility audits catch contrast, ARIA, and semantic HTML issues
+
+### Test Structure
+
+```
+packages/frontend/tests/
+├── e2e/
+│   ├── expense-workflow.spec.ts      # 12 tests: CRUD operations, validation
+│   └── keyboard-navigation.spec.ts   # 14 tests: Tab, Enter, shortcuts, focus
+├── visual/
+│   └── ui-snapshots.spec.ts          # 13 tests: Screenshot comparisons
+└── accessibility/
+    └── a11y.spec.ts                  # 14 tests: WCAG 2.1 AA compliance
+```
+
+### Running Tests
+
+```bash
+# Run all E2E tests (headless, for CI)
+npm run test:e2e --workspace=frontend
+
+# Interactive UI mode (time-travel debugging, watch mode)
+npm run test:e2e:ui --workspace=frontend
+
+# Headed mode (see browser window)
+npm run test:e2e:headed --workspace=frontend
+
+# Debug mode (step through tests with Playwright Inspector)
+npm run test:e2e:debug --workspace=frontend
+
+# View HTML test report (screenshots, videos, traces)
+npm run test:e2e:report --workspace=frontend
+
+# Update visual regression baselines
+npm run test:e2e:update-snapshots --workspace=frontend
+```
+
+### Test Examples
+
+#### E2E Workflow Test
+```typescript
+test('can add expense', async ({ page }) => {
+    await page.goto('/')
+    await page.getByPlaceholder('Expense name').fill('Coffee')
+    await page.getByPlaceholder('Amount').fill('4.50')
+    await page.getByRole('button', { name: 'Add' }).click()
+    
+    await expect(page.locator('.expense-name')).toContainText('Coffee')
+    await expect(page.locator('.total-amount')).toContainText('4.50')
+})
+```
+
+#### Visual Regression Test
+```typescript
+test('expense form UI', async ({ page }) => {
+    await page.goto('/')
+    const form = page.locator('.form-container')
+    
+    // Compare to baseline screenshot
+    await expect(form).toHaveScreenshot('expense-form.png')
+})
+```
+
+#### Keyboard Navigation Test
+```typescript
+test('can submit with Enter key', async ({ page }) => {
+    await page.goto('/')
+    await page.getByPlaceholder('Expense name').fill('Test')
+    await page.getByPlaceholder('Amount').fill('10.00')
+    await page.keyboard.press('Enter')
+    
+    await expect(page.locator('.expense-name')).toContainText('Test')
+})
+```
+
+#### Accessibility Test
+```typescript
+test('no accessibility violations', async ({ page }) => {
+    await page.goto('/')
+    
+    const results = await new AxeBuilder({ page }).analyze()
+    expect(results.violations).toEqual([])
+})
+```
+
+### When Tests Fail
+
+Playwright provides rich debugging information:
+
+1. **Screenshots**: Automatically captured on failure
+2. **Videos**: Optional recording of test execution
+3. **Traces**: Step-by-step replay with DOM snapshots, console logs, network activity
+4. **HTML Report**: Interactive report with all test results
+
+View the report:
+```bash
+npm run test:e2e:report --workspace=frontend
+```
+
+### Visual Regression Workflow
+
+**First run**: Creates baseline screenshots in `tests/<test-name>-snapshots/`
+
+**Subsequent runs**: Compares current UI to baselines
+- Pass: UI matches baseline (within threshold)
+- Fail: UI differs - test shows visual diff
+
+**When UI intentionally changes**:
+```bash
+# Review the diff in test report
+npm run test:e2e:report --workspace=frontend
+
+# If change is expected, update baselines
+npm run test:e2e:update-snapshots --workspace=frontend
+```
+
+### Configuration
+
+Located in `packages/frontend/playwright.config.ts`:
+
+- **Browsers**: Chromium (desktop + mobile)
+- **Auto-start dev server**: Vite starts automatically before tests
+- **Screenshots**: Only on failure
+- **Videos**: Retained on failure
+- **Traces**: On first retry
+- **CI optimized**: Retries, single worker, GitHub Actions reporter
+
+### Writing New Tests
+
+1. Create test file in appropriate directory:
+   - `tests/e2e/` - User workflows and interactions
+   - `tests/visual/` - UI screenshot comparisons
+   - `tests/accessibility/` - WCAG compliance
+
+2. Use descriptive test names:
+```typescript
+test('complete expense workflow - add, view, remove', async ({ page }) => {
+    // Test implementation
+})
+```
+
+3. Follow project patterns:
+   - Use `page.getByRole()`, `page.getByPlaceholder()` for accessibility
+   - Test keyboard shortcuts (Enter, Tab, Cmd+Enter)
+   - Verify both success and error states
+   - Check empty states and edge cases
+
+4. Add visual checks for critical UI:
+```typescript
+await expect(page).toHaveScreenshot('critical-feature.png')
+```
+
+### Best Practices
+
+- **Test user behavior, not implementation**: Use accessible selectors (`getByRole`, `getByPlaceholder`)
+- **Wait for content**: Use `expect()` with auto-waiting instead of manual waits
+- **Independent tests**: Each test should work in isolation
+- **Visual tests for UI**: Use screenshots to catch layout/CSS changes
+- **Keyboard tests for accessibility**: Verify Tab, Enter, Escape work as expected
+- **Mobile testing**: Test responsive breakpoints with different viewports
+
+### CI/CD Integration
+
+Playwright runs in CI with:
+- Headless browser execution
+- Retries on failure (reduces flakiness)
+- Parallel execution disabled for stability
+- Artifacts uploaded (screenshots, videos, traces)
+
+Example GitHub Actions:
+```yaml
+- name: Install Playwright browsers
+  run: npx playwright install --with-deps chromium
+  
+- name: Run E2E tests
+  run: npm run test:e2e --workspace=frontend
+  
+- name: Upload test results
+  if: failure()
+  uses: actions/upload-artifact@v3
+  with:
+    name: playwright-report
+    path: packages/frontend/playwright-report/
+```
+
+### Troubleshooting
+
+**Tests fail locally but pass in CI (or vice versa)**:
+- Visual tests may be platform-dependent (fonts, rendering)
+- Solution: Run tests in Docker with same OS as CI, or increase threshold
+
+**Tests are flaky**:
+- Use `await expect()` instead of manual waits
+- Ensure test data cleanup between tests
+- Check for race conditions in application code
+
+**Visual tests fail unexpectedly**:
+- Check if CSS, fonts, or layout changed
+- Review diff in test report
+- Update baselines if change is intentional
+
+**Debugging tips**:
+- Use `test:e2e:debug` to step through tests
+- Add `await page.pause()` to pause execution
+- Check browser console in headed mode
+- Use `page.screenshot()` to capture specific moments
+
+For more information, see [Playwright documentation](https://playwright.dev/docs/intro).
