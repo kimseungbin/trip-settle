@@ -56,15 +56,12 @@ test.describe('Keyboard Navigation', () => {
 
 		// Tab to currency selector (should be next in tab order)
 		await page.keyboard.press('Tab')
-		// Currency selector button should be focused
-		const currencyButton = page.locator('button').filter({ hasText: /USD|EUR|GBP/ }).first()
-		if (await currencyButton.isVisible()) {
-			await expect(currencyButton).toBeFocused()
+		// Currency selector button should be focused (matches any 3-letter currency code)
+		const currencyButton = page.locator('button.currency-button')
+		await expect(currencyButton).toBeFocused()
 
-			// Tab to Add button
-			await page.keyboard.press('Tab')
-		}
-
+		// Tab to Add button
+		await page.keyboard.press('Tab')
 		await expect(addButton).toBeFocused()
 	})
 
