@@ -1,0 +1,83 @@
+# Trip Settle Commit Message Rules
+# These rules define the commit message format for the Trip Settle monorepo
+
+format:
+  pattern: "{type}({scope}): {subject}"
+  max_subject_length: 72
+  max_body_line_length: 100
+
+types:
+  feat:
+    description: "A new feature"
+  fix:
+    description: "A bug fix"
+  refactor:
+    description: "Code change that neither fixes a bug nor adds a feature"
+  perf:
+    description: "Performance improvement"
+  test:
+    description: "Adding or updating tests"
+  docs:
+    description: "Documentation changes"
+  style:
+    description: "Code style changes (formatting, whitespace)"
+  build:
+    description: "Build system or dependency changes"
+  ci:
+    description: "CI/CD configuration changes"
+  chore:
+    description: "Other changes that don't modify src or test files"
+
+scopes:
+  frontend:
+    description: "Changes to packages/frontend (Svelte app)"
+    patterns:
+      - "packages/frontend/**"
+
+  backend:
+    description: "Changes to packages/backend (NestJS API)"
+    patterns:
+      - "packages/backend/**"
+
+  infra:
+    description: "Changes to packages/infra (AWS CDK)"
+    patterns:
+      - "packages/infra/**"
+
+  config:
+    description: "Configuration changes (TypeScript configs, environment configs)"
+    patterns:
+      - "config/**"
+      - "*.config.*"
+      - "tsconfig*.json"
+
+  monorepo:
+    description: "Changes affecting multiple packages or workspace root"
+    patterns:
+      - "package.json"
+      - "packages/*/package.json"
+
+conventions:
+  subject:
+    - "Use imperative mood: 'Add feature' not 'Added feature'"
+    - "Don't capitalize first letter unless proper noun"
+    - "No period at the end"
+    - "Be specific but concise"
+
+  body:
+    - "Separate from subject with blank line"
+    - "Explain what and why, not how"
+    - "Wrap at 100 characters"
+
+  footer:
+    - "Breaking changes: 'BREAKING CHANGE: description'"
+    - "Issue references: 'Refs #123' or 'Closes #123'"
+    - "Always include Claude Code attribution"
+
+special_cases:
+  multi_package:
+    scope: "monorepo"
+
+  breaking_change:
+    footer_required: true
+    footer_format: "BREAKING CHANGE: <description>"
