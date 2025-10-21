@@ -357,11 +357,13 @@ This section tracks the implementation status of tests needed for continuous int
 - [x] Currency selection flow
 - [x] Expense CRUD operations (add, delete)
 
-#### Accessibility Tests (Playwright + axe-core)
-- [x] Keyboard navigation (Enter, Escape, Arrow keys)
-- [x] Tab order validation
-- [x] ARIA attributes and roles
-- [x] Screen reader compatibility
+#### Accessibility Tests (Playwright + axe-core) - TODO
+- [ ] Keyboard navigation (Enter, Escape, Arrow keys)
+- [ ] Tab order validation
+- [ ] ARIA attributes and roles
+- [ ] Screen reader compatibility
+
+**Note**: Accessibility test suite exists but is marked with `test.fixme()` and will be implemented later after the UI is stabilized.
 
 #### User Interaction Tests (Playwright E2E)
 - [x] Form submission with Enter key
@@ -486,8 +488,10 @@ packages/frontend/tests/
 ├── visual/
 │   └── ui-snapshots.spec.ts          # 13 tests: Screenshot comparisons
 └── accessibility/
-    └── a11y.spec.ts                  # 14 tests: WCAG 2.1 AA compliance
+    └── a11y.spec.ts                  # 14 tests: WCAG 2.1 AA compliance (TODO)
 ```
+
+**Note on Accessibility Tests**: The accessibility test file exists with test.fixme() markers. These tests will be implemented after the UI is stabilized to avoid frequent baseline updates.
 
 ### Running Tests
 
