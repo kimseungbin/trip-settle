@@ -3,6 +3,7 @@
 
 	let expenseName = ''
 	let expenseAmount = ''
+	let nameInput: HTMLInputElement
 
 	function handleSubmit() {
 		if (!expenseName.trim() || !expenseAmount) return
@@ -13,13 +14,20 @@
 		onAdd(expenseName.trim(), amount)
 		expenseName = ''
 		expenseAmount = ''
+		nameInput?.focus()
 	}
 </script>
 
 <div class="form-container">
 	<h3>Add Expense</h3>
 	<form on:submit|preventDefault={handleSubmit}>
-		<input type="text" placeholder="Expense name" bind:value={expenseName} required />
+		<input
+			type="text"
+			placeholder="Expense name"
+			bind:value={expenseName}
+			bind:this={nameInput}
+			required
+		/>
 		<input
 			type="number"
 			placeholder="Amount"
