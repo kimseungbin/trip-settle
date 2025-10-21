@@ -130,11 +130,14 @@ npm run destroy --workspace=infra
 
 ### Frontend (Svelte)
 
-- **Framework**: Svelte 4 with TypeScript
-- **Build Tool**: Vite 5
-- **Testing**: Vitest
+- **Framework**: Svelte 5 with TypeScript
+- **Build Tool**: Vite 6
+- **Testing**: Vitest 2
 - **API Communication**: Proxied to backend via Vite (`/api` → `http://localhost:3000`)
 - **Entry Point**: `src/main.ts` mounts `App.svelte` to `#app`
+- **State Management**: Uses Svelte 5 runes (`$state`, `$derived`, `$props`, `$bindable`, `$effect`)
+- **Component Props**: Uses `$props()` instead of `export let`
+- **Event Handlers**: Uses event attributes (`onclick`, `onkeydown`) instead of `on:` directives
 
 ### Backend (NestJS)
 

@@ -5,11 +5,11 @@
 	import KeyboardHint from './KeyboardHint.svelte'
 	import { shouldShowKeyboardHint, dismissKeyboardHint } from '../lib/keyboardHint'
 
-	let expenses: Expense[] = []
-	let nextId = 1
-	let showHint = false
+	let expenses = $state<Expense[]>([])
+	let nextId = $state(1)
+	let showHint = $state(false)
 
-	$: sessionCurrencies = getSessionCurrencies(expenses)
+	let sessionCurrencies = $derived(getSessionCurrencies(expenses))
 
 	function getSessionCurrencies(expenseList: Expense[]): string[] {
 		const uniqueCurrencies = new Set(expenseList.map(e => e.currency))

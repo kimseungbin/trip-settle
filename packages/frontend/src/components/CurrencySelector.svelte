@@ -1,22 +1,26 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte'
 	import type { Currency } from '../types/expense'
 	import { currencies, DEFAULT_CURRENCY, getCurrencyByCode, searchCurrencies } from '../data/currencies'
 
-	export let value: string = DEFAULT_CURRENCY
-	export let sessionCurrencies: string[] = []
+	let {
+		value = $bindable(DEFAULT_CURRENCY),
+		sessionCurrencies = [],
+		onselect
+	}: {
+		value?: string
+		sessionCurrencies?: string[]
+		onselect?: (event: CustomEvent<{ currency: string }>) => void
+	} = $props()
 
-	const dispatch = createEventDispatcher()
+	let isOpen = $state(false)
+	let searchQuery = $state('')
+	let selectedIndex = $state(0)
+	let inputElement = $state<HTMLInputElement | undefined>(undefined)
+	let buttonElement = $state<HTMLButtonElement | undefined>(undefined)
 
-	let isOpen = false
-	let searchQuery = ''
-	let selectedIndex = 0
-	let inputElement: HTMLInputElement
-	let buttonElement: HTMLButtonElement
-
-	$: recommendedCurrencies = getRecommendedCurrencies(sessionCurrencies)
-	$: displayedCurrencies = searchQuery ? searchCurrencies(searchQuery) : recommendedCurrencies
-	$: selectedCurrency = getCurrencyByCode(value)
+	let recommendedCurrencies = $derived(getRecommendedCurrencies(sessionCurrencies))
+	let displayedCurrencies = $derived(searchQuery ? searchCurrencies(searchQuery) : recommendedCurrencies)
+	let selectedCurrency = $derived(getCurrencyByCode(value))
 
 	function getRecommendedCurrencies(session: string[]): Currency[] {
 		const recommended = new Set<string>()
@@ -51,7 +55,9 @@
 		isOpen = false
 		searchQuery = ''
 		// Notify parent that selection is complete
-		dispatch('select', { currency: currency.code })
+		if (onselect) {
+			onselect(new CustomEvent('select', { detail: { currency: currency.code } }))
+		}
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -108,8 +114,8 @@
 		class="currency-button"
 		tabindex="0"
 		bind:this={buttonElement}
-		on:click={toggleDropdown}
-		on:keydown={handleKeydown}
+		onclick={toggleDropdown}
+		onkeydown={handleKeydown}
 		aria-haspopup="listbox"
 		aria-expanded={isOpen}
 	>
@@ -125,9 +131,9 @@
 				placeholder={searchQuery ? 'Searching...' : 'Type to search all currencies'}
 				bind:value={searchQuery}
 				bind:this={inputElement}
-				on:input={handleInput}
-				on:keydown={handleKeydown}
-				on:blur={handleBlur}
+				oninput={handleInput}
+				onkeydown={handleKeydown}
+				onblur={handleBlur}
 			/>
 
 			{#if !searchQuery}
@@ -142,8 +148,10 @@
 						class:active={currency.code === value}
 						role="option"
 						aria-selected={currency.code === value}
-						on:mouseenter={() => (selectedIndex = index)}
-						on:click={() => selectCurrency(currency)}
+						onmouseenter={() => (selectedIndex = index)}
+						onclick={() => selectCurrency(currency)}
+						onkeydown={(e) => e.key === 'Enter' && selectCurrency(currency)}
+						tabindex="0"
 					>
 						<span class="currency-code">{currency.code}</span>
 						<span class="currency-name">{currency.name}</span>

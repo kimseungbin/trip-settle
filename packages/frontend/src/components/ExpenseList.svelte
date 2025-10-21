@@ -1,8 +1,13 @@
 <script lang="ts">
 	import type { Expense } from '../types/expense'
 
-	export let expenses: Expense[]
-	export let onRemove: (id: number) => void
+	let {
+		expenses,
+		onRemove
+	}: {
+		expenses: Expense[]
+		onRemove: (id: number) => void
+	} = $props()
 
 	function getTotalsByCurrency(expenseList: Expense[]): Map<string, number> {
 		const totals = new Map<string, number>()
@@ -13,7 +18,7 @@
 		return totals
 	}
 
-	$: totalsByCurrency = getTotalsByCurrency(expenses)
+	let totalsByCurrency = $derived(getTotalsByCurrency(expenses))
 </script>
 
 <div class="list-container">
@@ -29,7 +34,7 @@
 						{expense.amount.toFixed(2)}
 						<span class="currency-code">{expense.currency}</span>
 					</span>
-					<button class="remove-btn" on:click={() => onRemove(expense.id)}>×</button>
+					<button class="remove-btn" onclick={() => onRemove(expense.id)}>×</button>
 				</li>
 			{/each}
 		</ul>

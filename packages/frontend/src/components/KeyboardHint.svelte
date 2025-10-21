@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	export let visible = false
-	export let onDismiss: () => void
+	let {
+		visible = false,
+		onDismiss
+	}: {
+		visible?: boolean
+		onDismiss: () => void
+	} = $props()
 
-	let show = false
+	let show = $state(false)
 
 	onMount(() => {
 		if (visible) {
@@ -18,9 +23,11 @@
 		}
 	})
 
-	$: if (visible) {
-		show = true
-	}
+	$effect(() => {
+		if (visible) {
+			show = true
+		}
+	})
 
 	function handleDismiss() {
 		show = false
@@ -38,7 +45,7 @@
 			<strong>Keyboard tip:</strong> Press <kbd>Enter</kbd> to add, <kbd>Tab</kbd> to move between
 			fields
 		</div>
-		<button class="dismiss" on:click={handleDismiss} aria-label="Dismiss tip">×</button>
+		<button class="dismiss" onclick={handleDismiss} aria-label="Dismiss tip">×</button>
 	</div>
 {/if}
 

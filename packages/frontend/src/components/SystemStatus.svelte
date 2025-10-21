@@ -2,9 +2,9 @@
 	import { onMount } from 'svelte'
 	import { config } from '../config'
 
-	let healthStatus = 'loading'
-	let databaseStatus = 'loading'
-	let apiUrl = ''
+	let healthStatus = $state('loading')
+	let databaseStatus = $state('loading')
+	let apiUrl = $state('')
 
 	async function checkHealth() {
 		try {

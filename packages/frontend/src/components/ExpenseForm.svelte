@@ -2,16 +2,22 @@
 	import CurrencySelector from './CurrencySelector.svelte'
 	import { DEFAULT_CURRENCY } from '../data/currencies'
 
-	export let onAdd: (name: string, amount: number, currency: string) => void
-	export let onMouseSubmit: (() => void) | undefined = undefined
-	export let sessionCurrencies: string[] = []
+	let {
+		onAdd,
+		onMouseSubmit = undefined,
+		sessionCurrencies = []
+	}: {
+		onAdd: (name: string, amount: number, currency: string) => void
+		onMouseSubmit?: (() => void) | undefined
+		sessionCurrencies?: string[]
+	} = $props()
 
-	let expenseName = ''
-	let expenseAmount = ''
-	let selectedCurrency = DEFAULT_CURRENCY
-	let nameInput: HTMLInputElement
-	let submitButton: HTMLButtonElement
-	let isMouseClick = false
+	let expenseName = $state('')
+	let expenseAmount = $state('')
+	let selectedCurrency = $state(DEFAULT_CURRENCY)
+	let nameInput = $state<HTMLInputElement | undefined>(undefined)
+	let submitButton = $state<HTMLButtonElement | undefined>(undefined)
+	let isMouseClick = $state(false)
 
 	function handleSubmit() {
 		if (!expenseName.trim() || !expenseAmount) return
@@ -52,7 +58,7 @@
 
 <div class="form-container">
 	<h3>Add Expense</h3>
-	<form on:submit|preventDefault={handleSubmit} on:keydown={handleKeydown}>
+	<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} onkeydown={handleKeydown}>
 		<input
 			type="text"
 			placeholder="Expense name"
@@ -71,9 +77,9 @@
 		<CurrencySelector
 			bind:value={selectedCurrency}
 			{sessionCurrencies}
-			on:select={handleCurrencySelect}
+			onselect={handleCurrencySelect}
 		/>
-		<button type="submit" bind:this={submitButton} on:click={handleButtonClick}>Add</button>
+		<button type="submit" bind:this={submitButton} onclick={handleButtonClick}>Add</button>
 	</form>
 </div>
 
