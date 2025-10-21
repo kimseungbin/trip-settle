@@ -70,8 +70,9 @@ When implementing features, always consider:
    - Optimize performance if needed
 
 6. **Commit**: Create descriptive commit following project style
+   - Use the `git-commit-rules` skill to generate standardized commit messages
    - Reference the feature and tests added
-   - Use conventional commit format (feat:, fix:, etc.)
+   - Follow conventional commit format defined in `.claude/skills/git-commit-rules/commit-rules.yaml`
 
 ### Exceptions
 
@@ -100,9 +101,10 @@ npm run test --workspace=frontend
 npm run format
 # ✅ All tests pass
 
-# 5. Commit
+# 5. Commit (using git-commit-rules skill)
+# The skill will generate a message like:
 git add .
-git commit -m "feat(frontend): add expense edit functionality
+git commit -m "feat(frontend): Add expense edit functionality
 
 - Add edit button to expense items
 - Create inline edit form with keyboard support
