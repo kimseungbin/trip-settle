@@ -73,7 +73,6 @@ conventions:
   footer:
     - "Breaking changes: 'BREAKING CHANGE: description'"
     - "Issue references: 'Refs #123' or 'Closes #123'"
-    - "Always include Claude Code attribution"
 
 special_cases:
   multi_package:

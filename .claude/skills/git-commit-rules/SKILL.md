@@ -48,7 +48,6 @@ When the user requests to create a commit or generate a commit message:
 7. **Create the commit** (if user approves):
    - Stage any unstaged files if appropriate
    - Use the generated message with proper formatting
-   - Include the standard Claude Code co-author attribution
 
 ## Example Workflow
 
