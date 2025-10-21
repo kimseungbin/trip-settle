@@ -9,8 +9,15 @@
 	let nextId = 1
 	let showHint = false
 
-	function addExpense(name: string, amount: number) {
-		expenses = [...expenses, { id: nextId++, name, amount }]
+	$: sessionCurrencies = getSessionCurrencies(expenses)
+
+	function getSessionCurrencies(expenseList: Expense[]): string[] {
+		const uniqueCurrencies = new Set(expenseList.map(e => e.currency))
+		return Array.from(uniqueCurrencies)
+	}
+
+	function addExpense(name: string, amount: number, currency: string) {
+		expenses = [...expenses, { id: nextId++, name, amount, currency }]
 	}
 
 	function removeExpense(id: number) {
@@ -32,7 +39,7 @@
 
 <div class="expense-tracker">
 	<KeyboardHint visible={showHint} onDismiss={handleDismissHint} />
-	<ExpenseForm onAdd={addExpense} onMouseSubmit={handleMouseSubmit} />
+	<ExpenseForm onAdd={addExpense} onMouseSubmit={handleMouseSubmit} {sessionCurrencies} />
 	<ExpenseList {expenses} onRemove={removeExpense} />
 </div>
 

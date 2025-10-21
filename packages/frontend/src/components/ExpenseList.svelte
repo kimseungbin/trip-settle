@@ -4,9 +4,16 @@
 	export let expenses: Expense[]
 	export let onRemove: (id: number) => void
 
-	function getTotalAmount(): number {
-		return expenses.reduce((sum, expense) => sum + expense.amount, 0)
+	function getTotalsByCurrency(): Map<string, number> {
+		const totals = new Map<string, number>()
+		expenses.forEach(expense => {
+			const current = totals.get(expense.currency) || 0
+			totals.set(expense.currency, current + expense.amount)
+		})
+		return totals
 	}
+
+	$: totalsByCurrency = getTotalsByCurrency()
 </script>
 
 <div class="list-container">
@@ -18,14 +25,24 @@
 			{#each expenses as expense (expense.id)}
 				<li class="expense-item">
 					<span class="expense-name">{expense.name}</span>
-					<span class="expense-amount">${expense.amount.toFixed(2)}</span>
+					<span class="expense-amount">
+						{expense.amount.toFixed(2)}
+						<span class="currency-code">{expense.currency}</span>
+					</span>
 					<button class="remove-btn" on:click={() => onRemove(expense.id)}>×</button>
 				</li>
 			{/each}
 		</ul>
 		<div class="total">
 			<span class="total-label">Total:</span>
-			<span class="total-amount">${getTotalAmount().toFixed(2)}</span>
+			<div class="total-amounts">
+				{#each Array.from(totalsByCurrency.entries()) as [currency, amount]}
+					<span class="total-amount">
+						{amount.toFixed(2)}
+						<span class="total-currency">{currency}</span>
+					</span>
+				{/each}
+			</div>
 		</div>
 	{/if}
 </div>
@@ -72,6 +89,18 @@
 	.expense-amount {
 		font-weight: 600;
 		color: #ff3e00;
+		display: flex;
+		align-items: center;
+		gap: 0.4em;
+	}
+
+	.currency-code {
+		font-size: 0.75em;
+		font-weight: 700;
+		color: #666;
+		background: #f5f5f5;
+		padding: 0.2em 0.4em;
+		border-radius: 3px;
 	}
 
 	.remove-btn {
@@ -94,6 +123,7 @@
 	.total {
 		display: flex;
 		justify-content: space-between;
+		align-items: center;
 		padding: 1em;
 		background: white;
 		border-radius: 4px;
@@ -102,7 +132,26 @@
 		font-weight: 700;
 	}
 
+	.total-amounts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75em;
+		align-items: center;
+	}
+
 	.total-amount {
 		color: #ff3e00;
+		display: flex;
+		align-items: center;
+		gap: 0.4em;
+	}
+
+	.total-currency {
+		font-size: 0.75em;
+		font-weight: 700;
+		color: #666;
+		background: #fff5f3;
+		padding: 0.3em 0.5em;
+		border-radius: 3px;
 	}
 </style>

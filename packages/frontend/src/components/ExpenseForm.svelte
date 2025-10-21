@@ -1,10 +1,16 @@
 <script lang="ts">
-	export let onAdd: (name: string, amount: number) => void
+	import CurrencySelector from './CurrencySelector.svelte'
+	import { DEFAULT_CURRENCY } from '../data/currencies'
+
+	export let onAdd: (name: string, amount: number, currency: string) => void
 	export let onMouseSubmit: (() => void) | undefined = undefined
+	export let sessionCurrencies: string[] = []
 
 	let expenseName = ''
 	let expenseAmount = ''
+	let selectedCurrency = DEFAULT_CURRENCY
 	let nameInput: HTMLInputElement
+	let submitButton: HTMLButtonElement
 	let isMouseClick = false
 
 	function handleSubmit() {
@@ -13,7 +19,7 @@
 		const amount = parseFloat(expenseAmount)
 		if (isNaN(amount) || amount <= 0) return
 
-		onAdd(expenseName.trim(), amount)
+		onAdd(expenseName.trim(), amount, selectedCurrency)
 
 		// Trigger mouse submit callback if this was a mouse click
 		if (isMouseClick && onMouseSubmit) {
@@ -29,11 +35,24 @@
 	function handleButtonClick() {
 		isMouseClick = true
 	}
+
+	function handleCurrencySelect() {
+		// Auto-focus submit button after currency selection
+		setTimeout(() => submitButton?.focus(), 0)
+	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		// Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux) submits from anywhere
+		if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+			event.preventDefault()
+			handleSubmit()
+		}
+	}
 </script>
 
 <div class="form-container">
 	<h3>Add Expense</h3>
-	<form on:submit|preventDefault={handleSubmit}>
+	<form on:submit|preventDefault={handleSubmit} on:keydown={handleKeydown}>
 		<input
 			type="text"
 			placeholder="Expense name"
@@ -49,7 +68,12 @@
 			min="0.01"
 			required
 		/>
-		<button type="submit" on:click={handleButtonClick}>Add</button>
+		<CurrencySelector
+			bind:value={selectedCurrency}
+			{sessionCurrencies}
+			on:select={handleCurrencySelect}
+		/>
+		<button type="submit" bind:this={submitButton} on:click={handleButtonClick}>Add</button>
 	</form>
 </div>
 
