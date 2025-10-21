@@ -1,9 +1,11 @@
 <script lang="ts">
 	export let onAdd: (name: string, amount: number) => void
+	export let onMouseSubmit: (() => void) | undefined = undefined
 
 	let expenseName = ''
 	let expenseAmount = ''
 	let nameInput: HTMLInputElement
+	let isMouseClick = false
 
 	function handleSubmit() {
 		if (!expenseName.trim() || !expenseAmount) return
@@ -12,9 +14,20 @@
 		if (isNaN(amount) || amount <= 0) return
 
 		onAdd(expenseName.trim(), amount)
+
+		// Trigger mouse submit callback if this was a mouse click
+		if (isMouseClick && onMouseSubmit) {
+			onMouseSubmit()
+		}
+
 		expenseName = ''
 		expenseAmount = ''
 		nameInput?.focus()
+		isMouseClick = false
+	}
+
+	function handleButtonClick() {
+		isMouseClick = true
 	}
 </script>
 
@@ -36,7 +49,7 @@
 			min="0.01"
 			required
 		/>
-		<button type="submit">Add</button>
+		<button type="submit" on:click={handleButtonClick}>Add</button>
 	</form>
 </div>
 

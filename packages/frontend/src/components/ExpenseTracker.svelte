@@ -2,9 +2,12 @@
 	import type { Expense } from '../types/expense'
 	import ExpenseForm from './ExpenseForm.svelte'
 	import ExpenseList from './ExpenseList.svelte'
+	import KeyboardHint from './KeyboardHint.svelte'
+	import { shouldShowKeyboardHint, dismissKeyboardHint } from '../lib/keyboardHint'
 
 	let expenses: Expense[] = []
 	let nextId = 1
+	let showHint = false
 
 	function addExpense(name: string, amount: number) {
 		expenses = [...expenses, { id: nextId++, name, amount }]
@@ -13,10 +16,23 @@
 	function removeExpense(id: number) {
 		expenses = expenses.filter(e => e.id !== id)
 	}
+
+	function handleMouseSubmit() {
+		// Only show hint if it hasn't been dismissed before
+		if (shouldShowKeyboardHint()) {
+			showHint = true
+		}
+	}
+
+	function handleDismissHint() {
+		showHint = false
+		dismissKeyboardHint()
+	}
 </script>
 
 <div class="expense-tracker">
-	<ExpenseForm onAdd={addExpense} />
+	<KeyboardHint visible={showHint} onDismiss={handleDismissHint} />
+	<ExpenseForm onAdd={addExpense} onMouseSubmit={handleMouseSubmit} />
 	<ExpenseList {expenses} onRemove={removeExpense} />
 </div>
 
