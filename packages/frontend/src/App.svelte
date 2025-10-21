@@ -7,8 +7,8 @@
 	<h1>Trip Settle</h1>
 	<p>Expense settlement made easy</p>
 
-	<SystemStatus />
 	<ExpenseTracker />
+	<SystemStatus />
 </main>
 
 <style>
