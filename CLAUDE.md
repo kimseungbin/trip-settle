@@ -177,8 +177,8 @@ Entity files should follow the pattern `*.entity.ts` and will be auto-loaded by 
 
 ### Formatting
 - Prettier with Svelte plugin
-- Config: `.prettierrc.json` (root level)
-- 100 character line width, single quotes, trailing commas
+- Config: `.prettierrc.yaml` (root level)
+- 120 character line width, tabs (width: 4), single quotes, no semicolons, ES5 trailing commas
 
 ### Testing
 - Frontend: Vitest with jsdom
