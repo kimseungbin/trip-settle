@@ -4,16 +4,16 @@
 	export let expenses: Expense[]
 	export let onRemove: (id: number) => void
 
-	function getTotalsByCurrency(): Map<string, number> {
+	function getTotalsByCurrency(expenseList: Expense[]): Map<string, number> {
 		const totals = new Map<string, number>()
-		expenses.forEach(expense => {
+		expenseList.forEach(expense => {
 			const current = totals.get(expense.currency) || 0
 			totals.set(expense.currency, current + expense.amount)
 		})
 		return totals
 	}
 
-	$: totalsByCurrency = getTotalsByCurrency()
+	$: totalsByCurrency = getTotalsByCurrency(expenses)
 </script>
 
 <div class="list-container">
