@@ -95,7 +95,7 @@ services:
       sh -c "
         echo 'Waiting for services to be ready...' &&
         sleep 5 &&
-        npm run test:e2e --workspace=frontend -- ${PLAYWRIGHT_ARGS:-}
+        npm run test:e2e --workspace=frontend
       "
 
   # Playwright UI mode (interactive watch mode)

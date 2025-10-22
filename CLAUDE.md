@@ -681,37 +681,69 @@ npm run test:e2e --workspace=frontend
 
 #### Visual Snapshot Management (IMPORTANT)
 
-**Environment-Based Testing**: The project uses `TEST_ENV` to control which tests run in different environments:
+**Philosophy: Remote-Only Visual Testing**
+
+Visual regression tests are **NEVER** run locally. Research shows that running visual tests locally is an anti-pattern due to high flakiness from:
+- **OS rendering differences** (macOS vs Linux font hinting, subpixel rendering)
+- **Docker-on-macOS quirks** (host kernel affects rendering even in containers)
+- **GPU/hardware variations** (acceleration, color profiles)
+- **Timing/network conditions** (loading states, animations)
+
+**The Solution**: Visual snapshots are ONLY generated, updated, and validated in the remote CI environment (GitHub Actions).
+
+**Environment-Based Testing**: The project uses `TEST_ENV` to enforce this:
 
 - **`TEST_ENV=local`** (default): Skips visual regression tests, runs functional E2E tests only
-- **`TEST_ENV=ci-docker`**: Runs ALL tests including visual snapshots (set automatically in Docker)
+- **`TEST_ENV=ci-docker`**: Runs ALL tests including visual snapshots (GitHub Actions only)
 - **`TEST_ENV=ecs`** (future): Production validation tests
 
-**Why Visual Tests Are Docker-Only**:
-- macOS and Linux render fonts, anti-aliasing, and subpixel positioning differently
-- CI runs in Docker (Linux), so snapshots must match that environment
-- Running visual tests locally would create platform-specific snapshots (-darwin.png vs -linux.png)
-- This leads to maintenance burden and CI failures
+**What Runs Where**:
+| Environment | Functional E2E | Visual Regression | Snapshot Updates |
+|-------------|---------------|-------------------|------------------|
+| Local (developer) | ✅ Yes | ❌ Never | ❌ Never |
+| GitHub Actions | ✅ Yes | ✅ Yes | ✅ Via workflow |
 
-**How to Update Snapshots**:
+**How to Update Snapshots (Remote-Only)**:
+
+When UI changes cause CI visual tests to fail:
+
+**Option 1: Manual workflow trigger**
 ```bash
-# CORRECT: Update snapshots in Docker (TEST_ENV=ci-docker automatically set)
-npm run test:e2e:docker:update-snapshots
+# 1. Push your code changes
+git push
 
-# WRONG: Never update snapshots locally
-npm run test:e2e:update-snapshots --workspace=frontend  # Won't work, visual tests skipped
+# 2. Go to GitHub Actions → "Update Visual Snapshots" → Run workflow
+# 3. Workflow updates snapshots and commits to your branch
+# 4. Pull the changes
+git pull
 ```
 
-**What Runs Where**:
-| Environment | Functional E2E | Visual Regression |
-|-------------|---------------|-------------------|
-| Local (macOS/dev) | ✅ Yes | ❌ Skipped |
-| Docker (ci-docker) | ✅ Yes | ✅ Yes |
-| GitHub Actions | ✅ Yes | ✅ Yes |
+**Option 2: PR comment trigger**
+```bash
+# 1. Create PR with your changes
+# 2. Comment on the PR: /update-snapshots
+# 3. Workflow updates snapshots automatically
+# 4. Review and merge
+```
 
-**After Updating Snapshots**:
-- Review git diff to ensure snapshot changes are intentional
-- Commit updated snapshots: only *-linux.png files should exist
-- Delete any *-darwin.png files if accidentally created
+**Option 3: Commit message trigger**
+```bash
+# Include [update-snapshots] in your commit message
+git commit -m "feat(frontend): Redesign button [update-snapshots]"
+git push
+# Workflow runs automatically and updates snapshots
+```
 
-**Golden Rule**: Visual snapshots are ONLY generated and validated in `TEST_ENV=ci-docker`.
+**Verifying Changes**:
+1. CI workflow commits snapshot updates with detailed message
+2. Review the git diff in the snapshot files
+3. Check uploaded artifacts for visual diffs
+4. Ensure only *-linux.png files exist (no *-darwin.png)
+
+**Why This Works**:
+- **Consistency**: All snapshots generated in identical CI environment
+- **Reliability**: No platform-specific rendering issues
+- **Audit Trail**: Automated commits show when/why snapshots changed
+- **No Local Setup**: Developers don't need Docker/Playwright installed locally
+
+**Golden Rule**: Visual snapshots are a **CI-only concern**. Developers write code, CI validates visuals.
