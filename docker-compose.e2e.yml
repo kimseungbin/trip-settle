@@ -82,6 +82,7 @@ services:
       - ./packages/frontend/tests:/app/packages/frontend/tests
     environment:
       - CI=true
+      - TEST_ENV=ci-docker  # Identifies test environment for snapshot management
       - PLAYWRIGHT_BASE_URL=http://frontend:5173
       - PLAYWRIGHT_WORKERS=4  # Run tests in parallel with 4 workers
       - HOME=/root  # Required when running as root

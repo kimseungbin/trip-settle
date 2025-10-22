@@ -5,6 +5,13 @@ import { defineConfig, devices } from '@playwright/test'
  * See https://playwright.dev/docs/test-configuration
  */
 
+// Test environment: local (dev machine), ci-docker (GH Actions), ecs (AWS), etc.
+const testEnv = process.env.TEST_ENV || 'local'
+
+// Determine if we should run visual snapshot tests
+// Only run in ci-docker where Linux snapshots are maintained
+const shouldRunVisualTests = testEnv === 'ci-docker'
+
 // Detect if running in Docker (via PLAYWRIGHT_BASE_URL env var)
 const isDocker = !!process.env.PLAYWRIGHT_BASE_URL
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173'
@@ -62,6 +69,8 @@ export default defineConfig({
 		{
 			name: 'chromium',
 			use: { ...devices['Desktop Chrome'] },
+			// Skip visual regression tests unless in ci-docker (where Linux snapshots are maintained)
+			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual Regression)/,
 		},
 
 		// Uncomment to test on Firefox
@@ -74,16 +83,22 @@ export default defineConfig({
 		{
 			name: 'webkit',
 			use: { ...devices['Desktop Safari'] },
+			// Skip visual regression tests unless in ci-docker (where Linux snapshots are maintained)
+			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual Regression)/,
 		},
 
 		// Test against mobile viewports
 		{
 			name: 'Mobile Chrome',
 			use: { ...devices['Pixel 5'] },
+			// Skip visual regression tests unless in ci-docker (where Linux snapshots are maintained)
+			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual Regression)/,
 		},
 		{
 			name: 'Mobile Safari',
 			use: { ...devices['iPhone 12'] },
+			// Skip visual regression tests unless in ci-docker (where Linux snapshots are maintained)
+			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual Regression)/,
 		},
 	],
 

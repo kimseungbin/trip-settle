@@ -681,26 +681,37 @@ npm run test:e2e --workspace=frontend
 
 #### Visual Snapshot Management (IMPORTANT)
 
-**Best Practice**: Visual snapshots should ONLY be updated via Docker to ensure consistency with CI environment.
+**Environment-Based Testing**: The project uses `TEST_ENV` to control which tests run in different environments:
 
-**Why**:
+- **`TEST_ENV=local`** (default): Skips visual regression tests, runs functional E2E tests only
+- **`TEST_ENV=ci-docker`**: Runs ALL tests including visual snapshots (set automatically in Docker)
+- **`TEST_ENV=ecs`** (future): Production validation tests
+
+**Why Visual Tests Are Docker-Only**:
 - macOS and Linux render fonts, anti-aliasing, and subpixel positioning differently
 - CI runs in Docker (Linux), so snapshots must match that environment
-- Updating locally creates platform-specific snapshots (-darwin.png vs -linux.png)
+- Running visual tests locally would create platform-specific snapshots (-darwin.png vs -linux.png)
 - This leads to maintenance burden and CI failures
 
 **How to Update Snapshots**:
 ```bash
-# CORRECT: Update snapshots in Docker (same environment as CI)
+# CORRECT: Update snapshots in Docker (TEST_ENV=ci-docker automatically set)
 npm run test:e2e:docker:update-snapshots
 
-# WRONG: Never update snapshots locally on macOS
-npm run test:e2e:update-snapshots --workspace=frontend  # DON'T DO THIS
+# WRONG: Never update snapshots locally
+npm run test:e2e:update-snapshots --workspace=frontend  # Won't work, visual tests skipped
 ```
 
-**After Updating**:
-- Review the git diff to ensure snapshot changes are intentional
-- Commit updated snapshots: only *-linux.png files should exist
-- Delete any *-darwin.png files if they were accidentally created
+**What Runs Where**:
+| Environment | Functional E2E | Visual Regression |
+|-------------|---------------|-------------------|
+| Local (macOS/dev) | ✅ Yes | ❌ Skipped |
+| Docker (ci-docker) | ✅ Yes | ✅ Yes |
+| GitHub Actions | ✅ Yes | ✅ Yes |
 
-**Golden Rule**: If CI runs tests in environment X, snapshots must be generated in environment X.
+**After Updating Snapshots**:
+- Review git diff to ensure snapshot changes are intentional
+- Commit updated snapshots: only *-linux.png files should exist
+- Delete any *-darwin.png files if accidentally created
+
+**Golden Rule**: Visual snapshots are ONLY generated and validated in `TEST_ENV=ci-docker`.
