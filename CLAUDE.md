@@ -462,6 +462,7 @@ This section tracks the implementation status of tests needed for continuous int
 
 #### Unit Tests
 - [ ] AppController tests (`app.controller.spec.ts`)
+- 
 - [ ] AppService tests (`app.service.spec.ts`)
 - [ ] Database configuration tests (`database.config.spec.ts`)
 
@@ -653,3 +654,27 @@ For comprehensive Playwright documentation including test examples, debugging, t
 - **Skill**: `.claude/skills/playwright-testing/guide.yaml`
 - **Configuration**: `packages/frontend/playwright.config.ts`
 - **Docker setup**: `docker-compose.e2e.yml`, `packages/frontend/Dockerfile.e2e`
+
+### Troubleshooting
+
+#### Permission Denied on test-results/playwright-report (macOS)
+
+**Symptom**: When running local E2E tests after Docker tests, you may see:
+```
+Error: EACCES: permission denied, rmdir '/path/to/test-results'
+```
+
+**Root Cause**: Docker containers running as root create test output directories with special macOS extended attributes (quarantine/provenance flags). Even though you own the files, macOS kernel protection prevents deletion without elevated privileges.
+
+**Solution**:
+```bash
+# Remove protected directories
+sudo rm -rf packages/frontend/test-results packages/frontend/playwright-report
+
+# Then run tests normally
+npm run test:e2e --workspace=frontend
+```
+
+**Prevention**: These directories are already in `.gitignore` and won't be committed. The issue only occurs when switching between Docker tests (run as root) and local tests (run as your user).
+
+**Why Docker Uses Root**: The CI environment (`DOCKER_USER: root`) runs as root to avoid permission issues with Docker volume mounts in GitHub Actions. This is necessary for automated testing but creates the permission issue locally when you switch testing modes.
