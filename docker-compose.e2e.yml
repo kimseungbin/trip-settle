@@ -78,6 +78,8 @@ services:
       # Mount test results and reports to host
       - ./packages/frontend/playwright-report:/app/packages/frontend/playwright-report
       - ./packages/frontend/test-results:/app/packages/frontend/test-results
+      # Mount snapshots directory to allow updating from Docker
+      - ./packages/frontend/tests:/app/packages/frontend/tests
     environment:
       - CI=true
       - PLAYWRIGHT_BASE_URL=http://frontend:5173
@@ -92,7 +94,7 @@ services:
       sh -c "
         echo 'Waiting for services to be ready...' &&
         sleep 5 &&
-        npm run test:e2e --workspace=frontend
+        npm run test:e2e --workspace=frontend -- ${PLAYWRIGHT_ARGS:-}
       "
 
   # Playwright UI mode (interactive watch mode)

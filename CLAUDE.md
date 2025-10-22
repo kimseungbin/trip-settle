@@ -633,6 +633,7 @@ npm run test:e2e:ui --workspace=frontend
 ```bash
 # Docker testing
 npm run test:e2e:docker                              # Run all tests
+npm run test:e2e:docker:update-snapshots             # Update visual snapshots (Docker-only)
 npm run test:e2e:docker:clean                        # Clean up resources
 
 # Local testing (requires: npx playwright install --with-deps)
@@ -640,7 +641,6 @@ npm run test:e2e --workspace=frontend                # Headless
 npm run test:e2e:ui --workspace=frontend             # Interactive UI mode
 npm run test:e2e:debug --workspace=frontend          # Playwright Inspector
 npm run test:e2e:report --workspace=frontend         # View test report
-npm run test:e2e:update-snapshots --workspace=frontend # Update baselines
 ```
 
 ### When to Use What
@@ -678,3 +678,29 @@ npm run test:e2e --workspace=frontend
 **Prevention**: These directories are already in `.gitignore` and won't be committed. The issue only occurs when switching between Docker tests (run as root) and local tests (run as your user).
 
 **Why Docker Uses Root**: The CI environment (`DOCKER_USER: root`) runs as root to avoid permission issues with Docker volume mounts in GitHub Actions. This is necessary for automated testing but creates the permission issue locally when you switch testing modes.
+
+#### Visual Snapshot Management (IMPORTANT)
+
+**Best Practice**: Visual snapshots should ONLY be updated via Docker to ensure consistency with CI environment.
+
+**Why**:
+- macOS and Linux render fonts, anti-aliasing, and subpixel positioning differently
+- CI runs in Docker (Linux), so snapshots must match that environment
+- Updating locally creates platform-specific snapshots (-darwin.png vs -linux.png)
+- This leads to maintenance burden and CI failures
+
+**How to Update Snapshots**:
+```bash
+# CORRECT: Update snapshots in Docker (same environment as CI)
+npm run test:e2e:docker:update-snapshots
+
+# WRONG: Never update snapshots locally on macOS
+npm run test:e2e:update-snapshots --workspace=frontend  # DON'T DO THIS
+```
+
+**After Updating**:
+- Review the git diff to ensure snapshot changes are intentional
+- Commit updated snapshots: only *-linux.png files should exist
+- Delete any *-darwin.png files if they were accidentally created
+
+**Golden Rule**: If CI runs tests in environment X, snapshots must be generated in environment X.
