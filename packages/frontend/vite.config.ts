@@ -25,16 +25,4 @@ export default defineConfig({
 			clientPort: port,
 		},
 	},
-	test: {
-		globals: true,
-		environment: 'happy-dom',
-		exclude: [
-			'**/node_modules/**',
-			'**/dist/**',
-			'**/e2e/**', // Exclude Playwright E2E tests
-			'**/visual/**', // Exclude Playwright visual tests
-			'**/accessibility/**', // Exclude Playwright a11y tests
-			'**/.{idea,git,cache,output,temp}/**',
-		],
-	},
 })

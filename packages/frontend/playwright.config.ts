@@ -13,6 +13,9 @@ export default defineConfig({
 	// Test directory
 	testDir: './tests',
 
+	// Only match Playwright test files (exclude Vitest *.test.ts files)
+	testMatch: '**/*.spec.ts',
+
 	// Run tests in parallel across files, but sequentially within each file
 	// This avoids race conditions while still getting parallelization benefits
 	fullyParallel: false,

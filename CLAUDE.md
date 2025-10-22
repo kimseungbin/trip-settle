@@ -188,8 +188,8 @@ npm run destroy --workspace=infra
 ### Frontend (Svelte)
 
 - **Framework**: Svelte 5 with TypeScript
-- **Build Tool**: Vite 6
-- **Testing**: Vitest 2
+- **Build Tool**: Vite 7
+- **Testing**: Vitest 3
 - **API Communication**: Proxied to backend via Vite (`/api` → `http://localhost:3000`)
 - **Entry Point**: `src/main.ts` mounts `App.svelte` to `#app`
 - **State Management**: Uses Svelte 5 runes (`$state`, `$derived`, `$props`, `$bindable`, `$effect`)
@@ -317,7 +317,7 @@ Entity files should follow the pattern `*.entity.ts` and will be auto-loaded by 
 - 120 character line width, tabs (width: 4), single quotes, no semicolons, ES5 trailing commas
 
 ### Testing
-- Frontend: Vitest with jsdom (unit tests), Playwright (E2E tests)
+- Frontend: Vitest with happy-dom (unit tests), Playwright (E2E tests)
 - Backend: Jest with ts-jest
 - Infra: Jest with ts-jest
 - E2E tests: Playwright for frontend, Jest for backend API
