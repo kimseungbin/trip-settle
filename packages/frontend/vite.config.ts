@@ -10,8 +10,10 @@ export default defineConfig({
 	plugins: [svelte()],
 	server: {
 		port,
-		host: true, // true = 0.0.0.0 + disable host check (Vite 6+)
+		host: true, // Listen on 0.0.0.0 (all interfaces)
 		strictPort: false,
+		// Allow requests from Docker service names and localhost
+		allowedHosts: ['frontend', 'localhost', '127.0.0.1', '.localhost'],
 		fs: {
 			strict: false,
 		},
