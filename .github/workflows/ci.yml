@@ -81,7 +81,12 @@ jobs:
         run: npm ci
 
       - name: Run ${{ matrix.package }} tests
-        run: npm run test --workspace=${{ matrix.package }} -- --passWithNoTests
+        run: |
+          if [ "${{ matrix.package }}" = "frontend" ]; then
+            npm run test:unit --workspace=frontend
+          else
+            npm run test --workspace=${{ matrix.package }} -- --passWithNoTests
+          fi
 
   # Job 4: E2E tests with Docker
   e2e-tests:

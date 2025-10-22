@@ -58,12 +58,14 @@ scopes:
       - "packages/*/package.json"
 
   tools:
-    description: "Developer tooling (git hooks, scripts, linters)"
+    description: "Developer tooling (git hooks, scripts, linters, CI/CD)"
     patterns:
       - ".githooks/**"
       - "scripts/**"
       - ".eslintrc*"
       - ".prettierrc*"
+      - ".github/workflows/**"
+      - ".github/actions/**"
 
 conventions:
   subject:

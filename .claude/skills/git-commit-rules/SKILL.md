@@ -21,9 +21,15 @@ When the user requests to create a commit or generate a commit message:
    - Run `git diff` to see unstaged changes
    - Identify the scope of changes (which packages, modules, or areas are affected)
 
-3. **Determine commit type and scope**:
-   - Based on the changes, determine the appropriate type from the rules (feat, fix, refactor, etc.)
-   - Identify the scope (frontend, backend, infra, config, etc.)
+3. **Determine commit type and scope** (IMPORTANT: type ≠ scope):
+   - **TYPE** (what kind of change): Choose from the `types` section in commit-rules.yaml
+     - Examples: feat, fix, refactor, test, docs, style, build, ci, chore
+     - Type describes the NATURE of the change (feature? bugfix? documentation?)
+   - **SCOPE** (where the change is): Choose from the `scopes` section in commit-rules.yaml
+     - Examples: frontend, backend, infra, config, monorepo, tools
+     - Scope describes the LOCATION/AREA of the change (which package? which subsystem?)
+     - Match file paths against the `patterns` in each scope definition
+   - Format: `{type}({scope}): {subject}` — e.g., `ci(tools): Fix workflow syntax`
    - Consider the monorepo structure: packages/frontend, packages/backend, packages/infra
 
 4. **Generate the commit message**:
