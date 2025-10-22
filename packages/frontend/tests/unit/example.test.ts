@@ -23,7 +23,7 @@ describe('Test Infrastructure', () => {
 
 	it('should support modern JavaScript features', () => {
 		const array = [1, 2, 3, 4, 5]
-		const doubled = array.map((x) => x * 2)
+		const doubled = array.map(x => x * 2)
 
 		expect(doubled).toEqual([2, 4, 6, 8, 10])
 	})
