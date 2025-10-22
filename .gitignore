@@ -8,10 +8,16 @@ coverage/
 test-results/
 playwright-report/
 playwright/.cache/
+view-test-results.html
 
 # Production
 dist/
 build/
+
+# TypeScript build artifacts (config directory)
+config/**/*.js
+config/**/*.js.map
+config/**/*.d.ts
 
 # Environment
 .env
@@ -21,6 +27,7 @@ build/
 # IDE
 .vscode/
 .idea/
+!.idea/runConfigurations/
 *.swp
 *.swo
 *~

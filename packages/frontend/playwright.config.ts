@@ -34,6 +34,8 @@ export default defineConfig({
 	reporter: [
 		['html', { outputFolder: 'playwright-report' }],
 		['list'],
+		// JUnit XML reporter for WebStorm test runner integration
+		['junit', { outputFile: 'test-results/junit.xml' }],
 		...(process.env.CI ? [['github'] as const] : []),
 	],
 
