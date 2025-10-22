@@ -15,6 +15,8 @@
 		"test:e2e:debug": "playwright test --debug",
 		"test:e2e:report": "playwright show-report",
 		"test:e2e:update-snapshots": "playwright test --update-snapshots",
+		"test:e2e:docker": "cd ../.. && npm run test:e2e:docker",
+		"test:e2e:docker:clean": "cd ../.. && npm run test:e2e:docker:clean",
 		"lint": "eslint .",
 		"type-check": "svelte-check --tsconfig ./tsconfig.json"
 	},

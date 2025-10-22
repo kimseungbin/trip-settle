@@ -10,12 +10,19 @@ export default defineConfig({
 	plugins: [svelte()],
 	server: {
 		port,
-		host: true, // Expose to local network
+		host: true, // true = 0.0.0.0 + disable host check (Vite 6+)
+		strictPort: false,
+		fs: {
+			strict: false,
+		},
 		proxy: {
 			'/api': {
 				target: backendUrl,
 				changeOrigin: true,
 			},
+		},
+		hmr: {
+			clientPort: port,
 		},
 	},
 	test: {

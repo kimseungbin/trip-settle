@@ -4,12 +4,18 @@ import { defineConfig, devices } from '@playwright/test'
  * Playwright configuration for Trip Settle frontend E2E tests
  * See https://playwright.dev/docs/test-configuration
  */
+
+// Detect if running in Docker (via PLAYWRIGHT_BASE_URL env var)
+const isDocker = !!process.env.PLAYWRIGHT_BASE_URL
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173'
+
 export default defineConfig({
 	// Test directory
 	testDir: './tests',
 
-	// Run tests in files in parallel
-	fullyParallel: true,
+	// Run tests in parallel across files, but sequentially within each file
+	// This avoids race conditions while still getting parallelization benefits
+	fullyParallel: false,
 
 	// Fail the build on CI if you accidentally left test.only in the source code
 	forbidOnly: !!process.env.CI,
@@ -17,8 +23,12 @@ export default defineConfig({
 	// Retry on CI only
 	retries: process.env.CI ? 2 : 0,
 
-	// Opt out of parallel tests on CI
-	workers: process.env.CI ? 1 : undefined,
+	// Workers: use PLAYWRIGHT_WORKERS env var if set, otherwise 1 in CI, undefined locally
+	workers: process.env.PLAYWRIGHT_WORKERS
+		? parseInt(process.env.PLAYWRIGHT_WORKERS, 10)
+		: process.env.CI
+		  ? 1
+		  : undefined,
 
 	// Reporter to use
 	reporter: [
@@ -30,7 +40,7 @@ export default defineConfig({
 	// Shared settings for all projects
 	use: {
 		// Base URL to use in actions like `await page.goto('/')`
-		baseURL: 'http://localhost:5173',
+		baseURL,
 
 		// Collect trace when retrying the failed test
 		trace: 'on-first-retry',
@@ -73,23 +83,26 @@ export default defineConfig({
 	],
 
 	// Run your local dev server before starting the tests
-	webServer: [
-		{
-			command: 'npm run dev --workspace=backend',
-			url: 'http://localhost:3000/api/health',
-			reuseExistingServer: !process.env.CI,
-			stdout: 'ignore',
-			stderr: 'pipe',
-			timeout: 120 * 1000,
-			cwd: '../..',
-		},
-		{
-			command: 'npm run dev --workspace=frontend',
-			url: 'http://localhost:5173',
-			reuseExistingServer: !process.env.CI,
-			stdout: 'ignore',
-			stderr: 'pipe',
-			cwd: '../..',
-		},
-	],
+	// Skip webServer in Docker mode (services already running via docker-compose)
+	webServer: isDocker
+		? undefined
+		: [
+				{
+					command: 'npm run dev --workspace=backend',
+					url: 'http://localhost:3000/api/health',
+					reuseExistingServer: !process.env.CI,
+					stdout: 'ignore',
+					stderr: 'pipe',
+					timeout: 120 * 1000,
+					cwd: '../..',
+				},
+				{
+					command: 'npm run dev --workspace=frontend',
+					url: 'http://localhost:5173',
+					reuseExistingServer: !process.env.CI,
+					stdout: 'ignore',
+					stderr: 'pipe',
+					cwd: '../..',
+				},
+		  ],
 })

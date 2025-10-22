@@ -1,0 +1,69 @@
+# Dockerignore for Trip Settle project
+# Optimize Docker build performance by excluding unnecessary files
+
+# Node modules (will be installed in container)
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+build
+**/dist
+**/build
+packages/*/dist
+packages/*/build
+
+# Test outputs and reports
+playwright-report
+test-results
+**/playwright-report
+**/test-results
+coverage
+**/coverage
+.nyc_output
+
+# Development files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+.circleci
+
+# Documentation
+*.md
+!README.md
+docs
+
+# CDK outputs
+cdk.out
+**/cdk.out
+
+# Misc
+.cache
+*.tsbuildinfo
+.turbo

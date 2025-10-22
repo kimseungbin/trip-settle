@@ -597,6 +597,66 @@ npm run test:e2e:report --workspace=frontend
 npm run test:e2e:update-snapshots --workspace=frontend
 ```
 
+### Running Tests with Docker
+
+**Problem**: Playwright E2E tests require browser binaries (Chromium, WebKit, etc.) and system dependencies to be installed locally. Missing browsers cause all tests to fail immediately.
+
+**Solution**: Use Docker with the official Playwright image that includes all pre-installed browsers and dependencies.
+
+#### Prerequisites
+
+- Docker installed and running
+- Docker Compose installed (included with Docker Desktop)
+
+#### Docker-Based Test Commands
+
+```bash
+# Run E2E tests in Docker (recommended for CI/CD and local development)
+npm run test:e2e:docker
+
+# Clean up Docker containers and volumes after testing
+npm run test:e2e:docker:clean
+
+# Alternative: Run from frontend package
+npm run test:e2e:docker --workspace=frontend
+```
+
+#### How It Works
+
+The Docker setup uses three services orchestrated by `docker-compose.e2e.yml`:
+
+1. **Backend Service**: Runs NestJS API with pg-mem database
+2. **Frontend Service**: Runs Vite dev server
+3. **Playwright Service**: Runs tests in official Playwright Docker image with pre-installed browsers
+
+**Benefits**:
+- ✅ No need to install Playwright browsers locally (`npx playwright install`)
+- ✅ Consistent test environment across all machines (Mac, Linux, Windows)
+- ✅ Same browser versions as CI/CD pipeline
+- ✅ Isolated test runs without affecting local environment
+- ✅ Automatically starts backend and frontend before running tests
+
+#### Docker Files
+
+- `packages/frontend/Dockerfile.e2e`: Playwright test runner image based on `mcr.microsoft.com/playwright:v1.56.1-noble`
+- `docker-compose.e2e.yml`: Orchestrates backend, frontend, and test runner
+- `.dockerignore`: Optimizes Docker build by excluding node_modules, build outputs, etc.
+
+#### Troubleshooting Docker Tests
+
+**Tests fail with "Cannot connect to http://localhost:5173"**:
+- The Docker setup uses service names (`frontend:5173`) instead of `localhost`
+- This is handled automatically by the Docker Compose configuration
+
+**Build is slow**:
+- First build downloads Playwright image (~1.5GB) and installs dependencies
+- Subsequent builds are faster due to Docker layer caching
+- Run `npm run test:e2e:docker:clean` to remove cached volumes if needed
+
+**Permission errors in test reports**:
+- Test reports are mounted to host filesystem
+- On Linux, you may need to adjust file ownership: `sudo chown -R $USER packages/frontend/playwright-report`
+
 ### Test Examples
 
 #### E2E Workflow Test

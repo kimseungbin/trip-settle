@@ -1,0 +1,112 @@
+# Docker Compose configuration for E2E testing
+# Orchestrates backend, frontend, and Playwright test runner
+
+services:
+  # Backend service
+  backend:
+    image: node:24-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+      - backend_node_modules:/app/packages/backend/node_modules
+      - frontend_node_modules:/app/packages/frontend/node_modules
+    command: >
+      sh -c "
+        echo 'Installing dependencies...' &&
+        npm ci &&
+        echo 'Starting backend...' &&
+        npm run dev --workspace=backend
+      "
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=local
+    networks:
+      default:
+        ipv4_address: 172.18.0.2
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+  # Frontend service
+  frontend:
+    image: node:24-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+      - backend_node_modules:/app/packages/backend/node_modules
+      - frontend_node_modules:/app/packages/frontend/node_modules
+    command: >
+      sh -c "
+        echo 'Starting frontend...' &&
+        npm run dev --workspace=frontend -- --host
+      "
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=local
+      - VITE_ALLOW_ORIGINS=*
+    networks:
+      default:
+        ipv4_address: 172.18.0.3
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5173"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+  # Playwright E2E test runner
+  playwright:
+    build:
+      context: .
+      dockerfile: packages/frontend/Dockerfile.e2e
+    init: true  # Recommended by Playwright docs
+    ipc: host  # Required for Chromium to run
+    security_opt:
+      - seccomp:unconfined  # Required for Chromium sandbox
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+      - backend_node_modules:/app/packages/backend/node_modules
+      - frontend_node_modules:/app/packages/frontend/node_modules
+      # Mount test results and reports to host
+      - ./packages/frontend/playwright-report:/app/packages/frontend/playwright-report
+      - ./packages/frontend/test-results:/app/packages/frontend/test-results
+    environment:
+      - CI=true
+      - PLAYWRIGHT_BASE_URL=http://172.18.0.3:5173
+      - PLAYWRIGHT_WORKERS=4  # Run tests in parallel with 4 workers
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    # Override baseURL in Playwright config to use static IP (Vite 6 host check workaround)
+    command: >
+      sh -c "
+        echo 'Waiting for services to be ready...' &&
+        sleep 5 &&
+        npm run test:e2e --workspace=frontend
+      "
+
+# Named volumes for sharing node_modules between containers
+volumes:
+  node_modules:
+  backend_node_modules:
+  frontend_node_modules:
+
+networks:
+  default:
+    name: trip-settle-e2e
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16

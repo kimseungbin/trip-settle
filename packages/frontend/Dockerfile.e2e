@@ -1,0 +1,37 @@
+# Dockerfile for running Playwright E2E tests
+# Based on official Playwright Docker image with pre-installed browsers
+
+# Use official Playwright image with specific version (must match package.json)
+FROM mcr.microsoft.com/playwright:v1.56.1-noble
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files for dependency installation
+# We need root package.json and frontend package.json for workspace setup
+COPY package*.json ./
+COPY packages/frontend/package*.json ./packages/frontend/
+
+# Install dependencies (run as root for native modules)
+RUN npm ci --workspace=frontend --omit=dev=false
+
+# Copy the rest of the application code
+COPY . .
+
+# Create pwuser if it doesn't exist and set up permissions
+RUN if ! id -u pwuser > /dev/null 2>&1; then \
+        groupadd -r pwuser && \
+        useradd -r -g pwuser -G audio,video pwuser && \
+        mkdir -p /home/pwuser/Downloads; \
+    fi && \
+    chown -R pwuser:pwuser /app /home/pwuser 2>/dev/null || true
+
+# Switch to non-root user
+USER pwuser
+
+# Set environment variables
+ENV CI=true
+ENV HOME=/home/pwuser
+
+# Default command: run E2E tests
+CMD ["npm", "run", "test:e2e", "--workspace=frontend"]
