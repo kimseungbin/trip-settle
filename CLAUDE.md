@@ -577,304 +577,49 @@ npm run test:e2e --workspace=frontend   # Alternative: Local (requires setup)
 npm run test:e2e --workspace=backend    # Backend API E2E tests
 ```
 
-## Playwright E2E Testing Guide
+## Playwright E2E Testing
 
-The frontend uses **Playwright** for end-to-end, visual regression, keyboard navigation, and accessibility testing. Playwright automates real browsers to test the application exactly as users interact with it.
+The frontend uses Playwright for end-to-end, visual regression, keyboard navigation, and accessibility testing.
 
-### Why Playwright?
+### Quick Start
 
-Playwright catches UI breakage that unit tests miss:
-- **Visual Regressions**: Screenshot comparisons detect layout shifts, CSS changes, missing elements
-- **Functional Testing**: Verifies forms, buttons, navigation, and user workflows actually work
-- **Keyboard Accessibility**: Ensures all features work without a mouse (critical for this project)
-- **WCAG Compliance**: Automated accessibility audits catch contrast, ARIA, and semantic HTML issues
+```bash
+# Docker-based (recommended - zero setup, consistent)
+npm run test:e2e:docker
+
+# Local (advanced - faster iteration, IDE integration)
+npm run test:e2e:ui --workspace=frontend
+```
 
 ### Test Structure
 
-```
-packages/frontend/tests/
-├── e2e/
-│   ├── expense-workflow.spec.ts      # 12 tests: CRUD operations, validation
-│   └── keyboard-navigation.spec.ts   # 14 tests: Tab, Enter, shortcuts, focus
-├── visual/
-│   └── ui-snapshots.spec.ts          # 13 tests: Screenshot comparisons
-└── accessibility/
-    └── a11y.spec.ts                  # 14 tests: WCAG 2.1 AA compliance (TODO)
-```
+- `tests/e2e/` - User workflows and interactions
+- `tests/visual/` - Screenshot comparisons
+- `tests/accessibility/` - WCAG compliance (currently test.fixme())
 
-**Note on Accessibility Tests**: The accessibility test file exists with test.fixme() markers. These tests will be implemented after the UI is stabilized to avoid frequent baseline updates.
+### Key Commands
 
-### Running E2E Tests
-
-#### Docker-Based Testing (Recommended)
-
-**Use Docker for default testing** - it provides zero-setup, consistent environments across all machines and matches CI/CD exactly.
-
-**Prerequisites**: Docker and Docker Compose installed (included with Docker Desktop)
-
-**Commands**:
 ```bash
-# Run full E2E test suite in Docker
-npm run test:e2e:docker
+# Docker testing
+npm run test:e2e:docker                              # Run all tests
+npm run test:e2e:docker:clean                        # Clean up resources
 
-# Clean up Docker containers and volumes
-npm run test:e2e:docker:clean
+# Local testing (requires: npx playwright install --with-deps)
+npm run test:e2e --workspace=frontend                # Headless
+npm run test:e2e:ui --workspace=frontend             # Interactive UI mode
+npm run test:e2e:debug --workspace=frontend          # Playwright Inspector
+npm run test:e2e:report --workspace=frontend         # View test report
+npm run test:e2e:update-snapshots --workspace=frontend # Update baselines
 ```
 
-**How It Works**: Three Docker services orchestrated by `docker-compose.e2e.yml`:
-1. **Backend Service**: NestJS API with pg-mem database
-2. **Frontend Service**: Vite dev server
-3. **Playwright Service**: Official Playwright image with pre-installed browsers
+### When to Use What
 
-**Why Docker?**
-- ✅ **Zero setup**: No `npx playwright install` needed
-- ✅ **Consistency**: Same browser versions on all machines (Mac, Linux, Windows)
-- ✅ **CI/CD parity**: Identical environment to GitHub Actions
-- ✅ **Isolation**: Tests don't affect local environment
-- ✅ **Orchestration**: Automatically starts backend + frontend
+- **Docker**: Default testing, pre-push checks, CI/CD (consistent across all machines)
+- **Local**: Active test development, debugging (faster iteration, IDE integration)
 
-**Docker Files**:
-- `packages/frontend/Dockerfile.e2e`: Playwright runner image (`mcr.microsoft.com/playwright:v1.56.1-noble`)
-- `docker-compose.e2e.yml`: Service orchestration
-- `.dockerignore`: Build optimization
+### Detailed Guide
 
-**Troubleshooting**:
-| Issue | Solution |
-|-------|----------|
-| "Cannot connect to localhost:5173" | Docker uses service names (`frontend:5173`) - handled automatically |
-| Slow first build | Downloads ~1.5GB Playwright image, then cached |
-| Permission errors on Linux | Run `sudo chown -R $USER packages/frontend/playwright-report` |
-
-#### Local Testing (Advanced)
-
-**Use local testing when you need:**
-- ⚡ **Faster iteration**: ~30s vs ~2-3min (no container startup)
-- 🛠️ **IDE integration**: Playwright UI mode, inspector, step-through debugging
-- 🔍 **Interactive development**: Rapid test writing with watch mode
-
-**Setup Required** (one-time):
-```bash
-npx playwright install --with-deps chromium webkit
-```
-
-**Commands**:
-```bash
-# Run all tests (headless)
-npm run test:e2e --workspace=frontend
-
-# Interactive UI mode (time-travel debugging, watch mode)
-npm run test:e2e:ui --workspace=frontend
-
-# Headed mode (see browser window)
-npm run test:e2e:headed --workspace=frontend
-
-# Debug mode (Playwright Inspector, step-through)
-npm run test:e2e:debug --workspace=frontend
-
-# View HTML test report (screenshots, videos, traces)
-npm run test:e2e:report --workspace=frontend
-
-# Update visual regression baselines
-npm run test:e2e:update-snapshots --workspace=frontend
-```
-
-**Comparison**:
-| Aspect | Docker (Recommended) | Local (Advanced) |
-|--------|---------------------|------------------|
-| **Setup** | Zero (just Docker) | `npx playwright install --with-deps` |
-| **Consistency** | ✅ Same on all machines | ⚠️ OS-dependent rendering |
-| **Speed** | ~2-3min (includes startup) | ~30sec (no container overhead) |
-| **IDE Integration** | ❌ Limited | ✅ Full (UI mode, inspector, WebStorm) |
-| **CI/CD Parity** | ✅ Identical environment | ⚠️ May differ (fonts, rendering) |
-| **Best For** | Default, pre-push checks | Active development, debugging |
-
-**When to use local**: Actively writing/debugging tests and need immediate feedback. Switch back to Docker before committing.
-
-### Test Examples
-
-#### E2E Workflow Test
-```typescript
-test('can add expense', async ({ page }) => {
-    await page.goto('/')
-    await page.getByPlaceholder('Expense name').fill('Coffee')
-    await page.getByPlaceholder('Amount').fill('4.50')
-    await page.getByRole('button', { name: 'Add' }).click()
-    
-    await expect(page.locator('.expense-name')).toContainText('Coffee')
-    await expect(page.locator('.total-amount')).toContainText('4.50')
-})
-```
-
-#### Visual Regression Test
-```typescript
-test('expense form UI', async ({ page }) => {
-    await page.goto('/')
-    const form = page.locator('.form-container')
-    
-    // Compare to baseline screenshot
-    await expect(form).toHaveScreenshot('expense-form.png')
-})
-```
-
-#### Keyboard Navigation Test
-```typescript
-test('can submit with Enter key', async ({ page }) => {
-    await page.goto('/')
-    await page.getByPlaceholder('Expense name').fill('Test')
-    await page.getByPlaceholder('Amount').fill('10.00')
-    await page.keyboard.press('Enter')
-    
-    await expect(page.locator('.expense-name')).toContainText('Test')
-})
-```
-
-#### Accessibility Test
-```typescript
-test('no accessibility violations', async ({ page }) => {
-    await page.goto('/')
-    
-    const results = await new AxeBuilder({ page }).analyze()
-    expect(results.violations).toEqual([])
-})
-```
-
-### When Tests Fail
-
-Playwright provides rich debugging information:
-
-1. **Screenshots**: Automatically captured on failure
-2. **Videos**: Optional recording of test execution
-3. **Traces**: Step-by-step replay with DOM snapshots, console logs, network activity
-4. **HTML Report**: Interactive report with all test results
-
-View the report:
-```bash
-npm run test:e2e:report --workspace=frontend
-```
-
-### Visual Regression Workflow
-
-**First run**: Creates baseline screenshots in `tests/<test-name>-snapshots/`
-
-**Subsequent runs**: Compares current UI to baselines
-- Pass: UI matches baseline (within threshold)
-- Fail: UI differs - test shows visual diff
-
-**When UI intentionally changes**:
-```bash
-# Review the diff in test report
-npm run test:e2e:report --workspace=frontend
-
-# If change is expected, update baselines
-npm run test:e2e:update-snapshots --workspace=frontend
-```
-
-### Configuration
-
-Located in `packages/frontend/playwright.config.ts`:
-
-- **Browsers**: Chromium (desktop + mobile)
-- **Auto-start dev server**: Vite starts automatically before tests
-- **Screenshots**: Only on failure
-- **Videos**: Retained on failure
-- **Traces**: On first retry
-- **CI optimized**: Retries, single worker, GitHub Actions reporter
-
-### Writing New Tests
-
-1. Create test file in appropriate directory:
-   - `tests/e2e/` - User workflows and interactions
-   - `tests/visual/` - UI screenshot comparisons
-   - `tests/accessibility/` - WCAG compliance
-
-2. Use descriptive test names:
-```typescript
-test('complete expense workflow - add, view, remove', async ({ page }) => {
-    // Test implementation
-})
-```
-
-3. Follow project patterns:
-   - Use `page.getByRole()`, `page.getByPlaceholder()` for accessibility
-   - Test keyboard shortcuts (Enter, Tab, Cmd+Enter)
-   - Verify both success and error states
-   - Check empty states and edge cases
-
-4. Add visual checks for critical UI:
-```typescript
-await expect(page).toHaveScreenshot('critical-feature.png')
-```
-
-### Best Practices
-
-- **Test user behavior, not implementation**: Use accessible selectors (`getByRole`, `getByPlaceholder`)
-- **Wait for content**: Use `expect()` with auto-waiting instead of manual waits
-- **Independent tests**: Each test should work in isolation
-- **Visual tests for UI**: Use screenshots to catch layout/CSS changes
-- **Keyboard tests for accessibility**: Verify Tab, Enter, Escape work as expected
-- **Mobile testing**: Test responsive breakpoints with different viewports
-
-### CI/CD Integration
-
-**Recommended**: Use Docker-based tests in CI for consistency with local development:
-
-```yaml
-- name: Run E2E tests in Docker
-  run: npm run test:e2e:docker
-
-- name: Upload test results
-  if: failure()
-  uses: actions/upload-artifact@v3
-  with:
-    name: playwright-report
-    path: packages/frontend/playwright-report/
-```
-
-**Alternative**: Local Playwright installation (if Docker not available in CI):
-
-```yaml
-- name: Install Playwright browsers
-  run: npx playwright install --with-deps chromium
-
-- name: Run E2E tests
-  run: npm run test:e2e --workspace=frontend
-
-- name: Upload test results
-  if: failure()
-  uses: actions/upload-artifact@v3
-  with:
-    name: playwright-report
-    path: packages/frontend/playwright-report/
-```
-
-**Key Points**:
-- Docker approach matches local development environment exactly
-- Headless browser execution
-- Retries on failure (reduces flakiness)
-- Artifacts uploaded (screenshots, videos, traces)
-
-### Troubleshooting
-
-**Tests fail locally but pass in CI (or vice versa)**:
-- Most common cause: Platform-dependent rendering (fonts, antialiasing)
-- **Solution**: Use Docker for both local and CI to ensure identical environments
-- If using local testing: Increase visual diff threshold in `playwright.config.ts`
-
-**Tests are flaky**:
-- Use `await expect()` with auto-waiting instead of manual `setTimeout` or `waitFor`
-- Ensure proper test isolation (independent test data, cleanup between tests)
-- Check for race conditions in application code (e.g., async state updates)
-
-**Visual tests fail unexpectedly**:
-- Review diff in test report: `npm run test:e2e:report --workspace=frontend`
-- Check if CSS, fonts, or layout intentionally changed
-- Update baselines if change is expected: `npm run test:e2e:update-snapshots --workspace=frontend`
-
-**Debugging tips**:
-- **Interactive debugging**: `npm run test:e2e:ui --workspace=frontend` (local only)
-- **Step-through**: `npm run test:e2e:debug --workspace=frontend` (local only)
-- **Pause execution**: Add `await page.pause()` in test code
-- **Manual screenshots**: Use `await page.screenshot({ path: 'debug.png' })` at any point
-- **Browser console**: Run in headed mode to see console output
-
-For more information, see [Playwright documentation](https://playwright.dev/docs/intro).
+For comprehensive Playwright documentation including test examples, debugging, troubleshooting, CI/CD integration, and best practices, see:
+- **Skill**: `.claude/skills/playwright-testing/guide.yaml`
+- **Configuration**: `packages/frontend/playwright.config.ts`
+- **Docker setup**: `docker-compose.e2e.yml`, `packages/frontend/Dockerfile.e2e`

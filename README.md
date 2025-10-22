@@ -17,6 +17,59 @@ A full-stack TypeScript application for managing trip expense settlements.
 - **Infrastructure**: AWS CDK
 - **Monorepo**: npm workspaces
 - **Development Database**: pg-mem (in-memory PostgreSQL, zero configuration)
+- **Testing**: Vitest (unit), Playwright (E2E), Jest (backend)
+
+## Design Philosophy
+
+### User Experience First
+
+This project prioritizes exceptional user experience with a focus on:
+
+- **Keyboard Accessibility**: All interactive features work without a mouse
+  - Forms submit with Enter, clear with Escape
+  - Tab navigation follows logical flow
+  - Keyboard shortcuts for common actions
+- **Responsive Design**: Mobile-first approach with desktop enhancements
+- **Performance**: Fast, smooth interactions with minimal latency
+- **Clear Feedback**: Visual and interaction feedback for all user actions
+
+### Testing Strategy
+
+**Why Playwright for E2E Testing?**
+
+Playwright catches UI breakage that unit tests miss:
+- **Visual Regressions**: Screenshot comparisons detect layout shifts, CSS changes, missing elements
+- **Functional Testing**: Verifies forms, buttons, navigation, and user workflows actually work
+- **Keyboard Accessibility**: Ensures all features work without a mouse (critical for this project)
+- **WCAG Compliance**: Automated accessibility audits catch contrast, ARIA, and semantic HTML issues
+
+**Why Docker for E2E Tests?**
+
+The project uses Docker-based Playwright testing by default for:
+- ✅ **Zero setup**: No `npx playwright install` needed
+- ✅ **Consistency**: Same browser versions on all machines (Mac, Linux, Windows)
+- ✅ **CI/CD parity**: Identical environment to GitHub Actions
+- ✅ **Isolation**: Tests don't affect local environment
+- ✅ **Orchestration**: Automatically starts backend + frontend services
+
+### Development Workflow
+
+**Why Custom Git Hooks?**
+
+By default, git hooks live in `.git/hooks/` which is **not tracked by version control**. Using a custom directory (`.githooks/`) provides:
+
+1. **Version control hooks**: All team members get the same hooks
+2. **Easy updates**: Hook changes propagate via git pull
+3. **No external dependencies**: Works without tools like husky
+4. **Explicit opt-in**: Developers consciously enable hooks after understanding what they do
+
+**Why No .env Files?**
+
+The project uses TypeScript-based configuration for:
+- **Type safety**: Configuration errors caught at compile time
+- **Better IDE support**: Autocomplete and refactoring
+- **Environment clarity**: Explicit local/development/production configs
+- **Zero secrets in repo**: Environment-specific values injected by CI/CD
 
 ## Quick Start
 
@@ -98,10 +151,18 @@ npm run build --workspace=infra
 # Run all tests
 npm test
 
-# Run tests for specific package
-npm run test --workspace=frontend
-npm run test --workspace=backend
+# Run unit tests for specific package
+npm run test --workspace=frontend  # Vitest (Svelte components)
+npm run test --workspace=backend   # Jest (NestJS services)
+
+# Run E2E tests (Docker-based, recommended)
+npm run test:e2e:docker
+
+# Run E2E tests locally (faster iteration during development)
+npm run test:e2e:ui --workspace=frontend  # Interactive UI mode
 ```
+
+**E2E Testing Philosophy**: The project uses Docker-based Playwright testing by default to ensure consistency across all development machines and CI/CD. Local testing is available for faster iteration when actively writing tests. See `.claude/skills/playwright-testing/guide.yaml` for comprehensive testing documentation.
 
 ### Deploying Infrastructure
 
