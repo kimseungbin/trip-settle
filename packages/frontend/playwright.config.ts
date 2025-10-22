@@ -69,8 +69,9 @@ export default defineConfig({
 		{
 			name: 'chromium',
 			use: { ...devices['Desktop Chrome'] },
-			// Skip visual regression tests unless in ci-docker (where Linux snapshots are maintained)
-			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual Regression)/,
+			// Skip visual snapshot tests unless in ci-docker (where Linux snapshots are maintained)
+			// Matches any test with "Visual" in the describe block name
+			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
 		},
 
 		// Uncomment to test on Firefox
@@ -83,22 +84,25 @@ export default defineConfig({
 		{
 			name: 'webkit',
 			use: { ...devices['Desktop Safari'] },
-			// Skip visual regression tests unless in ci-docker (where Linux snapshots are maintained)
-			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual Regression)/,
+			// Skip visual snapshot tests unless in ci-docker (where Linux snapshots are maintained)
+			// Matches any test with "Visual" in the describe block name
+			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
 		},
 
 		// Test against mobile viewports
 		{
 			name: 'Mobile Chrome',
 			use: { ...devices['Pixel 5'] },
-			// Skip visual regression tests unless in ci-docker (where Linux snapshots are maintained)
-			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual Regression)/,
+			// Skip visual snapshot tests unless in ci-docker (where Linux snapshots are maintained)
+			// Matches any test with "Visual" in the describe block name
+			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
 		},
 		{
 			name: 'Mobile Safari',
 			use: { ...devices['iPhone 12'] },
-			// Skip visual regression tests unless in ci-docker (where Linux snapshots are maintained)
-			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual Regression)/,
+			// Skip visual snapshot tests unless in ci-docker (where Linux snapshots are maintained)
+			// Matches any test with "Visual" in the describe block name
+			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
 		},
 	],
 
