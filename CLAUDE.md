@@ -70,9 +70,8 @@ When implementing features, always consider:
    - Optimize performance if needed
 
 6. **Commit**: Create descriptive commit following project style
-   - Use the `git-commit-rules` skill to generate standardized commit messages
-   - Reference the feature and tests added
-   - Follow conventional commit format defined in `.claude/skills/git-commit-rules/commit-rules.yaml`
+   - Use the `git-commit-rules` skill for commit message format and examples
+   - See `.claude/skills/git-commit-rules/commit-rules.yaml` for detailed guidance
 
 ### Exceptions
 
@@ -81,18 +80,18 @@ This workflow may be relaxed only for:
 - Configuration tweaks
 - Emergency hotfixes (but tests must be added immediately after)
 
-### Example
+### Example Workflow
 
 ```bash
 # 1. Plan
 # User requests: "Add expense edit functionality"
 # Create todos: Research existing code -> Write tests -> Implement -> Verify -> Commit
 
-# 2. Write Tests First
+# 2. Write Tests First (Red Phase)
 npm run test:e2e:docker -- tests/e2e/edit-expense.spec.ts
-# ❌ Tests fail (expected - feature doesn't exist)
+# ❌ Tests fail (expected - feature doesn't exist yet)
 
-# 3. Implement Feature
+# 3. Implement Feature (Green Phase)
 # Add edit button, edit form, update API call, etc.
 
 # 4. Verify Tests Pass
@@ -101,15 +100,10 @@ npm run test --workspace=frontend
 npm run format
 # ✅ All tests pass
 
-# 5. Commit (using git-commit-rules skill)
-# The skill will generate a message like:
+# 5. Commit
 git add .
-git commit -m "feat(frontend): Add expense edit functionality
-
-- Add edit button to expense items
-- Create inline edit form with keyboard support
-- Add Playwright E2E tests for edit workflow
-- Ensure Escape cancels edit, Enter saves"
+# Use git-commit-rules skill for proper message format
+git commit
 ```
 
 **Claude Code must follow this workflow for all feature implementations.**

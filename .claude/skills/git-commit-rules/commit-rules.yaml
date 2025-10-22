@@ -89,3 +89,94 @@ special_cases:
   breaking_change:
     footer_required: true
     footer_format: "BREAKING CHANGE: <description>"
+
+examples:
+  feature_with_tests:
+    description: "New feature with comprehensive test coverage"
+    type: "feat"
+    scope: "frontend"
+    subject: "Add expense edit functionality"
+    body: |
+      - Add edit button to expense items
+      - Create inline edit form with keyboard support
+      - Add Playwright E2E tests for edit workflow
+      - Ensure Escape cancels edit, Enter saves
+    rationale: "Body uses bullet points to list specific changes, includes test additions, mentions keyboard accessibility"
+
+  bug_fix:
+    description: "Simple bug fix"
+    type: "fix"
+    scope: "backend"
+    subject: "Prevent duplicate expense creation"
+    body: |
+      Add transaction-level uniqueness constraint to prevent race condition
+      when multiple requests create the same expense simultaneously.
+
+      Refs #42
+    rationale: "Body explains the 'why' (race condition), includes issue reference"
+
+  refactor_multi_package:
+    description: "Refactoring across multiple packages"
+    type: "refactor"
+    scope: "monorepo"
+    subject: "Standardize error handling across packages"
+    body: |
+      - Implement unified error response format
+      - Update frontend error display
+      - Update backend error middleware
+      - Add integration tests for error flows
+    rationale: "Uses 'monorepo' scope when changes affect multiple packages"
+
+  documentation:
+    description: "Documentation update"
+    type: "docs"
+    scope: "project"
+    subject: "Add Docker-based E2E testing guide"
+    body: |
+      Document the Docker-first approach for E2E tests with comparison
+      to local testing. Includes troubleshooting section.
+    rationale: "No tests needed for docs-only changes (TDD workflow exception)"
+
+  breaking_change:
+    description: "Breaking change with footer"
+    type: "feat"
+    scope: "backend"
+    subject: "Change expense API response format"
+    body: |
+      Restructure expense response to include currency metadata and
+      localized formatting hints for frontend consumption.
+
+      BREAKING CHANGE: Response structure changed from flat to nested.
+      Frontend must update ExpenseList component to access `expense.data`
+      instead of top-level fields.
+    rationale: "Breaking changes must include footer explaining migration path"
+
+  build_dependency:
+    description: "Dependency update"
+    type: "build"
+    scope: "frontend"
+    subject: "Update Playwright to v1.56.1"
+    body: |
+      Update to latest Playwright version for improved stability.
+      Update Docker image in Dockerfile.e2e accordingly.
+    rationale: "Use 'build' type for dependency changes, mention impact on other files"
+
+workflow_integration:
+  description: "How to use this skill during TDD workflow commit phase"
+  steps:
+    - "After tests pass and code is formatted/linted"
+    - "Stage your changes: git add ."
+    - "Review changed files to determine scope (frontend/backend/monorepo/etc)"
+    - "Choose appropriate type (feat/fix/refactor/test/docs/etc)"
+    - "Write subject in imperative mood, be specific"
+    - "Add body with bullet points for multi-change commits"
+    - "Reference examples above for similar scenarios"
+
+  command_template: |
+    git commit -m "type(scope): Subject line under 72 chars
+
+    - Bullet point explaining what changed
+    - Another change or context
+    - Mention tests added or updated
+
+    Refs #issue_number (if applicable)"
