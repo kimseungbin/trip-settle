@@ -1,0 +1,318 @@
+# Trip Settle TDD Workflow
+# Test-Driven Development workflow for all feature implementations
+
+name: "TDD Workflow"
+description: "Mandatory Test-Driven Development workflow for Trip Settle features"
+applies_to: "All feature implementations (exceptions listed below)"
+
+phases:
+  1_plan:
+    name: "Plan"
+    description: "Break down the feature into clear, testable requirements"
+    actions:
+      - "Identify affected components (frontend, backend, or both)"
+      - "Define success criteria and expected behavior"
+      - "Use TodoWrite tool to create and track implementation tasks"
+      - "Consider edge cases and error scenarios"
+
+    questions_to_answer:
+      - "What is the user-facing behavior we're implementing?"
+      - "Which components/modules will be affected?"
+      - "What are the success criteria?"
+      - "Are there accessibility requirements (keyboard, screen reader)?"
+
+    output: "Clear task list with testable acceptance criteria"
+
+  2_red:
+    name: "Write Tests First (Red Phase)"
+    description: "Write failing tests before any implementation code"
+
+    test_types:
+      backend:
+        unit_tests:
+          framework: "Jest"
+          pattern: "*.spec.ts"
+          purpose: "Test individual functions, services, controllers"
+          example: "ExpenseService.calculateTotal() returns correct sum"
+
+        integration_tests:
+          framework: "Jest"
+          pattern: "*.integration.spec.ts"
+          purpose: "Test database operations, module interactions"
+          example: "ExpenseController POST /api/expenses creates record in DB"
+
+      frontend:
+        unit_tests:
+          framework: "Vitest"
+          pattern: "*.test.ts, *.spec.ts"
+          purpose: "Test component logic, utilities, state management"
+          example: "ExpenseForm validates amount input correctly"
+
+        e2e_tests:
+          framework: "Playwright"
+          pattern: "tests/e2e/*.spec.ts"
+          purpose: "Test user workflows and interactions end-to-end"
+          example: "User can add, edit, and delete expenses"
+          command: "npm run test:e2e:docker"
+
+        visual_tests:
+          framework: "Playwright"
+          pattern: "tests/visual/*.spec.ts"
+          purpose: "Catch unintended UI changes with screenshot comparison"
+          when: "UI components are added or modified"
+          command: "npm run test:e2e:docker"
+
+        keyboard_tests:
+          framework: "Playwright"
+          pattern: "tests/e2e/keyboard-*.spec.ts"
+          purpose: "Ensure keyboard accessibility (Tab, Enter, Escape, shortcuts)"
+          when: "Interactive elements are added (forms, buttons, lists)"
+          command: "npm run test:e2e:docker"
+
+    validation:
+      requirement: "Tests MUST fail initially"
+      rationale: "Failing tests prove they're actually testing the new feature"
+      tip: "Run tests immediately after writing them to verify they fail"
+
+    best_practices:
+      - "Write tests at appropriate levels (unit for logic, E2E for workflows)"
+      - "Test behavior, not implementation details"
+      - "Include both happy path and error cases"
+      - "Use descriptive test names: 'should validate email format'"
+      - "For frontend, use accessible selectors (getByRole, getByPlaceholder)"
+
+  3_green:
+    name: "Implement Feature (Green Phase)"
+    description: "Write minimum code to make all tests pass"
+
+    guidelines:
+      - "Follow existing code patterns and architecture"
+      - "Ensure type safety (TypeScript strict mode)"
+      - "Implement proper error handling"
+      - "Maintain accessibility and keyboard support"
+      - "Keep it simple - only write code needed to pass tests"
+
+    code_quality:
+      - "Use TypeScript types, avoid 'any'"
+      - "Follow naming conventions (camelCase for variables, PascalCase for components)"
+      - "Add JSDoc comments for complex functions"
+      - "Handle edge cases identified in planning phase"
+
+    accessibility_checklist:
+      - "Forms submit with Enter key, clear with Escape"
+      - "Interactive elements accessible via Tab key"
+      - "ARIA labels for screen readers where needed"
+      - "Keyboard shortcuts documented in KeyboardHint component"
+
+    tip: "Resist the urge to over-engineer. Write the simplest code that passes tests."
+
+  4_verify:
+    name: "Verify Tests Pass"
+    description: "Run full test suite and quality checks"
+
+    commands:
+      backend:
+        unit_tests: "npm run test --workspace=backend"
+        coverage: "npm run test:cov --workspace=backend"
+        e2e_tests: "npm run test:e2e --workspace=backend"
+
+      frontend:
+        unit_tests: "npm run test --workspace=frontend"
+        e2e_tests: "npm run test:e2e:docker --workspace=frontend"
+        type_check: "npm run type-check --workspace=frontend"
+
+      quality:
+        format: "npm run format"
+        lint: "npm run lint"
+        build: "npm run build"
+
+    success_criteria:
+      - "✅ All new tests pass"
+      - "✅ No regressions in existing tests"
+      - "✅ Code formatting passes (Prettier)"
+      - "✅ Linting passes (ESLint)"
+      - "✅ TypeScript compilation succeeds"
+      - "✅ Build completes without errors"
+
+    if_tests_fail:
+      - "Review test expectations - are they correct?"
+      - "Check implementation logic for bugs"
+      - "Verify test setup/teardown is correct"
+      - "Use debugger or console.log to trace execution"
+      - "For Playwright: npm run test:e2e:ui for interactive debugging"
+
+  5_refactor:
+    name: "Refactor (Optional)"
+    description: "Clean up implementation while keeping tests green"
+
+    when_to_refactor:
+      - "Code duplication can be extracted to shared functions"
+      - "Complex conditionals can be simplified"
+      - "Performance can be improved without changing behavior"
+      - "Names can be more descriptive"
+
+    guidelines:
+      - "Keep all tests passing (green) throughout refactoring"
+      - "Make one change at a time, verify tests after each"
+      - "Extract reusable components/functions/utilities"
+      - "Improve readability and maintainability"
+
+    common_refactorings:
+      - "Extract method: Pull complex logic into named functions"
+      - "Extract component: Pull reusable UI into separate components"
+      - "Consolidate conditionals: Simplify complex if/else chains"
+      - "Rename variables: Use more descriptive names"
+
+    tip: "Refactoring is optional but encouraged. Skip if code is already clean."
+
+  6_commit:
+    name: "Commit"
+    description: "Create descriptive commit following project conventions"
+
+    skill: "git-commit-rules"
+    skill_location: ".claude/skills/git-commit-rules/commit-rules.yaml"
+
+    steps:
+      - "Stage changes: git add ."
+      - "Review git-commit-rules skill for format and examples"
+      - "Write commit message following conventional commit format"
+      - "Include what changed and why (not how)"
+      - "Mention tests added in commit body"
+
+    format: "type(scope): Subject line"
+    example: "feat(frontend): Add expense edit functionality"
+
+exceptions:
+  description: "Workflow can be relaxed for these cases"
+
+  cases:
+    documentation_only:
+      description: "*.md file changes with no code modifications"
+      relaxed_phases: ["red", "green", "verify"]
+      still_required: ["plan", "commit"]
+      example: "Updating README with new setup instructions"
+
+    configuration:
+      description: "Config file tweaks (tsconfig, prettier, eslint)"
+      relaxed_phases: ["red"]
+      still_required: ["verify", "commit"]
+      example: "Adjusting ESLint rules"
+
+    emergency_hotfix:
+      description: "Critical production bug requiring immediate fix"
+      relaxed_phases: ["red"]
+      requirement: "Tests MUST be added immediately after hotfix"
+      example: "Fix security vulnerability"
+
+  note: "Use exceptions sparingly. TDD catches bugs early and ensures code quality."
+
+examples:
+  feature_frontend:
+    description: "Adding new frontend feature with full TDD cycle"
+    scenario: "User requests: Add expense edit functionality"
+
+    workflow:
+      plan:
+        - "Create TodoWrite list: Research -> Write tests -> Implement -> Verify -> Commit"
+        - "Identify components: ExpenseList, ExpenseForm, API client"
+        - "Success criteria: Edit button, inline edit form, saves to backend"
+
+      red:
+        - "Write Playwright test: Click edit, modify amount, save, verify updated"
+        - "Run: npm run test:e2e:docker -- tests/e2e/edit-expense.spec.ts"
+        - "Result: ❌ Test fails (expected - feature doesn't exist)"
+
+      green:
+        - "Add edit button to ExpenseList items"
+        - "Create inline edit form in ExpenseForm"
+        - "Wire up PUT request to backend API"
+        - "Add keyboard shortcuts (Enter to save, Escape to cancel)"
+
+      verify:
+        - "npm run test:e2e:docker → ✅ E2E tests pass"
+        - "npm run test --workspace=frontend → ✅ Unit tests pass"
+        - "npm run format && npm run lint → ✅ Quality checks pass"
+
+      refactor:
+        - "Extract edit form logic to separate component"
+        - "Consolidate save/cancel handlers"
+
+      commit:
+        - "git add ."
+        - "git commit -m 'feat(frontend): Add expense edit functionality'"
+
+  bug_fix_backend:
+    description: "Fixing backend bug with TDD"
+    scenario: "Users report duplicate expenses created on double-click"
+
+    workflow:
+      plan:
+        - "Root cause: No idempotency check in POST /api/expenses"
+        - "Solution: Add transaction-level uniqueness constraint"
+
+      red:
+        - "Write integration test: Send duplicate POST requests rapidly"
+        - "Assert: Only one expense created, second returns 409 Conflict"
+        - "Run test → ❌ Fails (creates duplicates)"
+
+      green:
+        - "Add unique constraint to ExpenseEntity"
+        - "Update service to catch duplicate key error"
+        - "Return 409 with helpful error message"
+
+      verify:
+        - "npm run test --workspace=backend → ✅ All tests pass"
+        - "npm run format && npm run lint → ✅ Quality checks pass"
+
+      commit:
+        - "git commit -m 'fix(backend): Prevent duplicate expense creation'"
+
+best_practices:
+  general:
+    - "Small, focused commits - one feature per commit"
+    - "Keep tests fast - use mocks/stubs where appropriate"
+    - "Test behavior, not implementation - refactor freely without breaking tests"
+    - "Write tests you'd want to read 6 months from now"
+
+  frontend_specific:
+    - "E2E tests for user workflows, unit tests for component logic"
+    - "Visual regression tests catch unintended CSS changes"
+    - "Always test keyboard navigation for interactive features"
+    - "Use Playwright UI mode (npm run test:e2e:ui) for test debugging"
+
+  backend_specific:
+    - "Unit tests for business logic, integration tests for DB operations"
+    - "Test both success and error paths"
+    - "Mock external dependencies (APIs, databases) in unit tests"
+    - "Use pg-mem for fast in-memory database tests"
+
+tools_and_commands:
+  test_execution:
+    all_tests: "npm test"
+    backend_unit: "npm run test --workspace=backend"
+    backend_watch: "npm run test:watch --workspace=backend"
+    frontend_unit: "npm run test --workspace=frontend"
+    frontend_e2e: "npm run test:e2e:docker"
+    frontend_e2e_ui: "npm run test:e2e:ui --workspace=frontend"
+
+  quality_checks:
+    format: "npm run format"
+    format_check: "npm run format:check"
+    lint: "npm run lint"
+    type_check: "npm run type-check --workspace=frontend"
+    build: "npm run build"
+
+  debugging:
+    playwright_ui: "npm run test:e2e:ui --workspace=frontend"
+    playwright_debug: "npm run test:e2e:debug --workspace=frontend"
+    jest_watch: "npm run test:watch --workspace=backend"
+
+enforcement:
+  message: "Claude Code MUST follow this workflow for all feature implementations"
+  rationale: |
+    TDD ensures:
+    - Features work as intended before merging
+    - Regressions are caught immediately
+    - Code is testable and maintainable
+    - Documentation through tests
+    - Confidence to refactor

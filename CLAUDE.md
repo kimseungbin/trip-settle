@@ -34,79 +34,47 @@ When implementing features, always consider:
 
 ## Feature Development Workflow (MANDATORY)
 
-**All new features must follow this Test-Driven Development (TDD) workflow:**
+**All new features must follow the Test-Driven Development (TDD) workflow defined in the `tdd-workflow` skill.**
 
-### Workflow Steps
+### Quick Reference
 
-1. **Plan**: Break down the feature into clear, testable requirements
-   - Identify affected components (frontend, backend, or both)
-   - Define success criteria
-   - Use TodoWrite tool to create and track tasks
+The TDD workflow follows these phases:
 
-2. **Write Tests First** (Red Phase): Write failing tests before implementation
-   - **Backend**: Jest unit tests (`*.spec.ts`) and/or integration tests
-   - **Frontend**:
-     - Vitest unit tests for components/utilities
-     - Playwright E2E tests for user workflows and interactions
-     - Visual regression tests if UI changes
-     - Keyboard navigation tests for interactive elements
-   - Tests must fail initially (proving they test the feature)
+1. **Plan** → Break down feature, create task list
+2. **Red** → Write failing tests first
+3. **Green** → Implement minimum code to pass tests
+4. **Verify** → Run full test suite and quality checks
+5. **Refactor** → Clean up code (optional)
+6. **Commit** → Create descriptive commit
 
-3. **Implement Feature** (Green Phase): Write minimum code to pass tests
-   - Follow existing code patterns and architecture
-   - Ensure type safety and proper error handling
-   - Maintain accessibility and keyboard support
+### Key Commands
 
-4. **Verify Tests Pass**: Run full test suite
-   - Backend: `npm run test --workspace=backend`
-   - Frontend: `npm run test --workspace=frontend && npm run test:e2e:docker`
-   - Ensure no regressions in existing tests
-   - Run formatting: `npm run format`
-   - Run linting: `npm run lint`
+```bash
+# Backend tests
+npm run test --workspace=backend
 
-5. **Refactor** (Optional): Clean up implementation
-   - Improve code quality while keeping tests green
-   - Extract reusable components/functions
-   - Optimize performance if needed
+# Frontend tests (unit + E2E)
+npm run test --workspace=frontend
+npm run test:e2e:docker
 
-6. **Commit**: Create descriptive commit following project style
-   - Use the `git-commit-rules` skill for commit message format and examples
-   - See `.claude/skills/git-commit-rules/commit-rules.yaml` for detailed guidance
+# Quality checks
+npm run format && npm run lint && npm run build
+```
 
 ### Exceptions
 
-This workflow may be relaxed only for:
+Workflow can be relaxed for:
 - Documentation-only changes (*.md files)
 - Configuration tweaks
-- Emergency hotfixes (but tests must be added immediately after)
+- Emergency hotfixes (tests required immediately after)
 
-### Example Workflow
+### Detailed Guidance
 
-```bash
-# 1. Plan
-# User requests: "Add expense edit functionality"
-# Create todos: Research existing code -> Write tests -> Implement -> Verify -> Commit
+For comprehensive workflow details, examples, and best practices, see:
+- **Skill**: `.claude/skills/tdd-workflow/workflow.yaml`
+- **Commit conventions**: `.claude/skills/git-commit-rules/commit-rules.yaml`
 
-# 2. Write Tests First (Red Phase)
-npm run test:e2e:docker -- tests/e2e/edit-expense.spec.ts
-# ❌ Tests fail (expected - feature doesn't exist yet)
-
-# 3. Implement Feature (Green Phase)
-# Add edit button, edit form, update API call, etc.
-
-# 4. Verify Tests Pass
-npm run test:e2e:docker
-npm run test --workspace=frontend
-npm run format
-# ✅ All tests pass
-
-# 5. Commit
-git add .
-# Use git-commit-rules skill for proper message format
-git commit
-```
-
-**Claude Code must follow this workflow for all feature implementations.**
+**Claude Code must follow the TDD workflow skill for all feature implementations.**
 
 ## Monorepo Structure
 
