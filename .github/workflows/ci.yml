@@ -81,7 +81,7 @@ jobs:
         run: npm ci
 
       - name: Run ${{ matrix.package }} tests
-        run: npm run test --workspace=${{ matrix.package }}
+        run: npm run test --workspace=${{ matrix.package }} -- --passWithNoTests
 
   # Job 4: E2E tests with Docker
   e2e-tests:

@@ -430,6 +430,8 @@ This section tracks the implementation status of tests needed for continuous int
 
 ### Backend Tests (NestJS + Jest)
 
+**Note**: Backend currently has no tests. CI uses `--passWithNoTests` flag to prevent failures. This is temporary until tests are implemented.
+
 #### Unit Tests
 - [ ] AppController tests (`app.controller.spec.ts`)
 - [ ] AppService tests (`app.service.spec.ts`)
