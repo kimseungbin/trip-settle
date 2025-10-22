@@ -166,6 +166,124 @@ npm run test:e2e:ui --workspace=frontend  # Interactive UI mode
 
 ### Deploying Infrastructure
 
+#### First-Time Setup: Bootstrap AWS CDK (One-Time Operation)
+
+Before deploying any infrastructure, you must bootstrap AWS CDK. This is a one-time operation per AWS account/region.
+
+**Using AWS CloudShell (Recommended - No Local Credentials Needed):**
+
+1. Log into AWS Console
+2. Open CloudShell (terminal icon in top navigation bar)
+3. Select your target region (e.g., `ap-northeast-2`)
+4. Get your AWS account ID and region:
+
+```bash
+# Get account ID
+aws sts get-caller-identity --query Account --output text
+
+# Get current region
+aws configure get region
+```
+
+5. Bootstrap CDK with your account ID and region:
+
+```bash
+# Replace with your account ID and desired region
+npx cdk bootstrap aws://YOUR_ACCOUNT_ID/YOUR_REGION
+
+# Example:
+# npx cdk bootstrap aws://433751222689/ap-northeast-2
+```
+
+6. Verify bootstrap succeeded:
+
+```bash
+aws cloudformation describe-stacks --stack-name CDKToolkit
+```
+
+You should see the CDKToolkit stack with `StackStatus: CREATE_COMPLETE`.
+
+**What does bootstrap do?**
+- Creates S3 bucket for CloudFormation templates
+- Creates ECR repository for Docker images
+- Creates IAM roles for deployments
+- One-time operation per account/region combination
+
+#### Setting Up GitHub Actions for Continuous Deployment
+
+To enable automatic deployments when you push to `main`, set up GitHub Actions OIDC (no AWS credentials stored in GitHub!):
+
+**1. Create OIDC Provider in AWS CloudShell:**
+
+```bash
+aws iam create-open-id-connect-provider \
+  --url https://token.actions.githubusercontent.com \
+  --client-id-list sts.amazonaws.com \
+  --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1
+```
+
+**What is the thumbprint?** It's the SHA-1 fingerprint of GitHub's root certificate authority. AWS uses this to verify GitHub's TLS certificate when validating OIDC tokens. This value is public and stable. If you get an error that the provider already exists, skip this step.
+
+**2. Create IAM Role for GitHub Actions:**
+
+```bash
+# Create trust policy file
+cat > trust-policy.json <<'EOF'
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::YOUR_ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+        },
+        "StringLike": {
+          "token.actions.githubusercontent.com:sub": "repo:YOUR_GITHUB_USERNAME/trip-settle:*"
+        }
+      }
+    }
+  ]
+}
+EOF
+
+# Replace YOUR_ACCOUNT_ID and YOUR_GITHUB_USERNAME in the file above
+
+# Create the role
+aws iam create-role \
+  --role-name GitHubActionsCDKDeployRole \
+  --assume-role-policy-document file://trust-policy.json
+
+# Attach permissions (use AdministratorAccess for initial setup)
+aws iam attach-role-policy \
+  --role-name GitHubActionsCDKDeployRole \
+  --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+
+# Get the role ARN (save this for GitHub secrets)
+aws iam get-role --role-name GitHubActionsCDKDeployRole --query 'Role.Arn' --output text
+```
+
+**3. Add GitHub Repository Variables:**
+
+Go to your GitHub repository → Settings → Secrets and variables → Actions → Variables tab → **Repository variables** section, and add:
+- `AWS_ROLE_ARN`: The role ARN from step 2 (e.g., `arn:aws:iam::433751222689:role/GitHubActionsCDKDeployRole`)
+- `AWS_REGION`: Your AWS region (e.g., `ap-northeast-2`)
+
+**Notes**:
+- Use **Variables** (not Secrets) for the role ARN since it's a public identifier, not a credential. This makes debugging easier as the ARN will be visible in workflow logs.
+- Use **Repository variables** (not Environment variables) since this project uses a single AWS account for all environments. If you plan to use separate AWS accounts per environment (e.g., staging, production), use Environment variables instead to configure different role ARNs per environment.
+
+**Security Note**: For production, replace `AdministratorAccess` with a least-privilege policy containing only the permissions needed for your infrastructure (CloudFormation, S3, EC2, RDS, etc.).
+
+#### Deploying Changes
+
+After setup, deployments happen automatically via GitHub Actions when you push to `main`. No local AWS credentials needed!
+
+For manual deployment (requires AWS credentials):
 ```bash
 # Preview changes
 npm run diff --workspace=infra
