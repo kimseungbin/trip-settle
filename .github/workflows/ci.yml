@@ -94,6 +94,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: [quality, build]  # Run after quality checks and build pass
+    # Prevent multiple E2E test runs from conflicting
+    concurrency:
+      group: e2e-tests-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout code
@@ -102,8 +106,23 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Clean up any existing Docker volumes
-        run: npm run test:e2e:docker:clean || true
+      - name: Aggressive cleanup of Docker resources
+        run: |
+          echo "🧹 Cleaning up any existing Docker resources..."
+
+          # Stop and remove any containers from this project
+          docker ps -aq --filter "name=trip-settle-e2e-*" | xargs -r docker rm -f || true
+
+          # Remove the network if it exists
+          docker network rm trip-settle-e2e 2>/dev/null || true
+
+          # Run docker-compose cleanup with all flags
+          npm run test:e2e:docker:clean || true
+
+          # Wait for Docker to fully release resources
+          sleep 3
+
+          echo "✅ Cleanup complete"
 
       - name: Run E2E tests in Docker
         run: npm run test:e2e:docker

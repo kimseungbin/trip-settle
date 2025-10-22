@@ -18,7 +18,7 @@
     "test:e2e:docker": "docker compose -f docker-compose.e2e.yml up --build --abort-on-container-exit",
     "test:e2e:docker:report": "npm run test:e2e:docker && open packages/frontend/playwright-report/index.html",
     "test:e2e:docker:ui": "docker compose -f docker-compose.e2e.yml up --build backend frontend playwright-ui",
-    "test:e2e:docker:clean": "docker compose -f docker-compose.e2e.yml down -v",
+    "test:e2e:docker:clean": "docker compose -f docker-compose.e2e.yml down -v --remove-orphans",
     "lint": "npm run lint --workspaces",
     "format": "prettier --write \"packages/**/*.{ts,js,json,svelte}\"",
     "format:check": "prettier --check \"packages/**/*.{ts,js,json,svelte}\""
