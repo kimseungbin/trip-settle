@@ -1,0 +1,11 @@
+# Build outputs
+*.js
+*.d.ts
+*.js.map
+
+# CDK outputs
+cdk.out/
+
+# Keep important config files
+!jest.config.js
+!.eslintrc.js

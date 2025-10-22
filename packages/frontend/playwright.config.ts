@@ -27,8 +27,8 @@ export default defineConfig({
 	workers: process.env.PLAYWRIGHT_WORKERS
 		? parseInt(process.env.PLAYWRIGHT_WORKERS, 10)
 		: process.env.CI
-		  ? 1
-		  : undefined,
+			? 1
+			: undefined,
 
 	// Reporter to use
 	reporter: [
@@ -104,5 +104,5 @@ export default defineConfig({
 					stderr: 'pipe',
 					cwd: '../..',
 				},
-		  ],
+			],
 })

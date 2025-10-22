@@ -57,6 +57,14 @@ scopes:
       - "package.json"
       - "packages/*/package.json"
 
+  tools:
+    description: "Developer tooling (git hooks, scripts, linters)"
+    patterns:
+      - ".githooks/**"
+      - "scripts/**"
+      - ".eslintrc*"
+      - ".prettierrc*"
+
 conventions:
   subject:
     - "Use imperative mood: 'Add feature' not 'Added feature'"
