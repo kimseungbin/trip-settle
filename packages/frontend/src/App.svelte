@@ -1,7 +1,6 @@
 <script lang="ts">
-	import SystemStatus from './components/SystemStatus.svelte'
 	import ExpenseTracker from './components/ExpenseTracker.svelte'
-	import HintDebugger from './components/HintDebugger.svelte'
+	import DevTools from './components/DevTools.svelte'
 	import { config } from './config'
 
 	const isLocalMode = config.environment === 'local'
@@ -12,9 +11,8 @@
 	<p>Expense settlement made easy</p>
 
 	<ExpenseTracker />
-	<SystemStatus />
 	{#if isLocalMode}
-		<HintDebugger />
+		<DevTools />
 	{/if}
 </main>
 

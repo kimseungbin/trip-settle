@@ -35,7 +35,7 @@
 </script>
 
 <div class="debugger" data-testid="hint-debugger">
-	<h3>Hint Debugger (Local Only)</h3>
+	<h3>Hint Debugger</h3>
 
 	<div class="debug-row">
 		<span class="label">Keyboard Hints:</span>
