@@ -213,6 +213,8 @@ You should see the CDKToolkit stack with `StackStatus: CREATE_COMPLETE`.
 
 To enable automatic deployments when you push to `main`, set up GitHub Actions OIDC (no AWS credentials stored in GitHub!):
 
+> **💡 Need help?** If you're using [Claude Code](https://claude.com/claude-code), you can ask Claude to guide you through this setup process interactively. Simply say: *"Help me set up AWS CDK deployment using the cdk-setup skill"*. Claude will invoke the skill automatically and walk you through each step with explanations.
+
 **1. Create OIDC Provider in AWS CloudShell:**
 
 ```bash

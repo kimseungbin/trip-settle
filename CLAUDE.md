@@ -347,118 +347,31 @@ Entity files should follow the pattern `*.entity.ts` and will be auto-loaded by 
 
 ## AWS CDK Deployment
 
-### First-Time Setup: Bootstrap AWS CDK
+### First-Time Setup
 
-**IMPORTANT**: Bootstrap is a one-time operation per AWS account/region. The human must complete this step before any CDK deployments can happen.
+**IMPORTANT**: AWS CDK requires a one-time bootstrap operation and OIDC configuration for GitHub Actions. This setup is performed manually by humans and only needs to be done once per AWS account/region.
 
-**Bootstrap Process (via AWS CloudShell):**
+**For detailed first-time setup instructions**, refer to:
+- **Human-readable guide**: See README.md section "Setting Up GitHub Actions for Continuous Deployment"
+- **Interactive AI guidance**: Use the `cdk-setup` skill (`.claude/skills/cdk-setup/setup-guide.yaml`)
 
-The human should run these commands in AWS CloudShell:
-
-```bash
-# Get account ID and region
-aws sts get-caller-identity --query Account --output text
-aws configure get region
-
-# Bootstrap CDK (replace with actual account ID and region)
-npx cdk bootstrap aws://ACCOUNT_ID/REGION
-
-# Example: npx cdk bootstrap aws://433751222689/ap-northeast-2
-
-# Verify
-aws cloudformation describe-stacks --stack-name CDKToolkit
-```
-
-**What bootstrap creates:**
-- S3 bucket for CloudFormation templates
-- ECR repository for Docker images
-- IAM roles for deployments
-- SSM parameters for configuration
+The setup process includes:
+1. **CDK Bootstrap** - Creates S3 bucket, ECR repository, IAM roles for deployments
+2. **OIDC Provider** - Enables GitHub Actions to authenticate with AWS without stored credentials
+3. **IAM Role Configuration** - Creates role with trust policy for this GitHub repository
+4. **GitHub Variables** - Stores AWS_ROLE_ARN and AWS_REGION as repository variables
 
 ### Deployment Strategy
 
 **Continuous Deployment (Recommended):**
-All infrastructure changes deploy automatically via GitHub Actions when pushed to `main`. This requires:
-
-1. CDK bootstrap completed (one-time, manual)
-2. GitHub Actions OIDC configured (see below)
-3. Push to `main` branch triggers deployment
+All infrastructure changes deploy automatically via GitHub Actions when pushed to `main`. The workflow file is at `.github/workflows/deploy.yml`.
 
 **Manual Deployment (Optional):**
-Requires AWS credentials configured locally:
+For testing infrastructure changes locally (requires AWS credentials configured):
 ```bash
 npm run diff --workspace=infra   # Preview changes
 npm run deploy --workspace=infra # Deploy to AWS
 ```
-
-### GitHub Actions OIDC Setup
-
-For secure, credential-less deployments from GitHub Actions, the human must configure OIDC:
-
-1. **Create OIDC Provider** (run in AWS CloudShell):
-```bash
-aws iam create-open-id-connect-provider \
-  --url https://token.actions.githubusercontent.com \
-  --client-id-list sts.amazonaws.com \
-  --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1
-```
-
-2. **Create IAM Role for GitHub Actions** (run in AWS CloudShell):
-```bash
-# Save this as trust-policy.json
-cat > trust-policy.json <<'EOF'
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Federated": "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
-      },
-      "Action": "sts:AssumeRoleWithWebIdentity",
-      "Condition": {
-        "StringEquals": {
-          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
-        },
-        "StringLike": {
-          "token.actions.githubusercontent.com:sub": "repo:GITHUB_USER/trip-settle:*"
-        }
-      }
-    }
-  ]
-}
-EOF
-
-# Replace ACCOUNT_ID and GITHUB_USER in the file
-
-# Create the role
-aws iam create-role \
-  --role-name GitHubActionsCDKDeployRole \
-  --assume-role-policy-document file://trust-policy.json
-
-# Attach AdministratorAccess policy (restrict this in production)
-aws iam attach-role-policy \
-  --role-name GitHubActionsCDKDeployRole \
-  --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
-
-# Get the role ARN (save this for GitHub Actions)
-aws iam get-role --role-name GitHubActionsCDKDeployRole --query 'Role.Arn' --output text
-```
-
-3. **Configure GitHub Repository Variables:**
-- Go to GitHub repo → Settings → Secrets and variables → Actions → Variables tab → Repository variables section
-- Add repository variable: `AWS_ROLE_ARN` = (the role ARN from step 2)
-- Add repository variable: `AWS_REGION` = (e.g., `ap-northeast-2`)
-
-**Notes**:
-- Use Variables (not Secrets) since the role ARN is a public identifier, not a credential.
-- Use Repository variables (not Environment variables) since this project uses a single AWS account. If using separate AWS accounts per environment, use Environment variables instead.
-
-**Security Note**: In production, replace `AdministratorAccess` with a least-privilege policy containing only:
-- `cloudformation:*`
-- `s3:*` (for CDKToolkit bucket)
-- `iam:PassRole`
-- Permissions for specific resources being deployed (EC2, RDS, etc.)
 
 ## Development Workflow
 
