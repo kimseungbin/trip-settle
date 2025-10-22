@@ -104,6 +104,8 @@ jobs:
 
       - name: Run E2E tests in Docker
         run: npm run test:e2e:docker
+        env:
+          DOCKER_USER: root  # Run as root in CI to avoid permission issues with bind mounts
 
       - name: Upload Playwright report
         if: always()  # Upload report even if tests fail

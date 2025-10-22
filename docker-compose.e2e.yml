@@ -74,6 +74,8 @@ services:
     ipc: host  # Required for Chromium to run
     security_opt:
       - seccomp:unconfined  # Required for Chromium sandbox
+    # Run as root in CI to avoid permission issues with bind mounts
+    user: "${DOCKER_USER:-pwuser}"
     volumes:
       - .:/app
       - node_modules:/app/node_modules
@@ -86,6 +88,7 @@ services:
       - CI=true
       - PLAYWRIGHT_BASE_URL=http://172.18.0.3:5173
       - PLAYWRIGHT_WORKERS=4  # Run tests in parallel with 4 workers
+      - HOME=/root  # Required when running as root
     depends_on:
       backend:
         condition: service_healthy
@@ -108,6 +111,8 @@ services:
     ipc: host
     security_opt:
       - seccomp:unconfined
+    # Run as root in CI to avoid permission issues with bind mounts
+    user: "${DOCKER_USER:-pwuser}"
     volumes:
       - .:/app
       - node_modules:/app/node_modules
@@ -119,6 +124,7 @@ services:
       - "9323:9323"  # Expose Playwright UI port to host
     environment:
       - PLAYWRIGHT_BASE_URL=http://172.18.0.3:5173
+      - HOME=/root  # Required when running as root
     networks:
       default:
         ipv4_address: 172.18.0.4
