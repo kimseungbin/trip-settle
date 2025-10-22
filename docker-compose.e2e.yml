@@ -22,9 +22,6 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=local
-    networks:
-      default:
-        ipv4_address: 172.18.0.2
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health"]
       interval: 5s
@@ -51,10 +48,7 @@ services:
     environment:
       - NODE_ENV=local
       - VITE_ALLOW_ORIGINS=*
-      - API_URL=http://172.18.0.2:3000/api
-    networks:
-      default:
-        ipv4_address: 172.18.0.3
+      - API_URL=http://backend:3000/api
     depends_on:
       backend:
         condition: service_healthy
@@ -86,7 +80,7 @@ services:
       - ./packages/frontend/test-results:/app/packages/frontend/test-results
     environment:
       - CI=true
-      - PLAYWRIGHT_BASE_URL=http://172.18.0.3:5173
+      - PLAYWRIGHT_BASE_URL=http://frontend:5173
       - PLAYWRIGHT_WORKERS=4  # Run tests in parallel with 4 workers
       - HOME=/root  # Required when running as root
     depends_on:
@@ -94,7 +88,6 @@ services:
         condition: service_healthy
       frontend:
         condition: service_healthy
-    # Override baseURL in Playwright config to use static IP (Vite 6 host check workaround)
     command: >
       sh -c "
         echo 'Waiting for services to be ready...' &&
@@ -123,11 +116,8 @@ services:
     ports:
       - "9323:9323"  # Expose Playwright UI port to host
     environment:
-      - PLAYWRIGHT_BASE_URL=http://172.18.0.3:5173
+      - PLAYWRIGHT_BASE_URL=http://frontend:5173
       - HOME=/root  # Required when running as root
-    networks:
-      default:
-        ipv4_address: 172.18.0.4
     depends_on:
       backend:
         condition: service_healthy
@@ -147,10 +137,3 @@ volumes:
   node_modules:
   backend_node_modules:
   frontend_node_modules:
-
-networks:
-  default:
-    name: trip-settle-e2e
-    ipam:
-      config:
-        - subnet: 172.18.0.0/16

@@ -106,21 +106,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Aggressive cleanup of Docker resources
+      - name: Cleanup any existing Docker resources
         run: |
           echo "🧹 Cleaning up any existing Docker resources..."
 
           # Stop and remove any containers from this project
           docker ps -aq --filter "name=trip-settle-e2e-*" | xargs -r docker rm -f || true
 
-          # Remove the network if it exists
-          docker network rm trip-settle-e2e 2>/dev/null || true
-
           # Run docker-compose cleanup with all flags
           npm run test:e2e:docker:clean || true
-
-          # Wait for Docker to fully release resources
-          sleep 3
 
           echo "✅ Cleanup complete"
 
