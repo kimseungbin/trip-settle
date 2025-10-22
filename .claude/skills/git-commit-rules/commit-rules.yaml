@@ -133,11 +133,20 @@ scope_selection_guide:
 
     config_files:
       pattern: "config/**, tsconfig*.json, *.config.*"
-      scope: "config"
+      scope: "config OR package scope depending on purpose"
       examples:
         - "chore(config): Update TypeScript target to ES2022"
         - "refactor(config): Standardize environment variable naming"
-      rationale: "Configuration files use 'config' scope"
+        - "fix(frontend): Fix Vite host validation for Docker E2E tests"
+      rationale: "Configuration files use 'config' scope for general config changes, but use package scope (frontend/backend/infra) when the change is specific to that package's functionality or testing"
+
+      disambiguation:
+        - question: "Does the config change affect how the package works or is tested?"
+          answer_yes: "Use package scope (frontend/backend/infra)"
+          answer_no: "Use config scope"
+        - question: "Is this a build/test infrastructure change?"
+          answer_yes: "Consider if it's test-specific (use package scope) or affects multiple packages (use tools/monorepo)"
+          answer_no: "Use config scope"
 
     multi_package:
       pattern: "Changes in 2+ packages"
