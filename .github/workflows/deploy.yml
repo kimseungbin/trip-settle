@@ -1,0 +1,62 @@
+name: Deploy Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/infra/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch: # Allow manual triggering
+
+# Prevent concurrent deployments
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build infrastructure package
+        run: npm run build --workspace=infra
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: GitHubActions-${{ github.run_id }}
+
+      - name: CDK diff
+        run: npm run diff --workspace=infra
+        continue-on-error: true # Diff might fail on first deployment
+
+      - name: CDK deploy
+        run: npm run deploy --workspace=infra -- --require-approval never
+
+      - name: Upload deployment outputs
+        if: always()
+        run: |
+          if [ -f cdk.out/outputs.json ]; then
+            echo "Deployment outputs:"
+            cat cdk.out/outputs.json
+          fi
