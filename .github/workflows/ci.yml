@@ -1,0 +1,150 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Job 1: Code quality checks (fast feedback)
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run linters
+        run: npm run lint
+
+      - name: Type check frontend
+        run: npm run type-check --workspace=frontend
+
+  # Job 2: Build all packages
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all packages
+        run: npm run build
+
+  # Job 3: Unit tests
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        package: [backend, frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ${{ matrix.package }} tests
+        run: npm run test --workspace=${{ matrix.package }}
+
+  # Job 4: E2E tests with Docker
+  e2e-tests:
+    name: E2E Tests (Docker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [quality, build]  # Run after quality checks and build pass
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run E2E tests in Docker
+        run: npm run test:e2e:docker
+
+      - name: Upload Playwright report
+        if: always()  # Upload report even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: packages/frontend/playwright-report/
+          retention-days: 30
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: packages/frontend/test-results/
+          retention-days: 30
+
+      - name: Clean up Docker resources
+        if: always()
+        run: npm run test:e2e:docker:clean
+
+  # Job 5: All checks passed
+  all-checks:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [quality, build, unit-tests, e2e-tests]
+    if: always()
+
+    steps:
+      - name: Check if all jobs succeeded
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
+            echo "❌ One or more checks failed"
+            exit 1
+          elif [[ "${{ contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
+            echo "⚠️ One or more checks were cancelled"
+            exit 1
+          else
+            echo "✅ All checks passed!"
+          fi
