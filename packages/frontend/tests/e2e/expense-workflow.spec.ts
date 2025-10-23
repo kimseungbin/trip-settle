@@ -2,6 +2,17 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Expense Workflow', () => {
 	test.beforeEach(async ({ page }) => {
+		// Set up as returning user to skip onboarding
+		await page.goto('/')
+		await page.evaluate(() => {
+			localStorage.setItem(
+				'appSettings',
+				JSON.stringify({
+					features: { isOnboarded: true, currencyMode: 'single', defaultCurrency: 'KRW' },
+					system: { hasSeenKeyboardHint: true },
+				})
+			)
+		})
 		await page.goto('/')
 	})
 
@@ -29,7 +40,9 @@ test.describe('Expense Workflow', () => {
 		// Verify expense appears in list
 		await expect(page.locator('.expense-name')).toContainText('Coffee')
 		await expect(page.locator('.expense-amount')).toContainText('4.50')
-		await expect(page.locator('.currency-code')).toContainText('KRW')
+
+		// In single-currency mode, currency is shown in total section only
+		await expect(page.locator('.total-currency-text')).toContainText('KRW')
 
 		// Verify total is updated
 		await expect(page.locator('.total-amount')).toContainText('4.50')
@@ -144,6 +157,18 @@ test.describe('Expense Workflow', () => {
 	})
 
 	test('can add expenses in different currencies', async ({ page }) => {
+		// This test needs multi-currency mode, so set it up separately
+		await page.evaluate(() => {
+			localStorage.setItem(
+				'appSettings',
+				JSON.stringify({
+					features: { isOnboarded: true, currencyMode: 'multi', defaultCurrency: 'USD' },
+					system: { hasSeenKeyboardHint: true },
+				})
+			)
+		})
+		await page.goto('/')
+
 		// Add USD expense
 		await page.getByPlaceholder('Expense name').fill('Coffee USD')
 		await page.getByPlaceholder('Amount').fill('5.00')

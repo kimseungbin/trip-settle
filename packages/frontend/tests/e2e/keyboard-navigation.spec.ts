@@ -9,6 +9,17 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Keyboard Navigation', () => {
 	test.beforeEach(async ({ page }) => {
+		// Set up as returning user to skip onboarding
+		await page.goto('/')
+		await page.evaluate(() => {
+			localStorage.setItem(
+				'appSettings',
+				JSON.stringify({
+					features: { isOnboarded: true, currencyMode: 'multi', defaultCurrency: 'KRW' },
+					system: { hasSeenKeyboardHint: false },
+				})
+			)
+		})
 		await page.goto('/')
 	})
 
@@ -215,9 +226,16 @@ test.describe('Keyboard Navigation', () => {
 	})
 
 	test('can dismiss keyboard hint toast with Escape key', async ({ page }) => {
-		// Clear localStorage to ensure toast shows
-		await page.evaluate(() => localStorage.clear())
-		await page.reload()
+		// Clear keyboard hint setting to ensure toast shows
+		await page.evaluate(() => {
+			const stored = localStorage.getItem('appSettings')
+			if (stored) {
+				const parsed = JSON.parse(stored)
+				parsed.system.hasSeenKeyboardHint = false
+				localStorage.setItem('appSettings', JSON.stringify(parsed))
+			}
+		})
+		await page.goto('/')
 
 		// Trigger toast by clicking Add button (mouse submission)
 		await page.getByPlaceholder('Expense name').fill('Test')
@@ -236,9 +254,16 @@ test.describe('Keyboard Navigation', () => {
 	})
 
 	test('can dismiss keyboard hint toast with close button', async ({ page }) => {
-		// Clear localStorage to ensure toast shows
-		await page.evaluate(() => localStorage.clear())
-		await page.reload()
+		// Clear keyboard hint setting to ensure toast shows
+		await page.evaluate(() => {
+			const stored = localStorage.getItem('appSettings')
+			if (stored) {
+				const parsed = JSON.parse(stored)
+				parsed.system.hasSeenKeyboardHint = false
+				localStorage.setItem('appSettings', JSON.stringify(parsed))
+			}
+		})
+		await page.goto('/')
 
 		// Trigger toast by clicking Add button (mouse submission)
 		await page.getByPlaceholder('Expense name').fill('Test')
@@ -259,9 +284,22 @@ test.describe('Keyboard Navigation', () => {
 })
 
 test.describe('Keyboard Accessibility - Visual Indicators', () => {
-	test('focused elements have visible focus indicator', async ({ page }) => {
+	test.beforeEach(async ({ page }) => {
+		// Set up as returning user to skip onboarding
 		await page.goto('/')
+		await page.evaluate(() => {
+			localStorage.setItem(
+				'appSettings',
+				JSON.stringify({
+					features: { isOnboarded: true, currencyMode: 'multi', defaultCurrency: 'KRW' },
+					system: { hasSeenKeyboardHint: false },
+				})
+			)
+		})
+		await page.goto('/')
+	})
 
+	test('focused elements have visible focus indicator', async ({ page }) => {
 		// Check name input focus ring
 		const nameInput = page.getByPlaceholder('Expense name')
 		await nameInput.focus()

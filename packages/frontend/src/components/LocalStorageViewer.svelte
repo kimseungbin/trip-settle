@@ -114,6 +114,7 @@
 							onclick={() => clearKey(key)}
 							aria-label="Clear {key}"
 							data-testid="clear-{key}"
+							tabindex="-1"
 						>
 							Clear
 						</button>
@@ -123,7 +124,7 @@
 		</div>
 
 		<div class="actions">
-			<button class="clear-all-btn" onclick={clearAll} data-testid="clear-all-storage">
+			<button class="clear-all-btn" onclick={clearAll} data-testid="clear-all-storage" tabindex="-1">
 				🗑️ Clear All LocalStorage
 			</button>
 		</div>
