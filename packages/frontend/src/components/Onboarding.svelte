@@ -81,13 +81,33 @@
 			<h2 class="section-title">How do you want to track expenses?</h2>
 
 			<div class="mode-options">
-				<button class="mode-option" onclick={() => selectCurrencyMode('single')}>
+				<button
+					class="mode-option"
+					onclick={() => selectCurrencyMode('single')}
+					onkeydown={e => {
+						if (e.key === 'Enter') {
+							e.preventDefault()
+							e.stopPropagation()
+							selectCurrencyMode('single')
+						}
+					}}
+				>
 					<div class="mode-icon">💵</div>
 					<div class="mode-title">Single Currency</div>
 					<p class="mode-description">All expenses in one currency (simpler)</p>
 				</button>
 
-				<button class="mode-option" onclick={() => selectCurrencyMode('multi')}>
+				<button
+					class="mode-option"
+					onclick={() => selectCurrencyMode('multi')}
+					onkeydown={e => {
+						if (e.key === 'Enter') {
+							e.preventDefault()
+							e.stopPropagation()
+							selectCurrencyMode('multi')
+						}
+					}}
+				>
 					<div class="mode-icon">🌍</div>
 					<div class="mode-title">Multiple Currencies</div>
 					<p class="mode-description">Track expenses in different currencies</p>

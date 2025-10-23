@@ -76,7 +76,7 @@ test.describe('Onboarding Flow', () => {
 		expect(settings.features.currencyMode).toBe('single')
 	})
 
-	test('should support keyboard navigation - Enter to proceed', async ({ page }) => {
+	test('should support keyboard navigation - Enter on multi-currency button', async ({ page }) => {
 		await page.goto('/onboarding')
 
 		// Navigate to multi-currency button and press Enter
@@ -86,6 +86,35 @@ test.describe('Onboarding Flow', () => {
 		// Should navigate to home page
 		await expect(page).toHaveURL('/')
 		await expect(page.getByRole('heading', { name: 'Track Your Expenses' })).toBeVisible()
+
+		// Verify settings
+		const appSettings = await page.evaluate(() => localStorage.getItem('appSettings'))
+		const settings = JSON.parse(appSettings!)
+		expect(settings.features.isOnboarded).toBe(true)
+		expect(settings.features.currencyMode).toBe('multi')
+	})
+
+	test('should support keyboard navigation - Enter on single-currency button', async ({ page }) => {
+		await page.goto('/onboarding')
+
+		// Navigate to single-currency button and press Enter
+		await page.getByRole('button', { name: /single currency/i }).focus()
+		await page.keyboard.press('Enter')
+
+		// Should show currency selector
+		await expect(page.getByRole('heading', { name: /choose your currency/i })).toBeVisible()
+
+		// Complete the flow
+		await page.getByRole('button', { name: /continue/i }).click()
+
+		// Should navigate to home page
+		await expect(page).toHaveURL('/')
+
+		// Verify settings
+		const appSettings = await page.evaluate(() => localStorage.getItem('appSettings'))
+		const settings = JSON.parse(appSettings!)
+		expect(settings.features.isOnboarded).toBe(true)
+		expect(settings.features.currencyMode).toBe('single')
 	})
 
 	test('should support keyboard navigation - Escape to skip', async ({ page }) => {
