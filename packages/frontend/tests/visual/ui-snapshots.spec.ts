@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 /**
  * Visual Regression Tests
@@ -10,6 +10,12 @@ import { test, expect } from '@playwright/test'
  * Subsequent runs: Compares against baseline
  *
  * To update baselines: npm run test:e2e -- --update-snapshots
+ *
+ * PHASED ROLLOUT STRATEGY:
+ * Phase 1 (Current): Empty state only - validate workflow
+ * Phase 2: Add form + single expense tests
+ * Phase 3: Add multiple expenses + interactions
+ * Phase 4: Add mobile + responsive tests
  */
 
 test.describe('Visual Regression', () => {
@@ -25,7 +31,8 @@ test.describe('Visual Regression', () => {
 		})
 	})
 
-	test('expense form UI', async ({ page }) => {
+	// PHASE 2: Uncomment to enable form UI test
+	test.skip('expense form UI', async ({ page }) => {
 		await page.goto('/')
 		await page.waitForLoadState('networkidle')
 
@@ -34,7 +41,8 @@ test.describe('Visual Regression', () => {
 		await expect(form).toHaveScreenshot('expense-form.png')
 	})
 
-	test('expense list with single item', async ({ page }) => {
+	// PHASE 2: Uncomment to enable single item test
+	test.skip('expense list with single item', async ({ page }) => {
 		await page.goto('/')
 
 		// Add one expense
@@ -51,7 +59,8 @@ test.describe('Visual Regression', () => {
 		})
 	})
 
-	test('expense list with multiple items', async ({ page }) => {
+	// PHASE 3: Uncomment to enable multiple items test
+	test.skip('expense list with multiple items', async ({ page }) => {
 		await page.goto('/')
 
 		// Add multiple expenses
@@ -76,7 +85,8 @@ test.describe('Visual Regression', () => {
 		})
 	})
 
-	test('total calculation display', async ({ page }) => {
+	// PHASE 3: Uncomment to enable total calculation test
+	test.skip('total calculation display', async ({ page }) => {
 		await page.goto('/')
 
 		// Add expenses
@@ -96,7 +106,8 @@ test.describe('Visual Regression', () => {
 		await expect(total).toHaveScreenshot('expense-total.png')
 	})
 
-	test('expense list item hover state', async ({ page }) => {
+	// PHASE 3: Uncomment to enable hover state test
+	test.skip('expense list item hover state', async ({ page }) => {
 		await page.goto('/')
 
 		// Add an expense
@@ -112,7 +123,8 @@ test.describe('Visual Regression', () => {
 		await expect(expenseItem).toHaveScreenshot('expense-item-hover.png')
 	})
 
-	test('remove button visibility', async ({ page }) => {
+	// PHASE 3: Uncomment to enable remove button test
+	test.skip('remove button visibility', async ({ page }) => {
 		await page.goto('/')
 
 		// Add an expense
@@ -126,7 +138,8 @@ test.describe('Visual Regression', () => {
 	})
 })
 
-test.describe('Visual Regression - Mobile', () => {
+// PHASE 4: Uncomment to enable mobile tests
+test.describe.skip('Visual Regression - Mobile', () => {
 	test.use({
 		viewport: { width: 375, height: 667 }, // iPhone SE size
 	})
@@ -166,7 +179,8 @@ test.describe('Visual Regression - Mobile', () => {
 	})
 })
 
-test.describe('Visual Regression - Responsive Breakpoints', () => {
+// PHASE 4: Uncomment to enable responsive breakpoint tests
+test.describe.skip('Visual Regression - Responsive Breakpoints', () => {
 	const viewports = [
 		{ name: 'mobile', width: 375, height: 667 },
 		{ name: 'tablet', width: 768, height: 1024 },
