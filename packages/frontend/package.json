@@ -20,6 +20,7 @@
 		"test:e2e:update-snapshots": "playwright test --update-snapshots",
 		"test:e2e:docker": "cd ../.. && npm run test:e2e:docker",
 		"test:e2e:docker:clean": "cd ../.. && npm run test:e2e:docker:clean",
+		"test:e2e:docker:clean:hard": "cd ../.. && npm run test:e2e:docker:clean:hard",
 		"lint": "eslint .",
 		"type-check": "svelte-check --tsconfig ./tsconfig.json"
 	},

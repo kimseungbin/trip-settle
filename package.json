@@ -15,10 +15,11 @@
     "build:backend": "npm run build --workspace=backend",
     "build:infra": "npm run build --workspace=infra",
     "test": "npm run test --workspaces",
-    "test:e2e:docker": "docker compose -f docker-compose.e2e.yml up --build --abort-on-container-exit",
+    "test:e2e:docker": "docker compose -f docker-compose.e2e.yml up --build --force-recreate --abort-on-container-exit",
     "test:e2e:docker:report": "npm run test:e2e:docker && open packages/frontend/playwright-report/index.html",
     "test:e2e:docker:ui": "docker compose -f docker-compose.e2e.yml up --build backend frontend playwright-ui",
-    "test:e2e:docker:clean": "docker compose -f docker-compose.e2e.yml down -v --remove-orphans",
+    "test:e2e:docker:clean": "docker compose -f docker-compose.e2e.yml down -v --remove-orphans && docker volume rm trip-settle_node_modules trip-settle_backend_node_modules trip-settle_frontend_node_modules 2>/dev/null || true",
+    "test:e2e:docker:clean:hard": "docker compose -f docker-compose.e2e.yml down -v --remove-orphans && docker system prune -af --volumes",
     "lint": "npm run lint --workspaces",
     "format": "prettier --write \"packages/**/*.{ts,js,json,svelte}\"",
     "format:check": "prettier --check \"packages/**/*.{ts,js,json,svelte}\""
