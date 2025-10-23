@@ -135,9 +135,48 @@ jobs:
           echo "✅ Cleanup complete"
 
       - name: Run E2E tests in Docker
-        run: npm run test:e2e:docker
+        run: npm run test:e2e:docker 2>&1 | tee docker-build.log
         env:
           DOCKER_USER: root  # Run as root in CI to avoid permission issues with bind mounts
+          BUILDKIT_PROGRESS: plain  # Enable detailed build output for cache analysis
+
+      - name: Generate Docker build cache report
+        if: always()
+        run: |
+          echo "## 🐳 Docker Build Cache Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f docker-build.log ]; then
+            # Count cache hits and misses
+            CACHED=$(grep -c "CACHED" docker-build.log || echo "0")
+            DONE=$(grep -c "DONE" docker-build.log || echo "0")
+            TOTAL=$((CACHED + DONE))
+
+            if [ "$TOTAL" -gt 0 ]; then
+              HIT_RATE=$((CACHED * 100 / TOTAL))
+
+              echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+              echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+              echo "| 📦 Layers cached | $CACHED |" >> $GITHUB_STEP_SUMMARY
+              echo "| 🔨 Layers built | $DONE |" >> $GITHUB_STEP_SUMMARY
+              echo "| 📊 Total layers | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+              echo "| ✅ Cache hit rate | **${HIT_RATE}%** |" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+
+              # Add interpretation
+              if [ "$HIT_RATE" -ge 80 ]; then
+                echo "🎉 **Excellent caching!** Most layers are being reused." >> $GITHUB_STEP_SUMMARY
+              elif [ "$HIT_RATE" -ge 50 ]; then
+                echo "⚡ **Good caching.** Consider optimizing Dockerfile layer ordering for better cache utilization." >> $GITHUB_STEP_SUMMARY
+              else
+                echo "⚠️ **Low cache hit rate.** Review Dockerfile and .dockerignore for optimization opportunities." >> $GITHUB_STEP_SUMMARY
+              fi
+            else
+              echo "ℹ️ No build metrics available (image may have been pulled from cache)" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "❌ Build log not found" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Upload Playwright report
         if: always()  # Upload report even if tests fail
