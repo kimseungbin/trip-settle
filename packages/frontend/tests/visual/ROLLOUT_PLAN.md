@@ -6,46 +6,37 @@ This document tracks the phased rollout of visual regression tests to ensure wor
 
 Visual regression tests are being added incrementally to avoid overwhelming the CI/CD pipeline with failures during initial setup. Each phase validates a specific aspect of the UI before expanding coverage.
 
-## Current Status: Phase 1
+## Current Status: Phase 2
 
-### Phase 1: Core Workflow Validation ✅ (Active)
+### Phase 1: Core Workflow Validation ✅ (Complete)
 **Goal:** Validate that the snapshot update workflow functions correctly with minimal tests.
 
 **Active Tests:**
 - `initial empty state` - Captures baseline empty page state
 
 **Success Criteria:**
-- Workflow completes without errors
-- Snapshot files are committed correctly
-- Baseline snapshots are stable across CI runs
+- ✅ Workflow completes without errors
+- ✅ Snapshot files are committed correctly
+- ✅ Baseline snapshots are stable across CI runs
+- ✅ Removed darwin (macOS) snapshots to enforce CI-only testing
 
-**To Move to Phase 2:**
-1. Run update-snapshots workflow
-2. Verify no unexpected failures
-3. Confirm snapshot files are committed
-4. Uncomment Phase 2 tests in `ui-snapshots.spec.ts`
+**Completion Date:** 2025-10-23
 
 ---
 
-### Phase 2: Form Interactions (Pending)
+### Phase 2: Form Interactions ✅ (Active)
 **Goal:** Add basic form and single-item interaction tests.
 
-**Tests to Enable:**
-- `expense form UI` - Form element rendering
-- `expense list with single item` - Basic CRUD operation
+**Active Tests:**
+- ✅ `expense form UI` - Form element rendering
+- ✅ `expense list with single item` - Basic CRUD operation
 
-**Steps to Enable:**
-1. In `ui-snapshots.spec.ts`, change:
-   ```ts
-   test.skip('expense form UI', ...)
-   ```
-   to:
-   ```ts
-   test('expense form UI', ...)
-   ```
-2. Do the same for `expense list with single item`
-3. Commit changes with: `[update-snapshots]` in commit message
-4. Monitor workflow for new failures
+**Enabled:** 2025-10-23
+
+**Steps Completed:**
+1. ✅ Removed `.skip` from both Phase 2 tests in `ui-snapshots.spec.ts`
+2. ✅ Removed 52 darwin (macOS) snapshot files to enforce CI-only testing
+3. Pending: Commit changes to trigger CI snapshot validation
 
 **Success Criteria:**
 - Both tests pass in CI
@@ -117,10 +108,12 @@ If any phase introduces too many failures:
 
 | Phase | Active Tests | Browsers | Total Comparisons | Est. Time |
 |-------|-------------|----------|-------------------|-----------|
-| 1     | 1           | 3        | 3                 | ~30s      |
-| 2     | 3           | 3        | 9                 | ~1min     |
-| 3     | 7           | 3        | 21                | ~2min     |
-| 4     | 13          | 3        | 39                | ~4min     |
+| 1     | 1           | 2        | 2                 | ~20s      |
+| 2     | 3           | 2        | 6                 | ~40s      |
+| 3     | 7           | 2        | 14                | ~1min     |
+| 4     | 13          | 2        | 26                | ~2-3min   |
+
+**Note:** Browser count reduced from 4 to 2 (Chromium + WebKit) per CI optimization strategy (see CLAUDE.md).
 
 ## Notes
 

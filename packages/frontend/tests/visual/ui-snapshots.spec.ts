@@ -31,8 +31,8 @@ test.describe('Visual Regression', () => {
 		})
 	})
 
-	// PHASE 2: Uncomment to enable form UI test
-	test.skip('expense form UI', async ({ page }) => {
+	// PHASE 2: Form UI test enabled
+	test('expense form UI', async ({ page }) => {
 		await page.goto('/')
 		await page.waitForLoadState('networkidle')
 
@@ -41,8 +41,8 @@ test.describe('Visual Regression', () => {
 		await expect(form).toHaveScreenshot('expense-form.png')
 	})
 
-	// PHASE 2: Uncomment to enable single item test
-	test.skip('expense list with single item', async ({ page }) => {
+	// PHASE 2: Single item test enabled
+	test('expense list with single item', async ({ page }) => {
 		await page.goto('/')
 
 		// Add one expense
