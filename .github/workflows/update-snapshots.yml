@@ -26,6 +26,10 @@ on:
     branches:
       - '**'
 
+# Sets permissions of the GITHUB_TOKEN to allow pushing commits
+permissions:
+  contents: write
+
 jobs:
   # Check if workflow should run
   check-trigger:
