@@ -15,16 +15,18 @@ COPY packages/frontend/package*.json ./packages/frontend/
 # Install dependencies (run as root for native modules)
 RUN npm ci --workspace=frontend --omit=dev=false
 
-# Copy the rest of the application code
-COPY . .
-
-# Create pwuser if it doesn't exist and set up permissions
+# Create pwuser if it doesn't exist (before COPY to preserve cache)
 RUN if ! id -u pwuser > /dev/null 2>&1; then \
         groupadd -r pwuser && \
         useradd -r -g pwuser -G audio,video pwuser && \
         mkdir -p /home/pwuser/Downloads; \
-    fi && \
-    chown -R pwuser:pwuser /app /home/pwuser 2>/dev/null || true
+    fi
+
+# Copy the rest of the application code
+COPY . .
+
+# Set up permissions after code copy
+RUN chown -R pwuser:pwuser /app /home/pwuser 2>/dev/null || true
 
 # Switch to non-root user
 USER pwuser
