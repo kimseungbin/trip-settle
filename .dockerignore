@@ -1,6 +1,6 @@
 # Dependencies (will be installed in container)
 node_modules
-package-lock.json
+# NOTE: package-lock.json is NOT excluded - required for npm ci
 
 # Build outputs (not needed in Docker context)
 dist

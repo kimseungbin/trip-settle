@@ -13,7 +13,7 @@ COPY package*.json ./
 COPY packages/frontend/package*.json ./packages/frontend/
 
 # Install dependencies (run as root for native modules)
-RUN npm ci --workspace=frontend --omit=dev=false
+RUN npm ci --workspace=frontend --include=dev
 
 # Create pwuser if it doesn't exist (before COPY to preserve cache)
 RUN if ! id -u pwuser > /dev/null 2>&1; then \
