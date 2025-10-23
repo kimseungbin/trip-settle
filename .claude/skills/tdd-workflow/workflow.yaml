@@ -279,6 +279,133 @@ prepush_validation:
     Visual regression tests are CI-only and never run locally.
     See CLAUDE.md "Testing Strategy & Test Pyramid" for details.
 
+selective_e2e_execution:
+  name: "Selective E2E Test Execution (Speed Optimization)"
+  description: "Run only E2E tests affected by code changes to speed up validation"
+
+  rationale: |
+    Running ALL E2E tests (7 files × 4 browsers = 28 suites) takes 2-5 minutes.
+    Running SELECTIVE tests (1-2 files × 1 browser) takes 10-30 seconds.
+
+    During local development, run only tests related to changed components.
+    Full test suite runs automatically in CI to catch cross-feature regressions.
+
+  local_vs_ci:
+    local_development:
+      browser_config: "Single browser (webkit/Safari) - configured in playwright.config.ts"
+      test_selection: "Selective - only affected test files"
+      speed: "10-30 seconds"
+      when: "Pre-push validation on developer machine"
+
+    ci_docker:
+      browser_config: "Full matrix (chromium, webkit, 2 mobile) - configured in playwright.config.ts"
+      test_selection: "All tests"
+      speed: "2-5 minutes"
+      when: "Automated on push/PR"
+
+  component_to_test_mapping:
+    description: "Map changed components to their affected E2E test files"
+
+    expense_features:
+      components:
+        - "ExpenseTracker.svelte"
+        - "ExpenseForm.svelte"
+        - "ExpenseList.svelte"
+        - "CurrencySelector.svelte"
+      test_files:
+        - "expense-workflow.spec.ts"
+        - "keyboard-navigation.spec.ts"
+      command: "npx playwright test expense-workflow keyboard-navigation"
+
+    onboarding_flow:
+      components:
+        - "Onboarding.svelte"
+        - "lib/router.svelte.ts"
+      test_files:
+        - "onboarding.spec.ts"
+        - "routing.spec.ts"
+      command: "npx playwright test onboarding routing"
+
+    dev_tools:
+      components:
+        - "DevTools.svelte"
+        - "SystemStatus.svelte"
+        - "LocalStorageViewer.svelte"
+      test_files:
+        - "local-storage-viewer.spec.ts"
+      command: "npx playwright test local-storage-viewer"
+
+    keyboard_hints:
+      components:
+        - "KeyboardHint.svelte"
+        - "lib/keyboardHint.ts"
+      test_files:
+        - "keyboard-navigation.spec.ts"
+      command: "npx playwright test keyboard-navigation"
+
+    shared_components:
+      note: "Changes to App.svelte, layout, or shared utilities may affect multiple tests"
+      components:
+        - "App.svelte"
+        - "main.ts"
+        - "config/*"
+      recommendation: "Run smoke tests (expense-workflow + onboarding) or full suite"
+      command: "npx playwright test expense-workflow onboarding"
+
+  usage_examples:
+    by_file_pattern:
+      description: "Run tests matching file name pattern"
+      examples:
+        - command: "npx playwright test expense"
+          matches: "expense-workflow.spec.ts"
+        - command: "npx playwright test onboarding routing"
+          matches: "onboarding.spec.ts, routing.spec.ts"
+        - command: "npx playwright test local-storage"
+          matches: "local-storage-viewer.spec.ts"
+
+    by_grep_pattern:
+      description: "Run tests matching describe block text"
+      examples:
+        - command: "npx playwright test --grep 'Expense'"
+          matches: "All test blocks with 'Expense' in describe()"
+        - command: "npx playwright test --grep 'LocalStorage'"
+          matches: "LocalStorageViewer Component tests"
+        - command: "npx playwright test --grep 'keyboard'"
+          matches: "All keyboard-related tests"
+
+    smoke_tests:
+      description: "Run critical path tests only (fastest validation)"
+      command: "npx playwright test expense-workflow onboarding"
+      coverage: "Core user flows (add expense, complete onboarding)"
+      speed: "15-30 seconds"
+
+  claude_code_responsibilities:
+    what_claude_can_do:
+      - "✅ Write/update E2E test files when features change"
+      - "✅ Suggest which tests human should run based on changed files"
+      - "✅ Include component-to-test mapping in recommendations"
+      - "✅ Remind human to run E2E tests before pushing"
+
+    what_claude_cannot_do:
+      - "❌ NEVER run E2E tests (any command with test:e2e, playwright test)"
+      - "❌ NEVER execute npm run test:e2e:docker"
+      - "❌ NEVER execute npx playwright test"
+
+    suggestion_template: |
+      "I've updated {component}. Before pushing, you should run:
+
+      npx playwright test {suggested-test-files}
+
+      This will test only the affected features (takes ~30 seconds locally).
+      Alternatively, run the full suite: npm run test:e2e:docker (takes 2-5 minutes)."
+
+  best_practices:
+    - "Run selective tests during pre-push validation for speed"
+    - "Let CI run full test suite for comprehensive coverage"
+    - "If unsure which tests to run, use smoke tests or full suite"
+    - "Update component-to-test mapping as codebase evolves"
+    - "Local config uses webkit only (playwright.config.ts isLocalDev flag)"
+
 exceptions:
   description: "Workflow can be relaxed for these cases"
 

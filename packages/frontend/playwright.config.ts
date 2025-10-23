@@ -16,6 +16,9 @@ const shouldRunVisualTests = testEnv === 'ci-docker'
 const isDocker = !!process.env.PLAYWRIGHT_BASE_URL
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173'
 
+// Detect local development environment (not CI, not Docker)
+const isLocalDev = !process.env.CI && !isDocker
+
 export default defineConfig({
 	// Test directory
 	testDir: './tests',
@@ -65,46 +68,40 @@ export default defineConfig({
 	},
 
 	// Configure projects for major browsers
-	projects: [
-		{
-			name: 'chromium',
-			use: { ...devices['Desktop Chrome'] },
-			// Skip visual snapshot tests unless in ci-docker (where Linux snapshots are maintained)
-			// Matches any test with "Visual" in the describe block name
-			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
-		},
-
-		// Uncomment to test on Firefox
-		// {
-		// 	name: 'firefox',
-		// 	use: { ...devices['Desktop Firefox'] },
-		// },
-
-		// Test on WebKit (Safari)
-		{
-			name: 'webkit',
-			use: { ...devices['Desktop Safari'] },
-			// Skip visual snapshot tests unless in ci-docker (where Linux snapshots are maintained)
-			// Matches any test with "Visual" in the describe block name
-			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
-		},
-
-		// Test against mobile viewports
-		{
-			name: 'Mobile Chrome',
-			use: { ...devices['Pixel 5'] },
-			// Skip visual snapshot tests unless in ci-docker (where Linux snapshots are maintained)
-			// Matches any test with "Visual" in the describe block name
-			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
-		},
-		{
-			name: 'Mobile Safari',
-			use: { ...devices['iPhone 12'] },
-			// Skip visual snapshot tests unless in ci-docker (where Linux snapshots are maintained)
-			// Matches any test with "Visual" in the describe block name
-			grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
-		},
-	],
+	// Local dev: Single browser (webkit/Safari) for speed
+	// CI/Docker: Full browser matrix for cross-browser compatibility
+	projects: isLocalDev
+		? [
+				// Local development: webkit only (Safari on Mac)
+				{
+					name: 'webkit',
+					use: { ...devices['Desktop Safari'] },
+					grep: /^(?!.*Visual)/, // Skip visual tests locally
+				},
+			]
+		: [
+				// CI/Docker: Full browser matrix
+				{
+					name: 'chromium',
+					use: { ...devices['Desktop Chrome'] },
+					grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
+				},
+				{
+					name: 'webkit',
+					use: { ...devices['Desktop Safari'] },
+					grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
+				},
+				{
+					name: 'Mobile Chrome',
+					use: { ...devices['Pixel 5'] },
+					grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
+				},
+				{
+					name: 'Mobile Safari',
+					use: { ...devices['iPhone 12'] },
+					grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
+				},
+			],
 
 	// Run your local dev server before starting the tests
 	// Skip webServer in Docker mode (services already running via docker-compose)

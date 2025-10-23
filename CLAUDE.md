@@ -730,6 +730,79 @@ npm run test:e2e:report --workspace=frontend         # View test report
 - **Docker**: Default testing, pre-push checks, CI/CD (consistent across all machines)
 - **Local**: Active test development, debugging (faster iteration, IDE integration)
 
+### Selective Test Execution (Speed Optimization)
+
+**Problem**: Running all E2E tests (7 files × 4 browsers) takes 2-5 minutes.
+**Solution**: Run only tests affected by your changes (1-2 files × 1 browser) in ~30 seconds.
+
+#### Local vs CI Configuration
+
+| Environment | Browsers | Test Selection | Speed | When |
+|------------|----------|----------------|-------|------|
+| **Local Dev** | webkit only (Safari) | Selective | 10-30s | During development |
+| **CI/Docker** | 4 browsers (full matrix) | All tests | 2-5min | Automated on push/PR |
+
+*Browser configuration automatically detected in `playwright.config.ts` based on environment.*
+
+#### Component-to-Test Mapping
+
+**Expense Features:**
+```bash
+# Changed: ExpenseTracker, ExpenseForm, ExpenseList, CurrencySelector
+npx playwright test expense-workflow keyboard-navigation
+```
+
+**Onboarding & Routing:**
+```bash
+# Changed: Onboarding.svelte, lib/router.svelte.ts
+npx playwright test onboarding routing
+```
+
+**DevTools:**
+```bash
+# Changed: DevTools, SystemStatus, LocalStorageViewer
+npx playwright test local-storage-viewer
+```
+
+**Keyboard Hints:**
+```bash
+# Changed: KeyboardHint.svelte, lib/keyboardHint.ts
+npx playwright test keyboard-navigation
+```
+
+**Shared/Core Changes:**
+```bash
+# Changed: App.svelte, main.ts, config/*
+# Run smoke tests or full suite
+npx playwright test expense-workflow onboarding  # Smoke tests (fastest)
+npm run test:e2e:docker                          # Full suite (comprehensive)
+```
+
+#### Pattern Matching Examples
+
+**By file name:**
+```bash
+npx playwright test expense          # Matches expense-workflow.spec.ts
+npx playwright test onboarding routing  # Matches multiple files
+npx playwright test local-storage    # Matches local-storage-viewer.spec.ts
+```
+
+**By test description:**
+```bash
+npx playwright test --grep "Expense"       # All tests with "Expense" in describe()
+npx playwright test --grep "LocalStorage"  # LocalStorageViewer tests
+npx playwright test --grep "keyboard"      # All keyboard-related tests
+```
+
+#### Best Practices
+
+1. **During Development**: Run selective tests for fast feedback (30 seconds)
+2. **Before Push**: Run full suite or selective tests depending on change scope
+3. **Let CI Handle**: Full cross-browser validation happens automatically in CI
+4. **When Unsure**: Run smoke tests (`expense-workflow + onboarding`) or full suite
+
+**See Also**: `.claude/skills/tdd-workflow/workflow.yaml` → `selective_e2e_execution` section for detailed mapping and examples.
+
 ### Detailed Guide
 
 For comprehensive Playwright documentation including test examples, debugging, troubleshooting, CI/CD integration, and best practices, see:
