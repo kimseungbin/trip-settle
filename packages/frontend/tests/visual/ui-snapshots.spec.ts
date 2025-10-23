@@ -19,9 +19,21 @@ import { expect, test } from '@playwright/test'
  */
 
 test.describe('Visual Regression', () => {
-	test('initial empty state', async ({ page }) => {
+	test.beforeEach(async ({ page }) => {
+		// Set up as returning user to skip onboarding
 		await page.goto('/')
-
+		await page.evaluate(() => {
+			localStorage.setItem(
+				'appSettings',
+				JSON.stringify({
+					features: { isOnboarded: true, currencyMode: 'single', defaultCurrency: 'KRW' },
+					system: { hasSeenKeyboardHint: true },
+				})
+			)
+		})
+		await page.goto('/')
+	})
+	test('initial empty state', async ({ page }) => {
 		// Wait for page to be fully loaded
 		await page.waitForLoadState('networkidle')
 
@@ -33,7 +45,6 @@ test.describe('Visual Regression', () => {
 
 	// PHASE 2: Form UI test enabled
 	test('expense form UI', async ({ page }) => {
-		await page.goto('/')
 		await page.waitForLoadState('networkidle')
 
 		// Screenshot just the form section
@@ -43,8 +54,6 @@ test.describe('Visual Regression', () => {
 
 	// PHASE 2: Single item test enabled
 	test('expense list with single item', async ({ page }) => {
-		await page.goto('/')
-
 		// Add one expense
 		await page.getByPlaceholder('Expense name').fill('Coffee')
 		await page.getByPlaceholder('Amount').fill('4.50')
@@ -144,8 +153,22 @@ test.describe.skip('Visual Regression - Mobile', () => {
 		viewport: { width: 375, height: 667 }, // iPhone SE size
 	})
 
-	test('mobile empty state', async ({ page }) => {
+	test.beforeEach(async ({ page }) => {
+		// Set up as returning user to skip onboarding
 		await page.goto('/')
+		await page.evaluate(() => {
+			localStorage.setItem(
+				'appSettings',
+				JSON.stringify({
+					features: { isOnboarded: true, currencyMode: 'single', defaultCurrency: 'KRW' },
+					system: { hasSeenKeyboardHint: true },
+				})
+			)
+		})
+		await page.goto('/')
+	})
+
+	test('mobile empty state', async ({ page }) => {
 		await page.waitForLoadState('networkidle')
 
 		await expect(page).toHaveScreenshot('mobile-empty-state.png', {
@@ -154,7 +177,6 @@ test.describe.skip('Visual Regression - Mobile', () => {
 	})
 
 	test('mobile expense form', async ({ page }) => {
-		await page.goto('/')
 		await page.waitForLoadState('networkidle')
 
 		const form = page.locator('.form-container')
@@ -162,8 +184,6 @@ test.describe.skip('Visual Regression - Mobile', () => {
 	})
 
 	test('mobile expense list', async ({ page }) => {
-		await page.goto('/')
-
 		// Add expenses
 		await page.getByPlaceholder('Expense name').fill('Coffee')
 		await page.getByPlaceholder('Amount').fill('4.50')
@@ -189,6 +209,18 @@ test.describe.skip('Visual Regression - Responsive Breakpoints', () => {
 
 	for (const { name, width, height } of viewports) {
 		test(`responsive layout - ${name}`, async ({ page }) => {
+			// Set up as returning user to skip onboarding
+			await page.goto('/')
+			await page.evaluate(() => {
+				localStorage.setItem(
+					'appSettings',
+					JSON.stringify({
+						features: { isOnboarded: true, currencyMode: 'single', defaultCurrency: 'KRW' },
+						system: { hasSeenKeyboardHint: true },
+					})
+				)
+			})
+
 			await page.setViewportSize({ width, height })
 			await page.goto('/')
 
