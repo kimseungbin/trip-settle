@@ -8,10 +8,20 @@ test.describe('Client-side Routing', () => {
 	})
 
 	test('should navigate to home page by default', async ({ page }) => {
-		// Set returning user flag to prevent onboarding redirect
+		// Set returning user flag BEFORE navigating to prevent onboarding redirect
 		await page.goto('/')
-		await page.evaluate(() => localStorage.setItem('hasSeenOnboarding', 'true'))
-		await page.reload()
+		await page.evaluate(() => {
+			localStorage.setItem(
+				'appSettings',
+				JSON.stringify({
+					features: { isOnboarded: true, currencyMode: 'multi', defaultCurrency: 'KRW' },
+					system: { hasSeenKeyboardHint: false },
+				})
+			)
+		})
+
+		// Navigate again - now settings are loaded before onMount check
+		await page.goto('/')
 
 		// Should show the main expense tracker
 		await expect(page.locator('h1')).toContainText('Trip Settle')
