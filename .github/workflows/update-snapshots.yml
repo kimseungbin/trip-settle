@@ -61,7 +61,11 @@ jobs:
 
           # Push with [update-snapshots] in commit message
           if [ "${{ github.event_name }}" = "push" ]; then
-            COMMIT_MSG="${{ github.event.head_commit.message }}"
+            # Use heredoc to safely handle multi-line commit messages
+            COMMIT_MSG=$(cat <<'EOF'
+          ${{ github.event.head_commit.message }}
+          EOF
+          )
             if [[ "$COMMIT_MSG" == *"[update-snapshots]"* ]]; then
               SHOULD_RUN="true"
             fi
@@ -92,8 +96,8 @@ jobs:
       - name: Cleanup existing Docker resources
         run: |
           echo "🧹 Cleaning up Docker resources..."
-          docker ps -aq --filter "name=trip-settle-e2e-*" | xargs -r docker rm -f || true
-          npm run test:e2e:docker:clean || true
+          docker compose -f docker-compose.e2e.yml down -v --remove-orphans 2>/dev/null || true
+          docker volume prune -f || true
 
       - name: Run E2E tests with snapshot update
         run: |
