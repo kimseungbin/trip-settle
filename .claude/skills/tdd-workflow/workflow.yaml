@@ -25,21 +25,36 @@ phases:
 
   2_red:
     name: "Write Tests First (Red Phase)"
-    description: "Write failing tests before any implementation code"
+    description: "Write failing UNIT tests before any implementation code"
 
-    test_types:
+    important: |
+      ⚠️ CRITICAL: During TDD Red-Green-Refactor cycles, ONLY write and run UNIT tests.
+
+      E2E tests are written when appropriate, but NOT run until Pre-Push Validation.
+      Running E2E tests during TDD cycles takes several minutes and destroys fast feedback.
+
+      See CLAUDE.md "Testing Strategy & Test Pyramid" for detailed execution contexts.
+
+    test_types_for_tdd:
       backend:
         unit_tests:
           framework: "Jest"
           pattern: "*.spec.ts"
           purpose: "Test individual functions, services, controllers"
           example: "ExpenseService.calculateTotal() returns correct sum"
+          command: "npm run test --workspace=backend"
+          speed: "< 5 seconds"
+          run_in_tdd: true
 
         integration_tests:
           framework: "Jest"
           pattern: "*.integration.spec.ts"
           purpose: "Test database operations, module interactions"
           example: "ExpenseController POST /api/expenses creates record in DB"
+          command: "npm run test --workspace=backend"
+          speed: "10-30 seconds"
+          run_in_tdd: false
+          note: "Write during Red phase, but run during Pre-Push Validation only"
 
       frontend:
         unit_tests:
@@ -47,20 +62,34 @@ phases:
           pattern: "*.test.ts, *.spec.ts"
           purpose: "Test component logic, utilities, state management"
           example: "ExpenseForm validates amount input correctly"
+          command: "npm run test --workspace=frontend"
+          speed: "< 5 seconds"
+          run_in_tdd: true
 
+    test_types_for_prepush:
+      note: "These tests are WRITTEN during Red phase but RUN during Pre-Push Validation"
+
+      frontend:
         e2e_tests:
           framework: "Playwright"
           pattern: "tests/e2e/*.spec.ts"
           purpose: "Test user workflows and interactions end-to-end"
           example: "User can add, edit, and delete expenses"
           command: "npm run test:e2e:docker"
+          speed: "2-5 minutes"
+          run_in_tdd: false
+          run_in_prepush: true
 
         visual_tests:
           framework: "Playwright"
           pattern: "tests/visual/*.spec.ts"
           purpose: "Catch unintended UI changes with screenshot comparison"
           when: "UI components are added or modified"
-          command: "npm run test:e2e:docker"
+          command: "CI-only (automated)"
+          speed: "2-5 minutes"
+          run_in_tdd: false
+          run_in_prepush: false
+          run_in_ci: true
 
         keyboard_tests:
           framework: "Playwright"
@@ -68,18 +97,23 @@ phases:
           purpose: "Ensure keyboard accessibility (Tab, Enter, Escape, shortcuts)"
           when: "Interactive elements are added (forms, buttons, lists)"
           command: "npm run test:e2e:docker"
+          speed: "2-5 minutes"
+          run_in_tdd: false
+          run_in_prepush: true
 
     validation:
-      requirement: "Tests MUST fail initially"
+      requirement: "UNIT tests MUST fail initially"
       rationale: "Failing tests prove they're actually testing the new feature"
-      tip: "Run tests immediately after writing them to verify they fail"
+      tip: "Run UNIT tests immediately after writing them to verify they fail (< 5s)"
+      critical: "Do NOT run E2E tests to verify failure - they take minutes, not seconds"
 
     best_practices:
-      - "Write tests at appropriate levels (unit for logic, E2E for workflows)"
+      - "Write UNIT tests for logic, write E2E tests for workflows (run later)"
       - "Test behavior, not implementation details"
       - "Include both happy path and error cases"
       - "Use descriptive test names: 'should validate email format'"
       - "For frontend, use accessible selectors (getByRole, getByPlaceholder)"
+      - "Keep TDD cycles fast: unit tests only (< 5s feedback)"
 
   3_green:
     name: "Implement Feature (Green Phase)"
@@ -108,17 +142,19 @@ phases:
 
   4_verify:
     name: "Verify Tests Pass"
-    description: "Run full test suite and quality checks"
+    description: "Run UNIT tests and quality checks (< 30 seconds total)"
 
-    commands:
+    important: |
+      ⚠️ CRITICAL: Only run UNIT tests during Verify phase.
+      E2E tests take minutes and are run during Pre-Push Validation (see below).
+
+    commands_for_tdd_cycle:
       backend:
         unit_tests: "npm run test --workspace=backend"
         coverage: "npm run test:cov --workspace=backend"
-        e2e_tests: "npm run test:e2e --workspace=backend"
 
       frontend:
         unit_tests: "npm run test --workspace=frontend"
-        e2e_tests: "npm run test:e2e:docker --workspace=frontend"
         type_check: "npm run type-check --workspace=frontend"
 
       quality:
@@ -127,19 +163,21 @@ phases:
         build: "npm run build"
 
     success_criteria:
-      - "✅ All new tests pass"
-      - "✅ No regressions in existing tests"
+      - "✅ All new UNIT tests pass (< 5s)"
+      - "✅ No regressions in existing UNIT tests"
       - "✅ Code formatting passes (Prettier)"
       - "✅ Linting passes (ESLint)"
       - "✅ TypeScript compilation succeeds"
       - "✅ Build completes without errors"
+
+    performance_target: "< 30 seconds total for all checks"
 
     if_tests_fail:
       - "Review test expectations - are they correct?"
       - "Check implementation logic for bugs"
       - "Verify test setup/teardown is correct"
       - "Use debugger or console.log to trace execution"
-      - "For Playwright: npm run test:e2e:ui for interactive debugging"
+      - "For unit tests: Use watch mode for faster iteration"
 
   5_refactor:
     name: "Refactor (Optional)"
@@ -182,6 +220,65 @@ phases:
     format: "type(scope): Subject line"
     example: "feat(frontend): Add expense edit functionality"
 
+prepush_validation:
+  name: "Pre-Push Validation (Outside TDD Cycle)"
+  description: "Run comprehensive tests BEFORE pushing to remote (manual, on-demand)"
+
+  important: |
+    ⚠️ This is NOT part of the TDD Red-Green-Refactor cycle.
+    Run these tests MANUALLY before `git push` to catch integration issues.
+
+    Pre-push validation is EXPENSIVE (2-5 minutes) and should NOT be run during active development.
+
+  when_to_run:
+    - "Before pushing commits to remote repository"
+    - "After completing multiple TDD cycles (multiple commits ready)"
+    - "When E2E tests were written but not yet validated"
+    - "Before creating a pull request"
+
+  commands:
+    backend:
+      unit_tests: "npm run test --workspace=backend"
+      integration_tests: "npm run test:e2e --workspace=backend"
+      coverage: "npm run test:cov --workspace=backend"
+
+    frontend:
+      unit_tests: "npm run test --workspace=frontend"
+      e2e_tests: "npm run test:e2e:docker"
+      type_check: "npm run type-check --workspace=frontend"
+
+    quality:
+      format_check: "npm run format:check"
+      lint: "npm run lint"
+      build: "npm run build"
+
+  success_criteria:
+    - "✅ All unit tests pass"
+    - "✅ All integration tests pass (backend)"
+    - "✅ All E2E functional tests pass (frontend)"
+    - "✅ Code formatting is correct"
+    - "✅ No linting errors"
+    - "✅ Build succeeds"
+
+  performance_expectations:
+    backend: "30-60 seconds (unit + integration)"
+    frontend: "2-5 minutes (unit + E2E via Docker)"
+    total: "3-6 minutes for full validation"
+
+  workflow:
+    - "Complete multiple TDD cycles (red-green-refactor-commit)"
+    - "Run pre-push validation commands"
+    - "Fix any issues discovered by E2E or integration tests"
+    - "Run unit tests again to verify fixes (fast)"
+    - "Push to remote: git push"
+
+  note: |
+    E2E tests are NOT run in git hooks due to execution time.
+    Developers are responsible for running pre-push validation manually.
+
+    Visual regression tests are CI-only and never run locally.
+    See CLAUDE.md "Testing Strategy & Test Pyramid" for details.
+
 exceptions:
   description: "Workflow can be relaxed for these cases"
 
@@ -208,7 +305,7 @@ exceptions:
 
 examples:
   feature_frontend:
-    description: "Adding new frontend feature with full TDD cycle"
+    description: "Adding new frontend feature with full TDD cycle + pre-push validation"
     scenario: "User requests: Add expense edit functionality"
 
     workflow:
@@ -218,9 +315,11 @@ examples:
         - "Success criteria: Edit button, inline edit form, saves to backend"
 
       red:
-        - "Write Playwright test: Click edit, modify amount, save, verify updated"
-        - "Run: npm run test:e2e:docker -- tests/e2e/edit-expense.spec.ts"
-        - "Result: ❌ Test fails (expected - feature doesn't exist)"
+        - "Write UNIT test in ExpenseList.test.ts: Test edit button renders and calls handler"
+        - "Write UNIT test in ExpenseForm.test.ts: Test inline edit mode state management"
+        - "Run: npm run test --workspace=frontend (< 5s)"
+        - "Result: ❌ Tests fail (expected - feature doesn't exist)"
+        - "NOTE: Also write E2E test (tests/e2e/edit-expense.spec.ts) but DON'T run it yet"
 
       green:
         - "Add edit button to ExpenseList items"
@@ -229,31 +328,40 @@ examples:
         - "Add keyboard shortcuts (Enter to save, Escape to cancel)"
 
       verify:
-        - "npm run test:e2e:docker → ✅ E2E tests pass"
-        - "npm run test --workspace=frontend → ✅ Unit tests pass"
+        - "npm run test --workspace=frontend → ✅ Unit tests pass (< 5s)"
         - "npm run format && npm run lint → ✅ Quality checks pass"
+        - "npm run build → ✅ Build succeeds"
 
       refactor:
         - "Extract edit form logic to separate component"
         - "Consolidate save/cancel handlers"
+        - "Re-run unit tests → ✅ Still passing"
 
       commit:
         - "git add ."
         - "git commit -m 'feat(frontend): Add expense edit functionality'"
 
+      prepush:
+        - "Before pushing: npm run test:e2e:docker (2-5 min)"
+        - "E2E test validates full edit workflow end-to-end"
+        - "If E2E fails: Fix issue, run unit tests (fast), then retry E2E"
+        - "git push"
+
   bug_fix_backend:
-    description: "Fixing backend bug with TDD"
+    description: "Fixing backend bug with TDD (unit tests only)"
     scenario: "Users report duplicate expenses created on double-click"
 
     workflow:
       plan:
         - "Root cause: No idempotency check in POST /api/expenses"
-        - "Solution: Add transaction-level uniqueness constraint"
+        - "Solution: Add unique constraint + service-level validation"
 
       red:
-        - "Write integration test: Send duplicate POST requests rapidly"
-        - "Assert: Only one expense created, second returns 409 Conflict"
-        - "Run test → ❌ Fails (creates duplicates)"
+        - "Write UNIT test in expenses.service.spec.ts: Test duplicate detection logic"
+        - "Write UNIT test in expenses.controller.spec.ts: Test 409 response"
+        - "Run: npm run test --workspace=backend (< 5s)"
+        - "Result: ❌ Tests fail (expected - validation doesn't exist)"
+        - "NOTE: Also write integration test but save it for pre-push validation"
 
       green:
         - "Add unique constraint to ExpenseEntity"
@@ -261,11 +369,24 @@ examples:
         - "Return 409 with helpful error message"
 
       verify:
-        - "npm run test --workspace=backend → ✅ All tests pass"
+        - "npm run test --workspace=backend → ✅ Unit tests pass (< 5s)"
         - "npm run format && npm run lint → ✅ Quality checks pass"
+        - "npm run build → ✅ Build succeeds"
 
       commit:
         - "git commit -m 'fix(backend): Prevent duplicate expense creation'"
+
+      prepush:
+        - "Before pushing: npm run test:e2e --workspace=backend"
+        - "Integration test validates DB-level constraint enforcement"
+        - "git push"
+
+  note: |
+    Key differences from old workflow:
+    - Red/Green/Verify cycles use UNIT tests only (< 5s feedback)
+    - E2E/Integration tests are written but NOT run during TDD cycles
+    - E2E/Integration tests run during Pre-Push Validation (manual, before git push)
+    - This keeps TDD cycles fast while ensuring comprehensive test coverage
 
 best_practices:
   general:

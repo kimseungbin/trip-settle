@@ -76,6 +76,37 @@ For comprehensive workflow details, examples, and best practices, see:
 
 **Claude Code must follow the TDD workflow skill for all feature implementations.**
 
+## Testing Strategy & Test Pyramid
+
+**CRITICAL FOR CLAUDE CODE**: This project uses a strict test pyramid to maintain fast TDD cycles.
+
+### The Golden Rule
+
+**During TDD cycles (Red-Green-Refactor): ONLY run unit tests (< 5 seconds).**
+
+E2E and integration tests take 2-5 minutes and are run BEFORE `git push`, not during active development.
+
+### Execution Contexts Summary
+
+| Context | Tests | Speed | When |
+|---------|-------|-------|------|
+| **TDD Cycles** | Unit only | < 5s | Active coding |
+| **Pre-Push** | Integration + E2E | 2-5m | Before git push |
+| **CI/CD** | All (including visual) | 5-10m | Automated |
+
+### Detailed Guidance
+
+For comprehensive testing strategy including:
+- Test pyramid structure and rationale
+- When to run which tests
+- Performance expectations
+- TDD workflow integration
+- Pre-push validation process
+
+**See**: `.claude/skills/tdd-workflow/workflow.yaml`
+
+This skill contains the authoritative testing guidance that Claude Code must follow.
+
 ## Monorepo Structure
 
 ```
