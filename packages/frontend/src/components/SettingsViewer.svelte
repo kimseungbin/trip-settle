@@ -2,6 +2,24 @@
 	import { settings } from '../stores/settings.svelte'
 	import { navigate } from '../lib/router.svelte'
 
+	let keyboardHintsExpanded = $state(false)
+
+	// Get all keyboard hints from localStorage
+	const keyboardHints = $derived.by(() => {
+		if (typeof window === 'undefined') return []
+		try {
+			const stored = localStorage.getItem('appSettings')
+			if (stored) {
+				const parsed = JSON.parse(stored)
+				const hints = parsed.system?.keyboardHints || {}
+				return Object.entries(hints).map(([id, dismissed]) => ({ id, dismissed: dismissed as boolean }))
+			}
+		} catch {
+			// Ignore errors
+		}
+		return []
+	})
+
 	function resetOnboarding() {
 		if (confirm('Reset onboarding? This will clear all settings and redirect to onboarding screen.')) {
 			settings.resetSettings()
@@ -16,10 +34,27 @@
 		}
 	}
 
-	function toggleKeyboardHint() {
-		settings.updateSystemPreferences({
-			hasSeenKeyboardHint: !settings.hasSeenKeyboardHint,
-		})
+	function toggleKeyboardHint(hintId: string) {
+		if (settings.hasSeenHint(hintId)) {
+			// To "undismiss", we need to manipulate localStorage directly
+			// since there's no API to undismiss a specific hint
+			try {
+				const stored = localStorage.getItem('appSettings')
+				if (stored) {
+					const parsed = JSON.parse(stored)
+					if (parsed.system?.keyboardHints?.[hintId]) {
+						delete parsed.system.keyboardHints[hintId]
+						localStorage.setItem('appSettings', JSON.stringify(parsed))
+						window.location.reload()
+					}
+				}
+			} catch (error) {
+				console.error('Failed to toggle hint:', error)
+			}
+		} else {
+			settings.dismissHint(hintId)
+			window.location.reload()
+		}
 	}
 
 	function toggleOnboarding() {
@@ -56,12 +91,42 @@
 	<div class="settings-section">
 		<div class="section-header">System Preferences (Mutable)</div>
 		<div class="settings-grid">
-			<div class="setting-item">
-				<span class="setting-label">Keyboard Hint Seen:</span>
-				<span class="setting-value">
-					{settings.hasSeenKeyboardHint ? '✅ Yes' : '❌ No'}
-				</span>
-				<button class="toggle-button" onclick={toggleKeyboardHint} tabindex="-1">Toggle</button>
+			<!-- Collapsible Keyboard Hints Section -->
+			<div class="collapsible-section">
+				<button
+					class="collapsible-header"
+					onclick={() => (keyboardHintsExpanded = !keyboardHintsExpanded)}
+					tabindex="-1"
+				>
+					<span class="expand-icon">{keyboardHintsExpanded ? '▼' : '▶'}</span>
+					<span class="section-title">
+						Keyboard Hints ({keyboardHints.length} dismissed)
+					</span>
+				</button>
+
+				{#if keyboardHintsExpanded}
+					<div class="collapsible-content">
+						{#if keyboardHints.length === 0}
+							<div class="empty-state">No hints dismissed yet</div>
+						{:else}
+							{#each keyboardHints as hint (hint.id)}
+								<div class="hint-item">
+									<span class="hint-id">{hint.id}</span>
+									<span class="hint-status">
+										{hint.dismissed ? '✅ Dismissed' : '❌ Active'}
+									</span>
+									<button
+										class="toggle-button"
+										onclick={() => toggleKeyboardHint(hint.id)}
+										tabindex="-1"
+									>
+										Toggle
+									</button>
+								</div>
+							{/each}
+						{/if}
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -148,6 +213,83 @@
 
 	.toggle-button:hover {
 		background: #1976d2;
+	}
+
+	/* Collapsible Section */
+	.collapsible-section {
+		background: #f9f9f9;
+		border-radius: 6px;
+		border-left: 3px solid #9c27b0;
+		overflow: hidden;
+	}
+
+	.collapsible-header {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+		padding: 0.75em;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		font-size: 1em;
+		text-align: left;
+		transition: background 0.2s;
+	}
+
+	.collapsible-header:hover {
+		background: rgba(156, 39, 176, 0.05);
+	}
+
+	.expand-icon {
+		font-size: 0.8em;
+		color: #9c27b0;
+		transition: transform 0.2s;
+	}
+
+	.section-title {
+		font-weight: 600;
+		color: #555;
+		flex: 1;
+	}
+
+	.collapsible-content {
+		padding: 0.5em 0.75em 0.75em;
+		border-top: 1px solid #e0e0e0;
+	}
+
+	.empty-state {
+		padding: 1em;
+		text-align: center;
+		color: #999;
+		font-style: italic;
+	}
+
+	.hint-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75em;
+		padding: 0.6em;
+		background: white;
+		border-radius: 4px;
+		margin-bottom: 0.5em;
+		border: 1px solid #e0e0e0;
+	}
+
+	.hint-item:last-child {
+		margin-bottom: 0;
+	}
+
+	.hint-id {
+		flex: 1;
+		font-family: 'Courier New', monospace;
+		color: #555;
+		font-weight: 500;
+	}
+
+	.hint-status {
+		font-size: 0.85em;
+		color: #666;
 	}
 
 	.actions {

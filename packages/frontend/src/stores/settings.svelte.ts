@@ -25,8 +25,12 @@ export interface FeatureSettings {
  * These settings only affect user experience, not app functionality
  */
 export interface SystemPreferences {
-	/** Whether keyboard hint has been dismissed */
-	hasSeenKeyboardHint: boolean
+	/** Individual keyboard hints dismissal status (hintId -> dismissed) */
+	keyboardHints: {
+		[hintId: string]: boolean
+	}
+	/** @deprecated Use keyboardHints['expenseForm'] instead. Kept for backward compatibility. */
+	hasSeenKeyboardHint?: boolean
 }
 
 /**
@@ -50,7 +54,7 @@ const DEFAULT_FEATURE_SETTINGS: FeatureSettings = {
  * Default system preferences
  */
 const DEFAULT_SYSTEM_PREFERENCES: SystemPreferences = {
-	hasSeenKeyboardHint: false,
+	keyboardHints: {},
 }
 
 /**
@@ -80,9 +84,21 @@ function loadSettings(): AppSettings {
 		const stored = localStorage.getItem(STORAGE_KEY)
 		if (stored) {
 			const parsed = JSON.parse(stored) as AppSettings
+
+			// Migrate old hasSeenKeyboardHint boolean to new keyboardHints dictionary
+			const systemPrefs = { ...DEFAULT_SYSTEM_PREFERENCES, ...parsed.system }
+			if (systemPrefs.hasSeenKeyboardHint && !systemPrefs.keyboardHints?.expenseForm) {
+				systemPrefs.keyboardHints = {
+					...systemPrefs.keyboardHints,
+					expenseForm: true,
+				}
+				// Remove deprecated field
+				delete systemPrefs.hasSeenKeyboardHint
+			}
+
 			return {
 				features: { ...DEFAULT_FEATURE_SETTINGS, ...parsed.features },
-				system: { ...DEFAULT_SYSTEM_PREFERENCES, ...parsed.system },
+				system: systemPrefs,
 			}
 		}
 
@@ -98,7 +114,7 @@ function loadSettings(): AppSettings {
 				},
 				system: {
 					...DEFAULT_SYSTEM_PREFERENCES,
-					hasSeenKeyboardHint: legacyKeyboardHint,
+					keyboardHints: legacyKeyboardHint ? { expenseForm: true } : {},
 				},
 			}
 		}
@@ -162,7 +178,37 @@ export function settingsStore() {
 		// Expose system preferences (read-only for consumers)
 		get hasSeenKeyboardHint() {
 			ensureLoaded()
-			return settings.system.hasSeenKeyboardHint
+			// Backward compatibility: return expenseForm hint status
+			return settings.system.keyboardHints?.expenseForm || false
+		},
+
+		/**
+		 * Check if a specific keyboard hint has been dismissed
+		 * @param hintId - The unique identifier for the hint (e.g., 'expenseForm', 'onboarding')
+		 * @returns true if the hint has been dismissed, false otherwise
+		 */
+		hasSeenHint(hintId: string): boolean {
+			ensureLoaded()
+			return settings.system.keyboardHints?.[hintId] || false
+		},
+
+		/**
+		 * Dismiss a specific keyboard hint
+		 * @param hintId - The unique identifier for the hint to dismiss
+		 */
+		dismissHint(hintId: string): void {
+			ensureLoaded()
+			settings = {
+				...settings,
+				system: {
+					...settings.system,
+					keyboardHints: {
+						...settings.system.keyboardHints,
+						[hintId]: true,
+					},
+				},
+			}
+			saveSettings(settings)
 		},
 
 		/**
@@ -191,11 +237,22 @@ export function settingsStore() {
 		 * Update system preferences (can be called anytime)
 		 */
 		updateSystemPreferences(preferences: Partial<SystemPreferences>) {
+			// Handle backward compatibility: convert hasSeenKeyboardHint to keyboardHints.expenseForm
+			const newPrefs = { ...preferences }
+			if ('hasSeenKeyboardHint' in newPrefs) {
+				newPrefs.keyboardHints = {
+					...settings.system.keyboardHints,
+					...newPrefs.keyboardHints,
+					expenseForm: newPrefs.hasSeenKeyboardHint || false,
+				}
+				delete newPrefs.hasSeenKeyboardHint
+			}
+
 			settings = {
 				...settings,
 				system: {
 					...settings.system,
-					...preferences,
+					...newPrefs,
 				},
 			}
 
@@ -277,6 +334,12 @@ export const settings = {
 	},
 	get hasSeenKeyboardHint() {
 		return getSettingsInstance().hasSeenKeyboardHint
+	},
+	hasSeenHint(hintId: string) {
+		return getSettingsInstance().hasSeenHint(hintId)
+	},
+	dismissHint(hintId: string) {
+		return getSettingsInstance().dismissHint(hintId)
 	},
 	completeOnboarding(currencyMode: CurrencyMode, defaultCurrency: string) {
 		return getSettingsInstance().completeOnboarding(currencyMode, defaultCurrency)

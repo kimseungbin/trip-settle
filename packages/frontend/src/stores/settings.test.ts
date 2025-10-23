@@ -188,7 +188,8 @@ describe('Settings Store', () => {
 			store.updateSystemPreferences({ hasSeenKeyboardHint: true })
 
 			const stored = JSON.parse(localStorage.getItem('appSettings')!)
-			expect(stored.system.hasSeenKeyboardHint).toBe(true)
+			// Deprecated field is converted to keyboardHints.expenseForm
+			expect(stored.system.keyboardHints.expenseForm).toBe(true)
 		})
 
 		it('should allow partial updates to system preferences', () => {
@@ -197,7 +198,8 @@ describe('Settings Store', () => {
 
 			// Future: when more system prefs are added, this test ensures partial updates work
 			const stored = JSON.parse(localStorage.getItem('appSettings')!)
-			expect(stored.system.hasSeenKeyboardHint).toBe(true)
+			// Deprecated field is converted to keyboardHints.expenseForm
+			expect(stored.system.keyboardHints.expenseForm).toBe(true)
 		})
 	})
 
@@ -261,7 +263,8 @@ describe('Settings Store', () => {
 			store.resetSystemPreferences()
 
 			const stored = JSON.parse(localStorage.getItem('appSettings')!)
-			expect(stored.system.hasSeenKeyboardHint).toBe(false)
+			// After reset, keyboardHints should be empty
+			expect(stored.system.keyboardHints).toEqual({})
 			expect(stored.features.isOnboarded).toBe(true)
 		})
 	})
@@ -285,6 +288,108 @@ describe('Settings Store', () => {
 
 			store.updateSystemPreferences({ hasSeenKeyboardHint: true })
 
+			expect(store.hasSeenKeyboardHint).toBe(true)
+		})
+	})
+
+	describe('Individual Keyboard Hints', () => {
+		it('should check individual hint status (default: not dismissed)', () => {
+			const store = settingsStore()
+
+			expect(store.hasSeenHint('expenseForm')).toBe(false)
+			expect(store.hasSeenHint('onboarding')).toBe(false)
+			expect(store.hasSeenHint('currencySelector')).toBe(false)
+		})
+
+		it('should dismiss individual hints independently', () => {
+			const store = settingsStore()
+
+			store.dismissHint('expenseForm')
+
+			expect(store.hasSeenHint('expenseForm')).toBe(true)
+			expect(store.hasSeenHint('onboarding')).toBe(false)
+			expect(store.hasSeenHint('currencySelector')).toBe(false)
+		})
+
+		it('should persist individual hint dismissals to localStorage', () => {
+			const store = settingsStore()
+
+			store.dismissHint('expenseForm')
+			store.dismissHint('currencySelector')
+
+			const stored = JSON.parse(localStorage.getItem('appSettings')!)
+			expect(stored.system.keyboardHints.expenseForm).toBe(true)
+			expect(stored.system.keyboardHints.currencySelector).toBe(true)
+			expect(stored.system.keyboardHints.onboarding).toBeUndefined()
+		})
+
+		it('should reset all hints when resetting system preferences', () => {
+			const store = settingsStore()
+
+			store.dismissHint('expenseForm')
+			store.dismissHint('onboarding')
+			store.dismissHint('currencySelector')
+
+			store.resetSystemPreferences()
+
+			expect(store.hasSeenHint('expenseForm')).toBe(false)
+			expect(store.hasSeenHint('onboarding')).toBe(false)
+			expect(store.hasSeenHint('currencySelector')).toBe(false)
+		})
+
+		it('should load individual hints from localStorage', () => {
+			localStorage.setItem(
+				'appSettings',
+				JSON.stringify({
+					features: {
+						isOnboarded: false,
+						currencyMode: 'multi',
+						defaultCurrency: 'KRW',
+					},
+					system: {
+						keyboardHints: {
+							expenseForm: true,
+							onboarding: true,
+						},
+					},
+				})
+			)
+
+			const store = settingsStore()
+
+			expect(store.hasSeenHint('expenseForm')).toBe(true)
+			expect(store.hasSeenHint('onboarding')).toBe(true)
+			expect(store.hasSeenHint('currencySelector')).toBe(false)
+		})
+
+		it('should migrate legacy hasSeenKeyboardHint to expenseForm hint', () => {
+			localStorage.setItem(
+				'appSettings',
+				JSON.stringify({
+					features: {
+						isOnboarded: false,
+						currencyMode: 'multi',
+						defaultCurrency: 'KRW',
+					},
+					system: {
+						hasSeenKeyboardHint: true,
+					},
+				})
+			)
+
+			const store = settingsStore()
+
+			// Legacy boolean should migrate to expenseForm hint
+			expect(store.hasSeenHint('expenseForm')).toBe(true)
+			expect(store.hasSeenHint('onboarding')).toBe(false)
+		})
+
+		it('should preserve hasSeenKeyboardHint getter for backward compatibility', () => {
+			const store = settingsStore()
+
+			store.dismissHint('expenseForm')
+
+			// Old getter should still work and return expenseForm hint status
 			expect(store.hasSeenKeyboardHint).toBe(true)
 		})
 	})
