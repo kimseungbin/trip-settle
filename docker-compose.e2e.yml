@@ -40,6 +40,8 @@ services:
       - /app/packages/frontend/node_modules
     command: >
       sh -c "
+        echo 'Installing dependencies...' &&
+        npm ci &&
         echo 'Starting frontend...' &&
         npm run dev --workspace=frontend -- --host
       "
