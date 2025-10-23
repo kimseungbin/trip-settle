@@ -6,7 +6,12 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 const port = parseInt(process.env.FRONTEND_PORT || '5173')
 const backendUrl = process.env.API_URL ? process.env.API_URL.replace('/api', '') : 'http://localhost:3000'
 
+// For GitHub Pages deployment, set base to repository name
+// In development and other deployments, use root
+const base = process.env.VITE_BASE_PATH || '/'
+
 export default defineConfig({
+	base,
 	plugins: [svelte()],
 	server: {
 		port,
