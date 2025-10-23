@@ -1,16 +1,54 @@
 <script lang="ts">
+	import { onMount } from 'svelte'
 	import ExpenseTracker from './components/ExpenseTracker.svelte'
+	import Onboarding from './components/Onboarding.svelte'
 	import DevTools from './components/DevTools.svelte'
 	import { config } from './config'
+	import { initRouter, destroyRouter, getRoute, navigate } from './lib/router.svelte'
 
 	const isLocalMode = config.environment === 'local'
+
+	// Initialize router on mount
+	onMount(() => {
+		initRouter()
+
+		// Check if this is a first-time user
+		const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding')
+		const currentRoute = getRoute()
+
+		// Handle unknown routes first (redirect to home)
+		if (currentRoute !== '/' && currentRoute !== '/onboarding') {
+			navigate('/')
+			return () => {
+				destroyRouter()
+			}
+		}
+
+		// Redirect to onboarding if first-time user and currently on home page
+		if (!hasSeenOnboarding && currentRoute === '/') {
+			navigate('/onboarding')
+		}
+
+		// Cleanup on unmount
+		return () => {
+			destroyRouter()
+		}
+	})
+
+	// Get current route (reactive)
+	const currentRoute = $derived(getRoute())
 </script>
 
 <main>
-	<h1>Trip Settle</h1>
-	<p>Expense settlement made easy</p>
+	{#if currentRoute === '/onboarding'}
+		<Onboarding />
+	{:else}
+		<h1>Trip Settle</h1>
+		<p>Expense settlement made easy</p>
 
-	<ExpenseTracker />
+		<ExpenseTracker />
+	{/if}
+
 	{#if isLocalMode}
 		<DevTools />
 	{/if}

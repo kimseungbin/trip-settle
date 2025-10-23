@@ -38,6 +38,7 @@
 </script>
 
 <div class="expense-tracker">
+	<h2>Track Your Expenses</h2>
 	<KeyboardHint visible={showHint} onDismiss={handleDismissHint} />
 	<ExpenseForm onAdd={addExpense} onMouseSubmit={handleMouseSubmit} {sessionCurrencies} />
 	<ExpenseList {expenses} onRemove={removeExpense} />
