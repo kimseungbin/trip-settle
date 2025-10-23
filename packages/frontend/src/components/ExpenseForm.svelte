@@ -1,6 +1,7 @@
 <script lang="ts">
 	import CurrencySelector from './CurrencySelector.svelte'
 	import { DEFAULT_CURRENCY } from '../data/currencies'
+	import { settings } from '../stores/settings.svelte'
 
 	let {
 		onAdd,
@@ -12,12 +13,17 @@
 		sessionCurrencies?: string[]
 	} = $props()
 
+	// In single-currency mode, use the default currency from settings
+	// In multi-currency mode, allow user to select currency per expense
 	let expenseName = $state('')
 	let expenseAmount = $state('')
-	let selectedCurrency = $state(DEFAULT_CURRENCY)
+	let selectedCurrency = $state(settings.currencyMode === 'single' ? settings.defaultCurrency : DEFAULT_CURRENCY)
 	let nameInput = $state<HTMLInputElement | undefined>(undefined)
 	let submitButton = $state<HTMLButtonElement | undefined>(undefined)
 	let isMouseClick = $state(false)
+
+	// Derived state: show currency selector only in multi-currency mode
+	const showCurrencySelector = $derived(settings.currencyMode === 'multi')
 
 	function handleSubmit() {
 		if (!expenseName.trim() || !expenseAmount) return
@@ -67,7 +73,9 @@
 	>
 		<input type="text" placeholder="Expense name" bind:value={expenseName} bind:this={nameInput} required />
 		<input type="number" placeholder="Amount" bind:value={expenseAmount} step="0.01" min="0.01" required />
-		<CurrencySelector bind:value={selectedCurrency} {sessionCurrencies} onselect={handleCurrencySelect} />
+		{#if showCurrencySelector}
+			<CurrencySelector bind:value={selectedCurrency} {sessionCurrencies} onselect={handleCurrencySelect} />
+		{/if}
 		<button type="submit" bind:this={submitButton} onclick={handleButtonClick}>Add</button>
 	</form>
 </div>

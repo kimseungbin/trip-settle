@@ -23,15 +23,52 @@ A full-stack TypeScript application for managing trip expense settlements.
 
 ### User Experience First
 
-This project prioritizes exceptional user experience with a focus on:
+This project prioritizes exceptional user experience because great applications should be accessible and delightful for everyone.
 
-- **Keyboard Accessibility**: All interactive features work without a mouse
-  - Forms submit with Enter, clear with Escape
-  - Tab navigation follows logical flow
-  - Keyboard shortcuts for common actions
-- **Responsive Design**: Mobile-first approach with desktop enhancements
-- **Performance**: Fast, smooth interactions with minimal latency
-- **Clear Feedback**: Visual and interaction feedback for all user actions
+**Why Keyboard Accessibility Matters**
+
+All interactive features must work without a mouse. This isn't just about power users - it's about inclusion:
+
+- **Accessibility**: Users with motor disabilities rely on keyboard navigation
+- **Efficiency**: Power users move faster with keyboard shortcuts
+- **Universality**: Works in environments where mice aren't practical (tablets, kiosks)
+- **Testing**: Keyboard-first design catches UX issues early
+
+Our keyboard-first principles:
+- Forms submit with Enter, clear with Escape
+- Tab navigation follows logical, intuitive flow
+- Arrow keys navigate lists and selections
+- Every interactive element is reachable and usable via keyboard
+
+**Why Responsive Design**
+
+Mobile-first approach with desktop enhancements ensures:
+- **Mobile Reality**: Most users browse on phones - design for them first
+- **Progressive Enhancement**: Start minimal, add features for larger screens
+- **Performance**: Mobile-first forces efficiency and fast load times
+- **Future-Proof**: Works across devices from watches to ultra-wide monitors
+
+**Why Performance Matters**
+
+Fast, smooth interactions with minimal latency create trust and satisfaction:
+- **User Retention**: Slow apps frustrate users and drive them away
+- **Perceived Quality**: Performance directly affects how users judge quality
+- **Accessibility**: Fast response helps users with cognitive disabilities
+- **Global Reach**: Works well even on slower networks and devices
+
+**Why Clear Feedback**
+
+Visual and interaction feedback for all actions builds confidence:
+- **User Confidence**: Users know their actions worked
+- **Error Prevention**: Clear states prevent accidental actions
+- **Learning**: Feedback teaches users how the app works
+- **Trust**: Responsive UI feels reliable and professional
+
+When designing features, ask yourself:
+1. Can this be done without a mouse? (keyboard accessibility)
+2. Is the interaction intuitive and discoverable? (usability)
+3. Does it work well on mobile devices? (responsive design)
+4. Is it accessible to users with disabilities? (inclusive design)
 
 ### Testing Strategy
 

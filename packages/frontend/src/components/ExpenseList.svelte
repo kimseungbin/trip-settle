@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Expense } from '../types/expense'
+	import { settings } from '../stores/settings.svelte'
 
 	let {
 		expenses,
@@ -19,6 +20,9 @@
 	}
 
 	let totalsByCurrency = $derived(getTotalsByCurrency(expenses))
+
+	// In single-currency mode, don't show currency badges since all amounts are the same currency
+	const showCurrencyBadges = $derived(settings.currencyMode === 'multi')
 </script>
 
 <div class="list-container">
@@ -32,7 +36,9 @@
 					<span class="expense-name">{expense.name}</span>
 					<span class="expense-amount">
 						{expense.amount.toFixed(2)}
-						<span class="currency-code">{expense.currency}</span>
+						{#if showCurrencyBadges}
+							<span class="currency-code">{expense.currency}</span>
+						{/if}
 					</span>
 					<button class="remove-btn" onclick={() => onRemove(expense.id)}>×</button>
 				</li>
@@ -44,7 +50,11 @@
 				{#each Array.from(totalsByCurrency.entries()) as [currency, amount]}
 					<span class="total-amount">
 						{amount.toFixed(2)}
-						<span class="total-currency">{currency}</span>
+						{#if showCurrencyBadges}
+							<span class="total-currency">{currency}</span>
+						{:else}
+							<span class="total-currency-text">{currency}</span>
+						{/if}
 					</span>
 				{/each}
 			</div>
@@ -158,5 +168,12 @@
 		background: #fff5f3;
 		padding: 0.3em 0.5em;
 		border-radius: 3px;
+	}
+
+	.total-currency-text {
+		font-size: 0.85em;
+		font-weight: 600;
+		color: #666;
+		margin-left: 0.3em;
 	}
 </style>

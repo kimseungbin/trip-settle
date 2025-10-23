@@ -1,5 +1,6 @@
 <script lang="ts">
 	import SystemStatus from './SystemStatus.svelte'
+	import SettingsViewer from './SettingsViewer.svelte'
 	import LocalStorageViewer from './LocalStorageViewer.svelte'
 </script>
 
@@ -11,6 +12,7 @@
 
 	<div class="dev-tools-content">
 		<SystemStatus />
+		<SettingsViewer />
 		<LocalStorageViewer />
 	</div>
 </div>
@@ -63,6 +65,13 @@
 		margin: 0;
 		background: white;
 		border: 1px solid #e0e0e0;
+	}
+
+	.dev-tools-content :global(.settings-viewer) {
+		margin: 0;
+		background: white;
+		border: 1px solid #e0e0e0;
+		border-left: 4px solid #4caf50;
 	}
 
 	.dev-tools-content :global(.storage-viewer) {

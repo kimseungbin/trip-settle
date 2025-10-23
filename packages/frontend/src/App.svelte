@@ -5,6 +5,7 @@
 	import DevTools from './components/DevTools.svelte'
 	import { config } from './config'
 	import { initRouter, destroyRouter, getRoute, navigate } from './lib/router.svelte'
+	import { settings } from './stores/settings.svelte'
 
 	const isLocalMode = config.environment === 'local'
 
@@ -12,8 +13,7 @@
 	onMount(() => {
 		initRouter()
 
-		// Check if this is a first-time user
-		const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding')
+		// Check if user has completed onboarding
 		const currentRoute = getRoute()
 
 		// Handle unknown routes first (redirect to home)
@@ -25,7 +25,7 @@
 		}
 
 		// Redirect to onboarding if first-time user and currently on home page
-		if (!hasSeenOnboarding && currentRoute === '/') {
+		if (!settings.isOnboarded && currentRoute === '/') {
 			navigate('/onboarding')
 		}
 

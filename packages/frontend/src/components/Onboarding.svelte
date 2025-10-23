@@ -1,32 +1,70 @@
 <script lang="ts">
 	import { navigate } from '../lib/router.svelte'
+	import { settings } from '../stores/settings.svelte'
+	import type { CurrencyMode } from '../stores/settings.svelte'
+	import CurrencySelector from './CurrencySelector.svelte'
+	import { DEFAULT_CURRENCY } from '../data/currencies'
+
+	let currencyMode = $state<CurrencyMode>('multi')
+	let defaultCurrency = $state(DEFAULT_CURRENCY)
+	let showCurrencySelector = $state(false)
 
 	/**
-	 * Complete onboarding and navigate to the main app
+	 * Select currency mode and proceed to currency selection if needed
+	 */
+	function selectCurrencyMode(mode: CurrencyMode) {
+		currencyMode = mode
+		if (mode === 'single') {
+			showCurrencySelector = true
+		} else {
+			// For multi-currency mode, complete onboarding immediately
+			completeOnboarding()
+		}
+	}
+
+	/**
+	 * Complete onboarding with selected settings and navigate to the main app
 	 */
 	function completeOnboarding() {
-		// Mark onboarding as complete in localStorage
-		localStorage.setItem('hasSeenOnboarding', 'true')
+		// Save settings to store
+		settings.completeOnboarding(currencyMode, defaultCurrency)
 
 		// Navigate to home page
 		navigate('/')
 	}
 
 	/**
-	 * Skip onboarding and go directly to the main app
+	 * Skip onboarding and use default multi-currency mode
 	 */
 	function skipOnboarding() {
-		completeOnboarding() // Same behavior as completing
+		currencyMode = 'multi'
+		defaultCurrency = DEFAULT_CURRENCY
+		completeOnboarding()
+	}
+
+	/**
+	 * Go back to currency mode selection
+	 */
+	function goBack() {
+		showCurrencySelector = false
 	}
 
 	/**
 	 * Handle keyboard events for accessibility
 	 */
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Enter') {
-			completeOnboarding()
-		} else if (event.key === 'Escape') {
-			skipOnboarding()
+		if (showCurrencySelector) {
+			if (event.key === 'Escape') {
+				event.preventDefault()
+				goBack()
+			} else if (event.key === 'Enter' && currencyMode === 'single') {
+				event.preventDefault()
+				completeOnboarding()
+			}
+		} else {
+			if (event.key === 'Escape') {
+				skipOnboarding()
+			}
 		}
 	}
 </script>
@@ -34,32 +72,51 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <div class="onboarding-container">
-	<h1>Welcome to Trip Settle</h1>
-	<p class="tagline">Expense settlement made easy</p>
+	{#if !showCurrencySelector}
+		<!-- Step 1: Currency Mode Selection -->
+		<h1>Welcome to Trip Settle</h1>
+		<p class="tagline">Expense settlement made easy</p>
 
-	<div class="features">
-		<div class="feature">
-			<h2>📱 Track Expenses in Multiple Currencies</h2>
-			<p>Add expenses in any currency and let us handle the conversion</p>
+		<div class="currency-mode-section">
+			<h2 class="section-title">How do you want to track expenses?</h2>
+
+			<div class="mode-options">
+				<button class="mode-option" onclick={() => selectCurrencyMode('single')}>
+					<div class="mode-icon">💵</div>
+					<div class="mode-title">Single Currency</div>
+					<p class="mode-description">All expenses in one currency (simpler)</p>
+				</button>
+
+				<button class="mode-option" onclick={() => selectCurrencyMode('multi')}>
+					<div class="mode-icon">🌍</div>
+					<div class="mode-title">Multiple Currencies</div>
+					<p class="mode-description">Track expenses in different currencies</p>
+				</button>
+			</div>
+
+			<button class="skip-link" onclick={skipOnboarding}>Skip and use multi-currency mode</button>
 		</div>
 
-		<div class="feature">
-			<h2>👥 Split Costs Among Trip Participants</h2>
-			<p>Easily divide expenses among friends and keep track of who paid what</p>
+		<p class="keyboard-hint">Press <kbd>Esc</kbd> to skip</p>
+	{:else}
+		<!-- Step 2: Currency Selection (Single-Currency Mode Only) -->
+		<h1>Choose Your Currency</h1>
+		<p class="tagline">Select the default currency for all expenses</p>
+
+		<div class="currency-selection">
+			<div class="currency-selector-wrapper">
+				<label for="default-currency">Default Currency:</label>
+				<CurrencySelector bind:value={defaultCurrency} />
+			</div>
+
+			<div class="actions">
+				<button class="primary" onclick={completeOnboarding}>Continue</button>
+				<button class="secondary" onclick={goBack}>Go Back</button>
+			</div>
 		</div>
 
-		<div class="feature">
-			<h2>⚡ Instant Settlement Calculations</h2>
-			<p>Get real-time calculations on who owes whom and how much</p>
-		</div>
-	</div>
-
-	<div class="actions">
-		<button class="primary" onclick={completeOnboarding}>Get Started</button>
-		<button class="secondary" onclick={skipOnboarding}>Skip</button>
-	</div>
-
-	<p class="keyboard-hint">Press <kbd>Enter</kbd> to get started or <kbd>Esc</kbd> to skip</p>
+		<p class="keyboard-hint">Press <kbd>Enter</kbd> to continue or <kbd>Esc</kbd> to go back</p>
+	{/if}
 </div>
 
 <style>
@@ -81,25 +138,6 @@
 		font-size: 1.5rem;
 		color: #666;
 		margin-bottom: 3rem;
-	}
-
-	.features {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 2rem;
-		margin-bottom: 3rem;
-		text-align: left;
-	}
-
-	.feature h2 {
-		font-size: 1.2rem;
-		margin-bottom: 0.5rem;
-		color: #333;
-	}
-
-	.feature p {
-		color: #666;
-		line-height: 1.6;
 	}
 
 	.actions {
@@ -151,9 +189,102 @@
 		outline-offset: 2px;
 	}
 
+	.currency-mode-section {
+		margin: 2rem 0;
+	}
+
+	.section-title {
+		font-size: 1.8rem;
+		color: #333;
+		margin-bottom: 2rem;
+		font-weight: 600;
+	}
+
+	.mode-options {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 1.5rem;
+		margin-bottom: 2rem;
+	}
+
+	.mode-option {
+		background: white;
+		border: 2px solid #e0e0e0;
+		border-radius: 12px;
+		padding: 2rem;
+		cursor: pointer;
+		transition: all 0.3s;
+		text-align: center;
+	}
+
+	.mode-option:hover {
+		border-color: #ff3e00;
+		transform: translateY(-4px);
+		box-shadow: 0 8px 16px rgba(255, 62, 0, 0.2);
+	}
+
+	.mode-option:focus {
+		outline: 2px solid #ff3e00;
+		outline-offset: 2px;
+	}
+
+	.mode-icon {
+		font-size: 3rem;
+		margin-bottom: 1rem;
+	}
+
+	.mode-title {
+		font-size: 1.3rem;
+		font-weight: 600;
+		color: #333;
+		margin-bottom: 0.5rem;
+	}
+
+	.mode-description {
+		font-size: 1rem;
+		color: #666;
+		margin: 0;
+		line-height: 1.4;
+	}
+
+	.skip-link {
+		background: none;
+		border: none;
+		color: #999;
+		font-size: 0.95rem;
+		text-decoration: underline;
+		padding: 0.5rem;
+		cursor: pointer;
+		transition: color 0.2s;
+	}
+
+	.skip-link:hover {
+		color: #666;
+	}
+
+	.currency-selection {
+		max-width: 400px;
+		margin: 0 auto;
+		padding: 2rem;
+	}
+
+	.currency-selector-wrapper {
+		margin-bottom: 2rem;
+		text-align: left;
+	}
+
+	.currency-selector-wrapper label {
+		display: block;
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: #333;
+		margin-bottom: 0.75rem;
+	}
+
 	.keyboard-hint {
 		color: #999;
 		font-size: 0.9rem;
+		margin-top: 2rem;
 	}
 
 	kbd {
@@ -176,9 +307,17 @@
 			font-size: 1.2rem;
 		}
 
-		.features {
+		.section-title {
+			font-size: 1.4rem;
+		}
+
+		.mode-options {
 			grid-template-columns: 1fr;
-			gap: 1.5rem;
+			gap: 1rem;
+		}
+
+		.mode-option {
+			padding: 1.5rem;
 		}
 
 		.actions {
@@ -187,6 +326,10 @@
 
 		button {
 			width: 100%;
+		}
+
+		.currency-selection {
+			padding: 1rem;
 		}
 	}
 </style>

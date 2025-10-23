@@ -12,25 +12,30 @@ Trip Settle is a full-stack TypeScript monorepo for managing trip expense settle
 
 ## Design Principles
 
-### User Experience First
+When implementing features, ensure:
 
-This project prioritizes exceptional user experience:
+**Keyboard Support** (all features must be keyboard accessible):
+- Forms: Enter to submit, Escape to cancel/clear
+- Lists: Arrow key navigation where appropriate
+- Logical tab order
+- Keyboard shortcuts for common actions
 
-- **Keyboard Support**: All interactive features must be fully keyboard accessible
-  - Forms should support Enter to submit, Escape to cancel/clear
-  - Lists should support arrow key navigation where appropriate
-  - Tab order must be logical and intuitive
-  - Provide keyboard shortcuts for common actions
-- **Accessibility**: Follow ARIA guidelines for screen readers and assistive technologies
-- **Responsive Design**: Mobile-first approach with desktop enhancements
-- **Performance**: Fast, smooth interactions with minimal latency
-- **Feedback**: Clear visual and interaction feedback for all user actions
+**Accessibility**:
+- Follow ARIA guidelines
+- Support screen readers and assistive technologies
 
-When implementing features, always consider:
-1. Can this be done without a mouse?
-2. Is the interaction intuitive and discoverable?
-3. Does it work well on mobile devices?
-4. Is it accessible to users with disabilities?
+**Responsive Design**:
+- Mobile-first approach
+- Desktop enhancements
+
+**Performance**:
+- Fast, smooth interactions
+- Minimal latency
+
+**User Feedback**:
+- Clear visual feedback for all actions
+
+See README.md "Design Philosophy" section for rationale and detailed explanations.
 
 ## Feature Development Workflow (MANDATORY)
 
