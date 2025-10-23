@@ -12,9 +12,6 @@ const testEnv = process.env.TEST_ENV || 'local'
 // Only run in ci-docker where Linux snapshots are maintained
 const shouldRunVisualTests = testEnv === 'ci-docker'
 
-// Detect if we're updating snapshots (no retries needed for snapshot updates)
-const isUpdatingSnapshots = process.env.UPDATING_SNAPSHOTS === 'true'
-
 // Detect if running in Docker (via PLAYWRIGHT_BASE_URL env var)
 const isDocker = !!process.env.PLAYWRIGHT_BASE_URL
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173'
@@ -36,9 +33,9 @@ export default defineConfig({
 	// Fail the build on CI if you accidentally left test.only in the source code
 	forbidOnly: !!process.env.CI,
 
-	// Retry on CI only, but disable retries when updating snapshots
-	// Retries are counterproductive for snapshot updates (captures current state once)
-	retries: isUpdatingSnapshots ? 0 : process.env.CI ? 2 : 0,
+	// No retries - tests should be reliable and pass on first run
+	// Retries hide flakiness and slow down CI feedback loop
+	retries: 0,
 
 	// Workers: use PLAYWRIGHT_WORKERS env var if set, otherwise 1 in CI, undefined locally
 	workers: process.env.PLAYWRIGHT_WORKERS
