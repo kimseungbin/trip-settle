@@ -284,3 +284,34 @@ workflow_integration:
     - Mention tests added or updated
 
     Refs #issue_number (if applicable)"
+
+special_commit_triggers:
+  description: "Special keywords in commit messages that trigger automated workflows"
+
+  update_snapshots:
+    keyword: "[update-snapshots]"
+    workflow: "Update Visual Snapshots"
+    usage: "Include keyword ANYWHERE in commit message (subject or body)"
+    purpose: "Triggers automatic visual regression snapshot updates in CI"
+    when_to_use:
+      - "After UI changes that legitimately change appearance"
+      - "When visual regression tests fail with expected changes"
+      - "To update baseline screenshots after intentional design updates"
+    example: |
+      feat(frontend): Redesign expense card layout [update-snapshots]
+
+      - Increase card padding for better readability
+      - Add subtle shadow for depth
+      - Update typography hierarchy
+
+      Visual changes are intentional. Snapshots need updating.
+
+    alternatives:
+      - "Manual workflow dispatch via GitHub Actions UI"
+      - "PR comment: /update-snapshots"
+
+    important_notes:
+      - "Visual snapshots are ONLY updated in remote CI, never locally"
+      - "Workflow automatically commits updated snapshots back to branch"
+      - "Review snapshot changes before merging to ensure they're correct"
+      - "See CLAUDE.md section 'Visual Snapshot Management' for details"
