@@ -110,7 +110,7 @@ jobs:
         run: |
           echo "📸 Updating visual snapshots in remote CI environment..."
           echo "ℹ️  Running only visual regression tests (tests/visual/)"
-          PLAYWRIGHT_ARGS="--update-snapshots tests/visual/" docker compose -f docker-compose.e2e.yml up --build --abort-on-container-exit
+          PLAYWRIGHT_ARGS="tests/visual/ --update-snapshots" docker compose -f docker-compose.e2e.yml up --build --abort-on-container-exit
         env:
           DOCKER_USER: root
           TEST_ENV: ci-docker
