@@ -1,6 +1,6 @@
 <script lang="ts">
 	import SystemStatus from './SystemStatus.svelte'
-	import HintDebugger from './HintDebugger.svelte'
+	import LocalStorageViewer from './LocalStorageViewer.svelte'
 </script>
 
 <div class="dev-tools" data-testid="dev-tools">
@@ -11,7 +11,7 @@
 
 	<div class="dev-tools-content">
 		<SystemStatus />
-		<HintDebugger />
+		<LocalStorageViewer />
 	</div>
 </div>
 
@@ -65,7 +65,7 @@
 		border: 1px solid #e0e0e0;
 	}
 
-	.dev-tools-content :global(.debugger) {
+	.dev-tools-content :global(.storage-viewer) {
 		margin: 0;
 		background: white;
 		border: 1px solid #e0e0e0;
