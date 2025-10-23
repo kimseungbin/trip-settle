@@ -126,11 +126,19 @@ jobs:
         run: |
           echo "🧹 Cleaning up any existing Docker resources..."
 
-          # Remove any existing containers, networks, and volumes
+          # Stop and remove containers
           docker compose -f docker-compose.e2e.yml down -v --remove-orphans 2>/dev/null || true
 
-          # Also clean up any dangling volumes from previous runs
+          # Remove specific volumes that might have conflicts
+          docker volume rm trip-settle_node_modules 2>/dev/null || true
+          docker volume rm trip-settle_backend_node_modules 2>/dev/null || true
+          docker volume rm trip-settle_frontend_node_modules 2>/dev/null || true
+
+          # Prune all unused volumes
           docker volume prune -f || true
+
+          # Remove any dangling images to free up space
+          docker image prune -f || true
 
           echo "✅ Cleanup complete"
 
