@@ -109,7 +109,7 @@ jobs:
     name: E2E Tests (Docker)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [quality, build]  # Run after quality checks and build pass
+    needs: [build]  # Run after build passes (quality runs in parallel)
     # Prevent multiple E2E test runs from conflicting
     concurrency:
       group: e2e-tests-${{ github.ref }}
