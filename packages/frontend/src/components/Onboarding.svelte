@@ -23,7 +23,9 @@
 	 * Handle keyboard events for accessibility
 	 */
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
+		if (event.key === 'Enter') {
+			completeOnboarding()
+		} else if (event.key === 'Escape') {
 			skipOnboarding()
 		}
 	}
