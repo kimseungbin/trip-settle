@@ -228,6 +228,22 @@ export function settingsStore() {
 
 			saveSettings(settings)
 		},
+
+		/**
+		 * Toggle onboarding status (DEV TOOLS ONLY)
+		 * This bypasses the normal immutability rules for development/testing purposes
+		 */
+		__dev_toggleOnboarding() {
+			settings = {
+				...settings,
+				features: {
+					...settings.features,
+					isOnboarded: !settings.features.isOnboarded,
+				},
+			}
+
+			saveSettings(settings)
+		},
 	}
 }
 
@@ -273,5 +289,8 @@ export const settings = {
 	},
 	resetSystemPreferences() {
 		return getSettingsInstance().resetSystemPreferences()
+	},
+	__dev_toggleOnboarding() {
+		return getSettingsInstance().__dev_toggleOnboarding()
 	},
 }

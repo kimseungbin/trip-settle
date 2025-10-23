@@ -21,6 +21,12 @@
 			hasSeenKeyboardHint: !settings.hasSeenKeyboardHint,
 		})
 	}
+
+	function toggleOnboarding() {
+		settings.__dev_toggleOnboarding()
+		// Reload to reflect routing changes
+		window.location.reload()
+	}
 </script>
 
 <div class="settings-viewer" data-testid="settings-viewer">
@@ -34,6 +40,7 @@
 				<span class="setting-value">
 					{settings.isOnboarded ? '✅ Yes' : '❌ No'}
 				</span>
+				<button class="toggle-button" onclick={toggleOnboarding} tabindex="-1">Toggle</button>
 			</div>
 			<div class="setting-item">
 				<span class="setting-label">Currency Mode:</span>
@@ -54,14 +61,14 @@
 				<span class="setting-value">
 					{settings.hasSeenKeyboardHint ? '✅ Yes' : '❌ No'}
 				</span>
-				<button class="toggle-button" onclick={toggleKeyboardHint}>Toggle</button>
+				<button class="toggle-button" onclick={toggleKeyboardHint} tabindex="-1">Toggle</button>
 			</div>
 		</div>
 	</div>
 
 	<div class="actions">
-		<button class="danger" onclick={resetOnboarding}>Reset All Settings</button>
-		<button class="warning" onclick={resetSystemPreferences}>Reset System Preferences</button>
+		<button class="danger" onclick={resetOnboarding} tabindex="-1">Reset All Settings</button>
+		<button class="warning" onclick={resetSystemPreferences} tabindex="-1">Reset System Preferences</button>
 	</div>
 </div>
 
