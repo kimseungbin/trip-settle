@@ -55,7 +55,23 @@ jobs:
         run: npm ci
 
       - name: Build all packages
-        run: npm run build
+        run: npm run build 2>&1 | tee build-log.txt
+        continue-on-error: true
+        id: build
+
+      - name: Check build status
+        if: steps.build.outcome == 'failure'
+        run: |
+          echo "❌ Build failed - logs captured in build-log.txt"
+          exit 1
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build-log.txt
+          retention-days: 30
 
   # Job 3: Unit tests
   unit-tests:
@@ -151,10 +167,53 @@ jobs:
     if: always()
 
     steps:
+      - name: Checkout code
+        if: contains(needs.*.result, 'failure')
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: contains(needs.*.result, 'failure')
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Download build log artifact
+        if: contains(needs.*.result, 'failure')
+        uses: actions/download-artifact@v4
+        with:
+          name: build-log
+          path: .
+        continue-on-error: true  # May not exist if build didn't fail
+
+      - name: Generate failure report
+        if: contains(needs.*.result, 'failure')
+        run: node .github/scripts/generate-failure-report.js
+        env:
+          BUILD_LOG_PATH: build-log.txt
+          OUTPUT_PATH: ci-failure-report.md
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF: ${{ github.ref }}
+
+      - name: Add report to job summary
+        if: contains(needs.*.result, 'failure') && hashFiles('ci-failure-report.md') != ''
+        run: cat ci-failure-report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload failure report
+        if: contains(needs.*.result, 'failure') && hashFiles('ci-failure-report.md') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-failure-report
+          path: ci-failure-report.md
+          retention-days: 30
+
       - name: Check if all jobs succeeded
         run: |
           if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
             echo "❌ One or more checks failed"
+            echo "📄 Download the ci-failure-report artifact for detailed analysis"
             exit 1
           elif [[ "${{ contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
             echo "⚠️ One or more checks were cancelled"

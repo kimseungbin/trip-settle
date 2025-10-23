@@ -164,6 +164,76 @@ npm run test:e2e:ui --workspace=frontend  # Interactive UI mode
 
 **E2E Testing Philosophy**: The project uses Docker-based Playwright testing by default to ensure consistency across all development machines and CI/CD. Local testing is available for faster iteration when actively writing tests. See `.claude/skills/playwright-testing/guide.yaml` for comprehensive testing documentation.
 
+### CI Failure Reports
+
+When GitHub Actions workflows fail, downloadable reports are automatically generated to help diagnose issues. These reports are optimized for both human developers and AI assistants like Claude Code.
+
+#### Available Reports
+
+**Build Failures** (`ci-failure-report.md`):
+- Aggregates TypeScript compilation errors
+- Groups errors by file with line numbers
+- Includes error codes and messages
+- Available as a downloadable artifact
+
+**E2E Test Failures** (Playwright reports):
+- HTML test report with screenshots
+- Test results with stack traces
+- Visual diff images for failed tests
+
+#### How to Access Reports
+
+1. **GitHub Actions UI**:
+   - Go to the failed workflow run
+   - Scroll to bottom → "Artifacts" section
+   - Download `ci-failure-report` (build errors) or `playwright-report` (E2E failures)
+
+2. **Job Summary**:
+   - The CI failure report is also displayed in the workflow job summary
+   - Click on the "All Checks Passed" job to view inline
+
+#### Using Reports with Claude Code
+
+These reports are designed to be Claude Code-friendly:
+
+```bash
+# 1. Download the ci-failure-report.md artifact from GitHub Actions
+# 2. In Claude Code, share the report:
+"Here's my CI failure report, can you help me fix it?"
+# 3. Attach the ci-failure-report.md file
+
+# Claude Code will analyze the errors and suggest fixes
+```
+
+#### What Gets Captured
+
+The CI workflow captures failure information using several techniques:
+
+- **Build logs**: Uses `tee` command to capture output while displaying it real-time
+  ```bash
+  npm run build 2>&1 | tee build-log.txt
+  ```
+  - `2>&1` redirects stderr to stdout (combines all output)
+  - `tee` writes to both file and terminal simultaneously
+  - Logs are uploaded as artifacts on failure
+
+- **Test reports**: Playwright automatically generates HTML reports
+- **Summary generation**: Node.js script parses logs and creates structured markdown
+
+#### Technical Details
+
+**How `tee` Works**:
+The `tee` command is like a T-shaped pipe fitting - it duplicates input to multiple destinations:
+- Writes output to a file (`build-log.txt`)
+- Also prints to stdout (visible in GitHub Actions UI)
+- This ensures you get both real-time logs AND saved artifacts
+
+**Failure Report Script**: `.github/scripts/generate-failure-report.js`
+- Parses TypeScript errors using regex patterns
+- Groups errors by file for easy navigation
+- Includes git context (commit SHA, branch, run URL)
+- Runs only when failures are detected
+
 ### Deploying Infrastructure
 
 #### First-Time Setup: Bootstrap AWS CDK (One-Time Operation)
