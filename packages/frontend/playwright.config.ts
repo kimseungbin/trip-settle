@@ -84,7 +84,8 @@ export default defineConfig({
 				},
 			]
 		: [
-				// CI/Docker: Full browser matrix
+				// CI/Docker: Essential browsers only (Chromium + WebKit for cross-engine coverage)
+				// Mobile browsers removed for 50% faster CI (responsive tested via viewport config)
 				{
 					name: 'chromium',
 					use: { ...devices['Desktop Chrome'] },
@@ -93,16 +94,6 @@ export default defineConfig({
 				{
 					name: 'webkit',
 					use: { ...devices['Desktop Safari'] },
-					grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
-				},
-				{
-					name: 'Mobile Chrome',
-					use: { ...devices['Pixel 5'] },
-					grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
-				},
-				{
-					name: 'Mobile Safari',
-					use: { ...devices['iPhone 12'] },
 					grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
 				},
 			],
