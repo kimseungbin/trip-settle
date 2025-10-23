@@ -1,0 +1,27 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"compilerOptions": {
+		// Type checking
+		"strict": false,
+		"skipLibCheck": true,
+
+		// Module resolution
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+
+		// Emit
+		"declaration": true,
+		"sourceMap": true,
+		"removeComments": true,
+
+		// Interop constraints
+		"isolatedModules": true,
+		"forceConsistentCasingInFileNames": true,
+
+		// Type roots for monorepo structure
+		"typeRoots": ["./node_modules/@types", "../node_modules/@types"]
+	},
+	"exclude": ["node_modules", "dist", "build", "cdk.out"]
+}
