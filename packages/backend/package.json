@@ -9,7 +9,7 @@
 		"start:dev": "NODE_ENV=local tsc-watch --onSuccess \"node dist/packages/backend/src/main.js\"",
 		"start:debug": "NODE_ENV=local tsc-watch --inspect --onSuccess \"node --inspect dist/packages/backend/src/main.js\"",
 		"start:prod": "node dist/packages/backend/src/main",
-		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+		"lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"{src,apps,libs,test}/**/*.ts\"",
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage",
