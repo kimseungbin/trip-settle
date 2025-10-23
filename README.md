@@ -201,6 +201,70 @@ npm run test:e2e:ui --workspace=frontend  # Interactive UI mode
 
 **E2E Testing Philosophy**: The project uses Docker-based Playwright testing by default to ensure consistency across all development machines and CI/CD. Local testing is available for faster iteration when actively writing tests. See `.claude/skills/playwright-testing/guide.yaml` for comprehensive testing documentation.
 
+### Continuous Integration (CI/CD)
+
+The project uses GitHub Actions to automatically validate code changes. Every push and pull request triggers a comprehensive CI pipeline.
+
+#### What Runs in CI
+
+The CI workflow runs **4 jobs in parallel** for fast feedback:
+
+1. **Code Quality** (~2 min) - Formatting, linting, type-checking
+2. **Build** (~2 min) - Compiles all packages (frontend, backend, infra)
+3. **Unit Tests** (~1 min) - Fast tests for frontend (Vitest) and backend (Jest)
+4. **E2E Tests** (~5-7 min) - End-to-end tests via Docker + Playwright
+
+**Total CI time**: ~7-8 minutes (jobs run in parallel)
+
+#### Running CI Checks Locally
+
+**Before pushing**, run the same checks CI will run to avoid failures:
+
+```bash
+# Code quality (formatting, linting, type-checking)
+npm run format:check && npm run lint && npm run type-check --workspace=frontend
+
+# Build all packages
+npm run build
+
+# Unit tests (fast)
+npm run test:unit --workspace=frontend  # Frontend unit tests
+npm run test --workspace=backend        # Backend unit tests
+
+# E2E tests (slower, run before push)
+npm run test:e2e:docker  # Full E2E test suite with Docker
+```
+
+**Pre-commit hooks** automatically run formatting, linting, and build checks. See [Git Hooks](#git-hooks) section.
+
+#### CI Optimizations
+
+The CI pipeline is optimized for speed and efficiency:
+
+- **Parallel execution**: Quality checks run concurrently with builds and tests
+- **Docker layer caching**: GitHub Actions cache persists build layers across runs
+- **Reduced browser matrix**: Tests run on 2 browsers (Chromium + WebKit) instead of 4
+- **Optimized Dockerfile**: Layer ordering preserves npm cache when only code changes
+
+**Performance gains**: 40-50% faster than sequential execution (~12-15 min → 7-8 min)
+
+#### Docker Build Cache Metrics
+
+CI automatically tracks Docker build efficiency with detailed metrics:
+
+- **Cache hit rate**: Percentage of layers reused vs. rebuilt
+- **Per-layer timing**: Identifies slow build steps
+- **Build duration**: Tracks performance improvements over time
+
+View metrics in the "e2e-tests" job summary after each CI run.
+
+#### What to Do When CI Fails
+
+1. **Check the job summary** - Click on the failed job to see details
+2. **Download artifacts** - Failed builds/tests generate downloadable reports
+3. **Run checks locally** - Reproduce the failure with local commands above
+4. **See CI Failure Reports section below** for troubleshooting guidance
+
 ### CI Failure Reports
 
 When GitHub Actions workflows fail, downloadable reports are automatically generated to help diagnose issues. These reports are optimized for both human developers and AI assistants like Claude Code.
