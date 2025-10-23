@@ -163,14 +163,26 @@ jobs:
               body: '✅ Visual snapshots have been updated in the remote CI environment and committed to this branch.\n\nPlease review the changes before merging.'
             })
 
-      - name: Upload snapshot diff report
-        if: steps.check_changes.outputs.has_changes == 'true'
+      - name: Upload Playwright HTML report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: snapshot-diff-report
+          name: playwright-report-snapshots
+          path: packages/frontend/playwright-report/
+          retention-days: 7
+
+      - name: Upload visual test artifacts (failed + passed)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-test-artifacts
           path: |
-            packages/frontend/playwright-report/
-            packages/frontend/test-results/
+            packages/frontend/test-results/**/test-failed-*.png
+            packages/frontend/test-results/**/diff-*.png
+            packages/frontend/test-results/**/*-actual.png
+            packages/frontend/test-results/**/*-expected.png
+            packages/frontend/test-results/**/error-context.md
+            packages/frontend/tests/**/ui-snapshots.spec.ts-snapshots/*.png
           retention-days: 7
 
       - name: Summary
