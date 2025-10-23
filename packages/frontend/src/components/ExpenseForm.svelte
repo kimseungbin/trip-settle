@@ -76,7 +76,7 @@
 		{#if showCurrencySelector}
 			<CurrencySelector bind:value={selectedCurrency} {sessionCurrencies} onselect={handleCurrencySelect} />
 		{/if}
-		<button type="submit" bind:this={submitButton} onclick={handleButtonClick}>Add</button>
+		<button type="submit" bind:this={submitButton} onclick={handleButtonClick} tabindex="0">Add</button>
 	</form>
 </div>
 
