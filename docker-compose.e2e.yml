@@ -63,6 +63,9 @@ services:
 
   # Playwright E2E test runner
   playwright:
+    # Use pre-built image if PLAYWRIGHT_IMAGE env var is set (CI mode)
+    # Otherwise build from Dockerfile (local development)
+    image: ${PLAYWRIGHT_IMAGE:-}
     build:
       context: .
       dockerfile: packages/frontend/Dockerfile.e2e
@@ -103,6 +106,9 @@ services:
 
   # Playwright UI mode (interactive watch mode)
   playwright-ui:
+    # Use pre-built image if PLAYWRIGHT_IMAGE env var is set (CI mode)
+    # Otherwise build from Dockerfile (local development)
+    image: ${PLAYWRIGHT_IMAGE:-}
     build:
       context: .
       dockerfile: packages/frontend/Dockerfile.e2e
