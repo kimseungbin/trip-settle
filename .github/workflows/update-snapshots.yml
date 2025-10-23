@@ -100,16 +100,8 @@ jobs:
       - name: Cleanup existing Docker resources
         run: |
           echo "🧹 Cleaning up Docker resources..."
-          # Stop and remove containers
+          # Stop and remove containers (anonymous volumes auto-cleaned with -v)
           docker compose -f docker-compose.e2e.yml down -v --remove-orphans 2>/dev/null || true
-
-          # Remove specific volumes that might have conflicts
-          docker volume rm trip-settle_node_modules 2>/dev/null || true
-          docker volume rm trip-settle_backend_node_modules 2>/dev/null || true
-          docker volume rm trip-settle_frontend_node_modules 2>/dev/null || true
-
-          # Prune all unused volumes
-          docker volume prune -f || true
 
           # Remove any dangling images to free up space
           docker image prune -f || true
@@ -121,6 +113,7 @@ jobs:
         env:
           DOCKER_USER: root
           TEST_ENV: ci-docker
+          UPDATING_SNAPSHOTS: true
 
       - name: Check for snapshot changes
         id: check_changes
