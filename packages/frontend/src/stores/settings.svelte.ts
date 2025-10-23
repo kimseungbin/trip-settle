@@ -68,6 +68,14 @@ const LEGACY_KEYBOARD_HINT_KEY = 'keyboardHintDismissed'
  * Load settings from localStorage with backward compatibility
  */
 function loadSettings(): AppSettings {
+	// Safety check for browser environment
+	if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+		return {
+			features: { ...DEFAULT_FEATURE_SETTINGS },
+			system: { ...DEFAULT_SYSTEM_PREFERENCES },
+		}
+	}
+
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY)
 		if (stored) {
@@ -120,22 +128,40 @@ function saveSettings(settings: AppSettings): void {
  * This store manages both feature settings (immutable after onboarding) and system preferences (always mutable)
  */
 export function settingsStore() {
-	let settings = $state<AppSettings>(loadSettings())
+	let settings = $state<AppSettings>({
+		features: { ...DEFAULT_FEATURE_SETTINGS },
+		system: { ...DEFAULT_SYSTEM_PREFERENCES },
+	})
+
+	// Flag to track if we've loaded from localStorage yet
+	let isLoaded = false
+
+	// Lazy load function - only loads once on first access
+	function ensureLoaded() {
+		if (!isLoaded && typeof window !== 'undefined') {
+			settings = loadSettings()
+			isLoaded = true
+		}
+	}
 
 	return {
 		// Expose feature settings (read-only for consumers)
 		get isOnboarded() {
+			ensureLoaded()
 			return settings.features.isOnboarded
 		},
 		get currencyMode() {
+			ensureLoaded()
 			return settings.features.currencyMode
 		},
 		get defaultCurrency() {
+			ensureLoaded()
 			return settings.features.defaultCurrency
 		},
 
 		// Expose system preferences (read-only for consumers)
 		get hasSeenKeyboardHint() {
+			ensureLoaded()
 			return settings.system.hasSeenKeyboardHint
 		},
 
@@ -206,7 +232,46 @@ export function settingsStore() {
 }
 
 /**
- * Global settings store instance
- * Import this in components to access settings
+ * Global settings store instance (lazily initialized)
+ * This approach avoids WebKit issues with early reactive state initialization
  */
-export const settings = settingsStore()
+let _settings: ReturnType<typeof settingsStore> | undefined
+
+function getSettingsInstance() {
+	if (!_settings) {
+		// Only initialize when actually accessed (not at module load time)
+		_settings = settingsStore()
+	}
+	return _settings
+}
+
+/**
+ * Settings proxy that delegates to lazily-initialized store
+ * This works around WebKit page crash issues with Svelte 5 $state runes during page reload
+ */
+export const settings = {
+	get isOnboarded() {
+		return getSettingsInstance().isOnboarded
+	},
+	get currencyMode() {
+		return getSettingsInstance().currencyMode
+	},
+	get defaultCurrency() {
+		return getSettingsInstance().defaultCurrency
+	},
+	get hasSeenKeyboardHint() {
+		return getSettingsInstance().hasSeenKeyboardHint
+	},
+	completeOnboarding(currencyMode: CurrencyMode, defaultCurrency: string) {
+		return getSettingsInstance().completeOnboarding(currencyMode, defaultCurrency)
+	},
+	updateSystemPreferences(preferences: Partial<SystemPreferences>) {
+		return getSettingsInstance().updateSystemPreferences(preferences)
+	},
+	resetSettings() {
+		return getSettingsInstance().resetSettings()
+	},
+	resetSystemPreferences() {
+		return getSettingsInstance().resetSystemPreferences()
+	},
+}
