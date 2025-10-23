@@ -49,6 +49,7 @@ services:
       - "5173:5173"
     environment:
       - NODE_ENV=local
+      - CI=true  # Disable network exposure by default; --host flag overrides for Docker
       - VITE_ALLOW_ORIGINS=*
       - API_URL=http://backend:3000/api
     depends_on:
