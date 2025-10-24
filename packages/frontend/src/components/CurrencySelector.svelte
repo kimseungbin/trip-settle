@@ -6,10 +6,12 @@
 		value = $bindable(DEFAULT_CURRENCY),
 		sessionCurrencies = [],
 		onselect,
+		autofocus = false,
 	}: {
 		value?: string
 		sessionCurrencies?: string[]
 		onselect?: (event: CustomEvent<{ currency: string }>) => void
+		autofocus?: boolean
 	} = $props()
 
 	let isOpen = $state(false)
@@ -17,6 +19,13 @@
 	let selectedIndex = $state(0)
 	let inputElement = $state<HTMLInputElement | undefined>(undefined)
 	let buttonElement = $state<HTMLButtonElement | undefined>(undefined)
+
+	// Auto-focus button when component mounts (if autofocus prop is true)
+	$effect(() => {
+		if (autofocus && buttonElement) {
+			setTimeout(() => buttonElement?.focus(), 100)
+		}
+	})
 
 	let recommendedCurrencies = $derived(getRecommendedCurrencies(sessionCurrencies))
 	let displayedCurrencies = $derived(searchQuery ? searchCurrencies(searchQuery) : recommendedCurrencies)
@@ -119,6 +128,7 @@
 		aria-haspopup="listbox"
 		aria-expanded={isOpen}
 	>
+		<span class="keyboard-icon">⌨️</span>
 		{selectedCurrency?.code || DEFAULT_CURRENCY}
 		<span class="arrow" class:open={isOpen}>▼</span>
 	</button>
@@ -193,8 +203,32 @@
 	}
 
 	.currency-button:focus {
-		outline: 2px solid #ff3e00;
-		outline-offset: 2px;
+		outline: none;
+		border-color: #ff3e00;
+		background: #fff5f3;
+		box-shadow:
+			0 0 0 3px rgba(255, 62, 0, 0.2),
+			0 4px 8px rgba(255, 62, 0, 0.3);
+		animation: buttonFocusPulse 2s ease-in-out infinite;
+	}
+
+	@keyframes buttonFocusPulse {
+		0%,
+		100% {
+			box-shadow:
+				0 0 0 3px rgba(255, 62, 0, 0.2),
+				0 4px 8px rgba(255, 62, 0, 0.3);
+		}
+		50% {
+			box-shadow:
+				0 0 0 5px rgba(255, 62, 0, 0.3),
+				0 4px 12px rgba(255, 62, 0, 0.4);
+		}
+	}
+
+	.keyboard-icon {
+		font-size: 0.9em;
+		opacity: 0.7;
 	}
 
 	.arrow {

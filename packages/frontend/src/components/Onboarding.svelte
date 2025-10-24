@@ -131,7 +131,11 @@
 		<div class="currency-selection">
 			<div class="currency-selector-wrapper">
 				<label for="default-currency">Default Currency:</label>
-				<CurrencySelector bind:value={defaultCurrency} />
+				<CurrencySelector bind:value={defaultCurrency} autofocus={true} />
+				<p class="currency-keyboard-hint">
+					<span class="hint-icon">⌨️</span>
+					Press <kbd>Enter</kbd> to open, <kbd>↑</kbd><kbd>↓</kbd> to navigate, <kbd>Enter</kbd> to select
+				</p>
 			</div>
 
 			<div class="actions">
@@ -335,6 +339,14 @@
 		gap: 0.5rem;
 	}
 
+	.currency-keyboard-hint {
+		color: #666;
+		font-size: 0.9rem;
+		margin-top: 0.75rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
 	.hint-icon {
 		font-size: 1.2rem;
 	}
