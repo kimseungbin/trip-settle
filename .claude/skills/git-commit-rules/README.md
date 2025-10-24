@@ -16,7 +16,7 @@ Claude will:
 1. Analyze your staged/unstaged changes
 2. Determine the appropriate type and scope
 3. Generate a commit message following project conventions
-4. Ask for your confirmation before committing
+4. Execute the commit and show the result
 
 ## Commit Message Format
 

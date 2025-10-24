@@ -39,21 +39,18 @@ When the user requests to create a commit or generate a commit message:
    - Add body and footer if needed (breaking changes, references, etc.)
    - Respect line length limits from the rules
 
-5. **Present to user**:
-   - Show the generated commit message
-   - Explain why this type and scope were chosen
-   - Ask for confirmation before committing
+5. **Generate and execute the commit**:
+   - Show the generated commit message with explanation of type and scope
+   - Stage any unstaged files if appropriate
+   - Execute the commit immediately (commits are easily undoable with git reset)
+   - Show the commit hash and confirmation
 
-6. **Evaluate rule coverage**:
+6. **Evaluate rule coverage** (optional):
    - If the commit doesn't fit well into existing types or scopes
    - If you notice patterns that aren't covered by current rules
    - Provide feedback to the user suggesting updates to `commit-rules.yaml`
    - Explain what new type, scope, or convention should be added
    - Suggest the specific YAML changes needed
-
-7. **Create the commit** (if user approves):
-   - Stage any unstaged files if appropriate
-   - Use the generated message with proper formatting
 
 ## Example Workflow
 
@@ -64,8 +61,9 @@ User: "Commit the changes"
 2. Analyze: Modified packages/backend/src/trips/trips.service.ts
 3. Determine: type=feat, scope=backend
 4. Generate: "feat(backend): Add trip expense calculation logic"
-5. Show message and ask for confirmation
-6. Create commit if approved
+5. Show message with explanation
+6. Execute commit immediately
+7. Show result (commit hash + status)
 ```
 
 ## Rules File Location
