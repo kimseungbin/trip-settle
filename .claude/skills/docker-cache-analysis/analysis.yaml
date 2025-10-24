@@ -1,0 +1,238 @@
+name: docker-cache-analysis
+description: |
+  Analyze Docker build cache efficiency in GitHub Actions CI from git notes.
+
+  Use this skill to:
+  - Review cache performance over time
+  - Identify cache degradation patterns
+  - Find commits that broke cache efficiency
+  - Get recommendations for improving cache hit rates
+  - Compare cache metrics across different change types
+
+instructions: |
+  When the user requests cache analysis or cache trend review:
+
+  ## Step 1: Fetch Cache Metrics Notes
+
+  First, ensure git notes are available locally:
+
+  ```bash
+  # Fetch cache metrics notes from remote
+  git fetch origin refs/notes/ci/cache-metrics:refs/notes/ci/cache-metrics 2>/dev/null || \
+    echo "No remote cache metrics found (notes may not be set up yet)"
+
+  # Check if any notes exist locally
+  git notes --ref=ci/cache-metrics list | head -5
+  ```
+
+  If no notes exist, inform the user that the CI workflow needs to be updated to capture metrics first.
+
+  ## Step 2: Extract Recent Metrics
+
+  Retrieve cache metrics from recent commits (default: last 20):
+
+  ```bash
+  # Get last 20 commits with cache metrics
+  git log --all --format="%H|%h|%s|%ar" -20 | while IFS='|' read full_hash short_hash subject rel_time; do
+    NOTE=$(git notes --ref=ci/cache-metrics show $full_hash 2>/dev/null)
+    if [ -n "$NOTE" ]; then
+      # Parse INI-style note
+      timestamp=$(echo "$NOTE" | grep "^timestamp" | cut -d'=' -f2 | xargs)
+      commit=$(echo "$NOTE" | grep "^commit" | cut -d'=' -f2 | xargs)
+      base_status=$(echo "$NOTE" | grep "^base_image" | cut -d'=' -f2 | xargs)
+      cache_status=$(echo "$NOTE" | grep "^cache_status" | cut -d'=' -f2 | xargs)
+      change_type=$(echo "$NOTE" | grep "^change_type" | cut -d'=' -f2 | xargs)
+
+      # Output structured data
+      echo "$timestamp|$commit|$base_status|$cache_status|$change_type|$subject"
+    fi
+  done
+  ```
+
+  ## Step 3: Analyze Trends
+
+  Parse the extracted data and identify patterns:
+
+  ### Key Metrics to Analyze:
+
+  1. **Base Image Cache Hit Rate**
+     - Count HIT vs MISS for base_image
+     - Calculate percentage
+     - Identify when cache started missing
+
+  2. **Cache Status Patterns**
+     - Group by cache_status (HIT, MISS, optimal, suboptimal)
+     - Identify degradation points
+
+  3. **Change Type Correlation**
+     - Analyze cache performance by change type:
+       - code-only: Should always have high cache hit
+       - deps: Expected to have cache misses (npm ci layer)
+       - dockerfile: Expected to have cache misses (all layers)
+
+  4. **Time-based Trends**
+     - Are cache misses increasing over time?
+     - Are there periodic patterns (weekly dependency updates)?
+
+  ### Analysis Template:
+
+  ```
+  === DOCKER CACHE EFFICIENCY ANALYSIS ===
+
+  Period: [oldest_timestamp] to [newest_timestamp]
+  Commits analyzed: [count]
+
+  ## Base Image Cache Performance
+
+  Cache Hit Rate: [X]% ([HIT_count]/[total_count])
+  - HIT: [count] builds (saved ~46s each)
+  - MISS: [count] builds (downloaded 786MB)
+
+  Total time saved: ~[X] minutes ([HIT_count] × 46s)
+
+  ## Cache Efficiency by Change Type
+
+  code-only changes:
+    - Total: [count]
+    - Base cache HIT: [X]%
+    - Status: [assessment]
+
+  dependency changes:
+    - Total: [count]
+    - Base cache HIT: [X]%
+    - Note: Cache misses expected for npm layer
+
+  dockerfile changes:
+    - Total: [count]
+    - Base cache HIT: [X]%
+    - Note: Full rebuild expected
+
+  ## Trends & Patterns
+
+  [Identify any concerning patterns, e.g.:]
+  - ⚠️ Base image cache started missing after commit abc123
+  - ✓ Cache efficiency stable for code-only changes
+  - 📊 Dependency updates occur every [X] days
+
+  ## Recommendations
+
+  [Provide actionable insights, e.g.:]
+  - ✓ Cache is working optimally
+  - ⚠️ Investigate commit abc123 - cache degraded afterward
+  - 💡 Consider pinning base image hash for more stable caching
+  ```
+
+  ## Step 4: Deep Dive (Optional)
+
+  If user requests details about a specific commit or time period:
+
+  ```bash
+  # Show full note for a commit
+  git notes --ref=ci/cache-metrics show <commit>
+
+  # Find commits between two dates
+  git log --since="2025-10-01" --until="2025-10-24" --format="%h" | \
+    xargs -I {} git notes --ref=ci/cache-metrics show {} 2>/dev/null
+  ```
+
+  ## Step 5: Visualize Trends (Advanced)
+
+  If available, generate a simple ASCII chart showing cache hit rate over time:
+
+  ```
+  Cache Hit Rate Over Time (Base Image)
+
+  100% │     ██████████████████
+   90% │     ██
+   80% │
+   70% │
+   60% │
+   50% │ ██
+       └─────────────────────────
+        Oct  Oct  Oct  Oct  Oct
+        20   21   22   23   24
+  ```
+
+examples:
+  basic_analysis:
+    user_request: "Analyze cache trends"
+    steps:
+      - "Fetch git notes: `git fetch origin refs/notes/ci/cache-metrics:refs/notes/ci/cache-metrics`"
+      - "Extract metrics from last 20 commits"
+      - "Calculate base image hit rate"
+      - "Group by change type and analyze"
+      - "Present findings with recommendations"
+
+  specific_commit:
+    user_request: "Show cache metrics for commit abc123"
+    steps:
+      - "Fetch notes if not available"
+      - "Run: `git notes --ref=ci/cache-metrics show abc123`"
+      - "Parse and explain the metrics"
+      - "Compare to surrounding commits"
+
+  time_range:
+    user_request: "Show cache efficiency for the last week"
+    steps:
+      - "Get commits from last 7 days"
+      - "Extract cache metrics for those commits"
+      - "Calculate aggregate statistics"
+      - "Identify any anomalies or trends"
+
+  identify_degradation:
+    user_request: "Why did cache efficiency drop?"
+    steps:
+      - "Extract recent metrics"
+      - "Find commits where cache_status changed from HIT to MISS"
+      - "Check change_type to determine cause"
+      - "Show git diff for those commits"
+      - "Provide recommendations"
+
+common_issues:
+  no_notes_found:
+    symptom: "No git notes found"
+    solution: |
+      The CI workflow hasn't captured cache metrics yet.
+      Steps to enable:
+      1. Ensure the "Capture cache metrics" step is in .github/workflows/ci.yml
+      2. Push a commit to trigger CI
+      3. After CI completes, fetch notes: `git fetch origin refs/notes/ci/cache-metrics`
+
+  cache_always_missing:
+    symptom: "Base image cache always MISS"
+    causes:
+      - "Cache key includes Dockerfile hash, which is changing"
+      - "GitHub Actions cache expired (7 days unused)"
+      - "Cache was manually cleared"
+    solution: "Review recent Dockerfile changes and cache configuration"
+
+  inconsistent_efficiency:
+    symptom: "Cache hit rate varies wildly"
+    cause: "Different change types have different expected cache behavior"
+    solution: |
+      This is normal:
+      - code-only: HIGH hit rate expected
+      - deps (package.json): MEDIUM (npm layer rebuilds)
+      - dockerfile: LOW (full rebuild)
+
+tips:
+  - "Always fetch notes before analysis: `git fetch origin refs/notes/ci/cache-metrics`"
+  - "Use `--since` and `--until` with git log to filter time ranges"
+  - "Parse INI format with `grep "^key" | cut -d'=' -f2 | xargs`"
+  - "Group data by change_type for meaningful insights"
+  - "Compare current metrics to historical baseline"
+  - "Look for sudden changes in cache_status (HIT -> MISS)"
+
+output_format: |
+  Present analysis in clear sections:
+  1. Summary statistics (hit rate, time saved)
+  2. Breakdown by change type
+  3. Trend identification
+  4. Specific issues or anomalies
+  5. Actionable recommendations
+
+  Use visual indicators:
+  - ✓ for good performance
+  - ⚠️ for concerning trends
+  - 📊 for statistical insights
+  - 💡 for recommendations
