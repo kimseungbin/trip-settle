@@ -134,6 +134,34 @@ test.describe('Onboarding Flow', () => {
 		expect(settings.features.currencyMode).toBe('multi')
 	})
 
+	test('should have visible focus on first currency option when page loads', async ({ page }) => {
+		await page.goto('/onboarding')
+
+		// The first currency option (Single Currency button) should have focus immediately
+		const singleCurrencyButton = page.getByRole('button', { name: /single currency/i })
+		await expect(singleCurrencyButton).toBeFocused()
+	})
+
+	test('should support Tab navigation between currency options', async ({ page }) => {
+		await page.goto('/onboarding')
+
+		// First button should have initial focus
+		const singleCurrencyButton = page.getByRole('button', { name: /single currency/i })
+		const multiCurrencyButton = page.getByRole('button', { name: /multiple currencies/i })
+
+		// Verify initial focus
+		await expect(singleCurrencyButton).toBeFocused()
+
+		// Press Tab to move to next option
+		await page.keyboard.press('Tab')
+		await expect(multiCurrencyButton).toBeFocused()
+
+		// Press Tab again to move to skip button
+		await page.keyboard.press('Tab')
+		const skipButton = page.getByRole('button', { name: /skip/i })
+		await expect(skipButton).toBeFocused()
+	})
+
 	test('should display currency mode options', async ({ page }) => {
 		await page.goto('/onboarding')
 

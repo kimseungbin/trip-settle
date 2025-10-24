@@ -4,10 +4,19 @@
 	import type { CurrencyMode } from '../stores/settings.svelte'
 	import CurrencySelector from './CurrencySelector.svelte'
 	import { DEFAULT_CURRENCY } from '../data/currencies'
+	import { onMount } from 'svelte'
 
 	let currencyMode = $state<CurrencyMode>('multi')
 	let defaultCurrency = $state(DEFAULT_CURRENCY)
 	let showCurrencySelector = $state(false)
+	let firstButton: HTMLButtonElement
+
+	/**
+	 * Focus the first interactive element on mount for keyboard accessibility
+	 */
+	onMount(() => {
+		firstButton?.focus()
+	})
 
 	/**
 	 * Select currency mode and proceed to currency selection if needed
@@ -82,7 +91,9 @@
 
 			<div class="mode-options">
 				<button
+					bind:this={firstButton}
 					class="mode-option"
+					tabindex="0"
 					onclick={() => selectCurrencyMode('single')}
 					onkeydown={e => {
 						if (e.key === 'Enter') {
@@ -99,6 +110,7 @@
 
 				<button
 					class="mode-option"
+					tabindex="0"
 					onclick={() => selectCurrencyMode('multi')}
 					onkeydown={e => {
 						if (e.key === 'Enter') {
@@ -119,7 +131,7 @@
 				Use <kbd>Tab</kbd> to navigate and <kbd>Enter</kbd> to select
 			</p>
 
-			<button class="skip-link" onclick={skipOnboarding}>Skip and use multi-currency mode</button>
+			<button class="skip-link" tabindex="0" onclick={skipOnboarding}>Skip and use multi-currency mode</button>
 		</div>
 
 		<p class="keyboard-hint">Press <kbd>Esc</kbd> to skip</p>
