@@ -199,6 +199,38 @@ npm run test:cov --workspace=backend
 npm run test:e2e --workspace=backend
 ```
 
+**Backend Run Modes:**
+
+The backend has two distinct run modes depending on the context:
+
+1. **Development Mode (Watch)** - `npm run dev`
+   - **When:** Local development (native or Docker)
+   - **What:** TypeScript compilation in watch mode with hot reload
+   - **Why:** Fast iteration during development
+   - **Command:** `npm run dev --workspace=backend`
+   - **Use cases:**
+     - Local native development
+     - Docker Compose local development (`docker-compose up`)
+     - Interactive debugging sessions
+
+2. **Production Mode (Build Once)** - `npm run build` then `npm run start`
+   - **When:** CI/CD E2E tests, production deployment
+   - **What:** Build TypeScript once, run compiled JavaScript
+   - **Why:** Faster startup, more stable for automated tests
+   - **Commands:**
+     ```bash
+     npm run build --workspace=backend
+     npm run start --workspace=backend
+     ```
+   - **Use cases:**
+     - GitHub Actions CI E2E tests
+     - Production deployments (ECS, Lambda, etc.)
+     - Docker E2E test environments
+
+**Important for Claude Code:** When modifying E2E test Docker configurations (docker-compose.e2e.yml, Dockerfile), ensure backend uses appropriate mode:
+- Local Docker E2E: Use watch mode (faster iteration, code changes reflected immediately)
+- CI E2E: Use build mode (faster startup, no unnecessary file watching overhead)
+
 ### Infrastructure (packages/infra)
 
 ```bash
