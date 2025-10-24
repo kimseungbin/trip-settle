@@ -153,11 +153,11 @@
 		<div class="currency-selection">
 			<div class="currency-selector-wrapper">
 				<label for="default-currency">Default Currency:</label>
-				<CurrencySelector bind:value={defaultCurrency} autofocus={true} />
+				<CurrencySelector bind:value={defaultCurrency} autofocus={true} initialOpen={true} />
 				<p class="currency-keyboard-hint">
 					<span class="hint-icon">⌨️</span>
-					<kbd>Enter</kbd>/<kbd>Space</kbd>/<kbd>↓</kbd> to open • <kbd>↑</kbd><kbd>↓</kbd> to navigate •
-					<kbd>Enter</kbd> to select
+					Type to search • <kbd>↑</kbd><kbd>↓</kbd> to navigate • <kbd>Enter</kbd> to select •
+					<kbd>Esc</kbd> to close
 				</p>
 			</div>
 

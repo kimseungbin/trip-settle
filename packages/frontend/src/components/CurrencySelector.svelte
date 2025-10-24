@@ -7,23 +7,31 @@
 		sessionCurrencies = [],
 		onselect,
 		autofocus = false,
+		initialOpen = false,
 	}: {
 		value?: string
 		sessionCurrencies?: string[]
 		onselect?: (event: CustomEvent<{ currency: string }>) => void
 		autofocus?: boolean
+		initialOpen?: boolean
 	} = $props()
 
-	let isOpen = $state(false)
+	let isOpen = $state(initialOpen)
 	let searchQuery = $state('')
 	let selectedIndex = $state(0)
 	let inputElement = $state<HTMLInputElement | undefined>(undefined)
 	let buttonElement = $state<HTMLButtonElement | undefined>(undefined)
 
-	// Auto-focus button when component mounts (if autofocus prop is true)
+	// Auto-focus appropriate element when component mounts
 	$effect(() => {
-		if (autofocus && buttonElement) {
-			setTimeout(() => buttonElement?.focus(), 100)
+		if (autofocus) {
+			if (initialOpen && inputElement) {
+				// If starting open, focus the search input
+				setTimeout(() => inputElement?.focus(), 100)
+			} else if (buttonElement) {
+				// If starting closed, focus the button
+				setTimeout(() => buttonElement?.focus(), 100)
+			}
 		}
 	})
 
