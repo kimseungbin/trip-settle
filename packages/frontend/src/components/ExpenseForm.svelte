@@ -2,6 +2,7 @@
 	import CurrencySelector from './CurrencySelector.svelte'
 	import { DEFAULT_CURRENCY } from '../data/currencies'
 	import { settings } from '../stores/settings.svelte'
+	import { onMount } from 'svelte'
 
 	let {
 		onAdd,
@@ -60,6 +61,13 @@
 			handleSubmit()
 		}
 	}
+
+	/**
+	 * Focus the name input on mount for keyboard accessibility
+	 */
+	onMount(() => {
+		nameInput?.focus()
+	})
 </script>
 
 <div class="form-container">
