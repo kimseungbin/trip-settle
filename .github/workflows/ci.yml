@@ -122,6 +122,29 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Cache Playwright base image
+        id: cache-playwright-image
+        uses: actions/cache@v4
+        with:
+          path: /tmp/playwright-image.tar
+          key: playwright-base-image-v1.56.1-noble-${{ hashFiles('packages/frontend/Dockerfile.e2e') }}
+          restore-keys: |
+            playwright-base-image-v1.56.1-noble-
+
+      - name: Load or pull Playwright base image
+        run: |
+          if [ -f /tmp/playwright-image.tar ]; then
+            echo "📦 Loading cached Playwright base image (786MB)..."
+            docker load -i /tmp/playwright-image.tar
+            echo "✅ Base image loaded from cache"
+          else
+            echo "⬇️ Pulling Playwright base image (first time - 786MB)..."
+            docker pull mcr.microsoft.com/playwright:v1.56.1-noble
+            echo "💾 Saving base image to cache..."
+            docker save mcr.microsoft.com/playwright:v1.56.1-noble -o /tmp/playwright-image.tar
+            echo "✅ Base image pulled and cached for future runs"
+          fi
+
       - name: Cleanup any existing Docker resources
         run: |
           echo "🧹 Cleaning up any existing Docker resources..."

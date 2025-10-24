@@ -6,7 +6,8 @@
 # Checks performed:
 # 1. Code formatting (Prettier)
 # 2. Linting (ESLint)
-# 3. Build validation (all packages)
+# 3. Type checking (TypeScript + Svelte)
+# 4. Build validation (all packages)
 #
 # Note: E2E tests are NOT run in pre-commit due to slow execution time.
 #       Run manually before pushing: npm run test:e2e:docker
@@ -62,7 +63,15 @@ else
     print_error "Linting failed. Fix the issues above."
 fi
 
-# 4. Build all packages
+# 4. Type check all TypeScript files (including tests)
+print_step "Type checking TypeScript files..."
+if npm run type-check --workspace=frontend; then
+    print_success "Type checking passed"
+else
+    print_error "Type checking failed. Fix type errors above."
+fi
+
+# 5. Build all packages
 print_step "Building all packages..."
 if npm run build; then
     print_success "Build successful"
@@ -70,7 +79,7 @@ else
     print_error "Build failed. Fix compilation errors above."
 fi
 
-# 5. Clean build artifacts after validation
+# 6. Clean build artifacts after validation
 print_step "Cleaning build artifacts..."
 find packages/infra -type f \( -name "*.js" -o -name "*.d.ts" -o -name "*.js.map" \) ! -name "jest.config.js" ! -name ".eslintrc.js" -delete 2>/dev/null || true
 print_success "Build artifacts cleaned"

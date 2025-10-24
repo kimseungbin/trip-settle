@@ -25,6 +25,7 @@ describe('Settings Store', () => {
 					defaultCurrency: 'USD',
 				},
 				system: {
+					keyboardHints: {},
 					hasSeenKeyboardHint: true,
 				},
 			}
@@ -93,6 +94,7 @@ describe('Settings Store', () => {
 					defaultCurrency: 'EUR',
 				},
 				system: {
+					keyboardHints: {},
 					hasSeenKeyboardHint: false,
 				},
 			}
