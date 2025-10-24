@@ -114,6 +114,11 @@
 				</button>
 			</div>
 
+			<p class="keyboard-hint">
+				<span class="hint-icon">⌨️</span>
+				Use <kbd>Tab</kbd> to navigate and <kbd>Enter</kbd> to select
+			</p>
+
 			<button class="skip-link" onclick={skipOnboarding}>Skip and use multi-currency mode</button>
 		</div>
 
@@ -244,8 +249,27 @@
 	}
 
 	.mode-option:focus {
-		outline: 2px solid #ff3e00;
-		outline-offset: 2px;
+		outline: none;
+		border-color: #ff3e00;
+		box-shadow:
+			0 0 0 3px rgba(255, 62, 0, 0.2),
+			0 8px 16px rgba(255, 62, 0, 0.3);
+		transform: translateY(-4px);
+		animation: focusPulse 2s ease-in-out infinite;
+	}
+
+	@keyframes focusPulse {
+		0%,
+		100% {
+			box-shadow:
+				0 0 0 3px rgba(255, 62, 0, 0.2),
+				0 8px 16px rgba(255, 62, 0, 0.3);
+		}
+		50% {
+			box-shadow:
+				0 0 0 5px rgba(255, 62, 0, 0.3),
+				0 8px 20px rgba(255, 62, 0, 0.4);
+		}
 	}
 
 	.mode-icon {
@@ -302,9 +326,17 @@
 	}
 
 	.keyboard-hint {
-		color: #999;
-		font-size: 0.9rem;
-		margin-top: 2rem;
+		color: #666;
+		font-size: 0.95rem;
+		margin-top: 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+
+	.hint-icon {
+		font-size: 1.2rem;
 	}
 
 	kbd {
@@ -315,6 +347,8 @@
 		font-family: monospace;
 		font-size: 0.85rem;
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+		font-weight: 600;
+		color: #333;
 	}
 
 	/* Mobile responsive */
