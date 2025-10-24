@@ -19,6 +19,25 @@ echo "🎣 Git Hook: Pre-commit"
 echo "=========================================="
 echo ""
 
+# Check for UI changes that may require visual snapshot updates
+changed_files=$(git diff --cached --name-only --diff-filter=ACM)
+
+if echo "$changed_files" | grep -qE "\.(svelte|css)$"; then
+    echo "⚠️  UI Changes Detected"
+    echo "------------------------------------------"
+    echo "You've modified UI files that may affect visual snapshots:"
+    echo ""
+    echo "$changed_files" | grep -E "\.(svelte|css)$" | sed 's/^/  📄 /'
+    echo ""
+    echo "If this changes visual appearance, remember to update snapshots:"
+    echo "  • Add [update-snapshots] to commit message, OR"
+    echo "  • Comment /update-snapshots on PR after pushing"
+    echo ""
+    echo "See CLAUDE.md 'Playwright E2E Testing' for details."
+    echo "=========================================="
+    echo ""
+fi
+
 # Function to print step header
 print_step() {
     echo "▶ $1"
