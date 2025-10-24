@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		// NestJS-specific options
 		"module": "commonjs",
-		"target": "ES2021",
+		"target": "ES2022",
 		"emitDecoratorMetadata": true,
 
 		// Output
