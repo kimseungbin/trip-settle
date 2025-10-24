@@ -140,6 +140,23 @@ jobs:
           restore-keys: |
             playwright-base-image-v1.56.1-noble-
 
+      - name: Diagnose cache status
+        run: |
+          echo "=== CACHE DIAGNOSTIC INFORMATION ==="
+          echo "Cache hit: ${{ steps.cache-playwright-image.outputs.cache-hit }}"
+          echo "Cache primary key: ${{ steps.cache-playwright-image.outputs.cache-primary-key }}"
+          echo "Cache matched key: ${{ steps.cache-playwright-image.outputs.cache-matched-key }}"
+          echo "Dockerfile hash: ${{ hashFiles('packages/frontend/Dockerfile.e2e') }}"
+          echo ""
+          echo "Tar file check:"
+          if [ -f /tmp/playwright-image.tar ]; then
+            ls -lh /tmp/playwright-image.tar
+            echo "✅ Tar file exists (restored from cache)"
+          else
+            echo "❌ Tar file does not exist (cache miss - will pull and save)"
+          fi
+          echo "==================================="
+
       - name: Load or pull Playwright base image
         run: |
           START_TIME=$(date +%s)
@@ -235,6 +252,8 @@ jobs:
           [cache]
           base_image       = ${{ steps.cache-playwright-image.outputs.cache-hit == 'true' && 'HIT' || 'MISS' }}
           cache_key        = ${CACHE_KEY}
+          cache_primary_key = ${{ steps.cache-playwright-image.outputs.cache-primary-key }}
+          cache_matched_key = ${{ steps.cache-playwright-image.outputs.cache-matched-key }}
           dockerfile_hash  = ${DOCKERFILE_HASH}
           layer_cache      = gha (GitHub Actions cache backend)
           build_action     = docker/build-push-action@v6
@@ -245,6 +264,7 @@ jobs:
           tar_file_exists     = ${TAR_EXISTS}
           tar_file_size_mb    = ${TAR_FILE_SIZE_MB:-0}
           expected_size_mb    = 786
+          cache_restore_issue = ${{ steps.cache-playwright-image.outputs.cache-hit != 'true' && env.TAR_EXISTS == 'true' && 'WARNING: Tar exists but cache missed' || 'none' }}
 
           [info]
           note          = Enhanced metrics with diagnostics for cache debugging
@@ -307,6 +327,25 @@ jobs:
           name: playwright-test-results
           path: packages/frontend/test-results/
           retention-days: 30
+
+      - name: Verify cache will be saved
+        if: always()
+        run: |
+          echo "=== FINAL CACHE VERIFICATION ==="
+          echo "Checking if tar file exists for cache save..."
+          if [ -f /tmp/playwright-image.tar ]; then
+            TAR_SIZE=$(stat -c%s /tmp/playwright-image.tar 2>/dev/null || stat -f%z /tmp/playwright-image.tar)
+            TAR_SIZE_MB=$((TAR_SIZE / 1024 / 1024))
+            echo "✅ Tar file exists: ${TAR_SIZE_MB}MB"
+            echo "📤 Cache will be saved by actions/cache@v4 (automatic post-job)"
+            echo "   Cache key: playwright-base-image-v1.56.1-noble-${{ hashFiles('packages/frontend/Dockerfile.e2e') }}"
+            echo "   Next run should restore this cache"
+          else
+            echo "❌ WARNING: Tar file missing!"
+            echo "   Cache will NOT be saved"
+            echo "   Next run will pull base image again (786MB download)"
+          fi
+          echo "================================"
 
       - name: Clean up Docker resources
         if: always()
