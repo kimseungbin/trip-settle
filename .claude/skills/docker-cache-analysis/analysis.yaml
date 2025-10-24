@@ -12,6 +12,88 @@ description: |
 instructions: |
   When the user requests cache analysis or cache trend review:
 
+  ## Background: How Metrics Are Captured
+
+  Before analyzing metrics, understand how they're generated in the CI pipeline:
+
+  ### CI Workflow Integration
+
+  The `.github/workflows/ci.yml` workflow should include a step in the `e2e-tests` job:
+
+  ```yaml
+  - name: Capture Docker cache metrics
+    if: always()  # Run even if tests fail
+    run: |
+      # Extract metrics from Docker build output
+      .github/scripts/extract-cache-metrics.sh docker-build.log cache-note.txt
+
+      # Store in git notes
+      git config user.name "github-actions[bot]"
+      git config user.email "github-actions[bot]@users.noreply.github.com"
+      git notes --ref=ci/cache-metrics add -F cache-note.txt ${{ github.sha }}
+
+      # Push to remote
+      git push origin refs/notes/ci/cache-metrics
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ```
+
+  **Key points:**
+  - Runs after Docker build step (captures build output)
+  - Uses `extract-cache-metrics.sh` to parse Docker logs
+  - Stores notes in `refs/notes/ci/cache-metrics` namespace
+  - Pushes notes to remote for team access
+
+  ### Extraction Script Logic
+
+  The `.github/scripts/extract-cache-metrics.sh` script parses Docker BuildKit output:
+
+  **What it extracts:**
+  - Total build time (from final DONE line)
+  - Cached vs built layer counts (grep "CACHED")
+  - Base image status (checks for "pulling.*playwright")
+  - Cache hit rate calculation (CACHED / TOTAL × 100)
+
+  **Output format:** INI-style structure (see examples below)
+
+  **Common issues:**
+  - Script expects Docker BuildKit output format (default in GitHub Actions)
+  - Needs read access to Docker build log file
+  - Validates GITHUB_SHA environment variable exists
+
+  ### Git Notes Storage
+
+  **What are git notes?**
+  - Metadata attached to commits without changing commit history
+  - Stored in separate ref namespace (`refs/notes/ci/cache-metrics`)
+  - Not fetched by default (requires explicit fetch)
+  - Pushed/pulled independently from commits
+
+  **Storage location:**
+  - Local: `.git/refs/notes/ci/cache-metrics`
+  - Remote: `refs/notes/ci/cache-metrics` (separate from code refs)
+
+  **Note structure:** Each commit gets one note with cache metrics in INI format
+
+  ### Troubleshooting Capture Issues
+
+  **No notes being created:**
+  - Check if CI step is present in workflow
+  - Verify extraction script is executable (`chmod +x`)
+  - Check GITHUB_SHA environment variable is set
+  - Look for script errors in CI logs
+
+  **Notes not pushed to remote:**
+  - Verify GITHUB_TOKEN has write permissions
+  - Check git config is set (user.name, user.email)
+  - Ensure refs/notes/ci/cache-metrics exists in remote
+
+  **Incorrect metrics:**
+  - Validate Docker build output format (BuildKit)
+  - Check if build log file path is correct
+  - Review extraction script regex patterns
+  - Compare manual calculation vs script output
+
   ## Step 1: Fetch Cache Metrics Notes
 
   First, ensure git notes are available locally:

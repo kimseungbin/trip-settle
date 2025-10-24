@@ -49,6 +49,69 @@ git log --notes=ci/cache-metrics --format="%h %s" -20
 
 The CI workflow must be configured to capture cache metrics. See `.github/workflows/ci.yml` for the "Capture cache metrics" step.
 
+## How Metrics Are Captured
+
+Understanding the full pipeline helps with troubleshooting and maintenance.
+
+### CI Workflow Integration
+
+Cache metrics are captured automatically in the GitHub Actions `e2e-tests` job:
+
+```yaml
+# .github/workflows/ci.yml (e2e-tests job)
+- name: Capture Docker cache metrics
+  if: always()  # Run even if tests fail
+  run: |
+    # Extract metrics from Docker build output
+    .github/scripts/extract-cache-metrics.sh docker-build.log cache-note.txt
+
+    # Store in git notes
+    git config user.name "github-actions[bot]"
+    git config user.email "github-actions[bot]@users.noreply.github.com"
+    git notes --ref=ci/cache-metrics add -F cache-note.txt ${{ github.sha }}
+
+    # Push to remote
+    git push origin refs/notes/ci/cache-metrics
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+**What happens:**
+1. Docker build runs and outputs to log file
+2. Extraction script parses log and generates INI-format note
+3. Git note attached to commit using `refs/notes/ci/cache-metrics` namespace
+4. Note pushed to remote for team access
+
+### Extraction Script
+
+**File**: `.github/scripts/extract-cache-metrics.sh`
+
+**Input**: Docker BuildKit output (captured from build step)
+
+**Processing**:
+- Extracts total build time from final `DONE` line
+- Counts cached vs built layers (grep for `CACHED`)
+- Detects base image pulls (searches for `pulling.*playwright`)
+- Calculates cache hit rate percentage
+
+**Output**: INI-style note with sections for metadata, timing, cache stats, and layers
+
+### Git Notes Storage
+
+**Namespace**: `refs/notes/ci/cache-metrics`
+
+**Why git notes?**
+- Attach metadata to commits without changing commit history
+- Store independently from code (separate ref)
+- Team-wide visibility (pushed to remote)
+- Commit-specific (each commit gets its own metrics)
+
+**Note**: Git notes are NOT fetched by default. You must fetch them explicitly:
+
+```bash
+git fetch origin refs/notes/ci/cache-metrics:refs/notes/ci/cache-metrics
+```
+
 ## Metrics Captured
 
 The skill analyzes these metrics from git notes:
