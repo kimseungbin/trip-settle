@@ -67,8 +67,18 @@
 				event.preventDefault()
 				goBack()
 			} else if (event.key === 'Enter' && currencyMode === 'single') {
-				event.preventDefault()
-				completeOnboarding()
+				// Only intercept Enter if it's NOT coming from the currency selector
+				// The currency selector needs Enter to open/close and select currencies
+				const target = event.target as HTMLElement
+				const isCurrencySelectorElement =
+					target.closest('.currency-selector') || target.classList.contains('currency-selector')
+
+				if (!isCurrencySelectorElement) {
+					// Enter pressed on Continue button or elsewhere - complete onboarding
+					event.preventDefault()
+					completeOnboarding()
+				}
+				// Otherwise, let the CurrencySelector handle the Enter key
 			}
 		} else {
 			if (event.key === 'Escape') {
@@ -146,7 +156,8 @@
 				<CurrencySelector bind:value={defaultCurrency} autofocus={true} />
 				<p class="currency-keyboard-hint">
 					<span class="hint-icon">⌨️</span>
-					Press <kbd>Enter</kbd> to open, <kbd>↑</kbd><kbd>↓</kbd> to navigate, <kbd>Enter</kbd> to select
+					<kbd>Enter</kbd>/<kbd>Space</kbd>/<kbd>↓</kbd> to open • <kbd>↑</kbd><kbd>↓</kbd> to navigate •
+					<kbd>Enter</kbd> to select
 				</p>
 			</div>
 
@@ -156,7 +167,10 @@
 			</div>
 		</div>
 
-		<p class="keyboard-hint">Press <kbd>Enter</kbd> to continue or <kbd>Esc</kbd> to go back</p>
+		<p class="keyboard-hint">
+			<span class="hint-icon">⌨️</span>
+			<kbd>Enter</kbd> on Continue button to proceed • <kbd>Esc</kbd> to go back
+		</p>
 	{/if}
 </div>
 
