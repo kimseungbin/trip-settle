@@ -100,65 +100,13 @@ E2E and integration tests take 2-5 minutes and are run BEFORE `git push`, not du
 | **Pre-Push** | Integration + E2E | 2-5m | Before git push |
 | **CI/CD** | All (including visual) | 5-10m | Automated |
 
-## Claude Code: E2E Test Execution Rules (CRITICAL)
+## E2E Test Execution
 
-**CLAUDE CODE MUST NEVER RUN E2E TESTS AUTONOMOUSLY.**
+**E2E test commands require user approval** (enforced in `.claude/settings.json`).
 
-### Prohibited Commands
+During TDD cycles, only run unit tests (< 5 seconds). E2E tests take 2-5 minutes and are run before `git push`.
 
-Claude Code is **ABSOLUTELY FORBIDDEN** from running any of the following commands:
-
-- ❌ `npm run test:e2e` (any workspace or variant)
-- ❌ `npm run test:e2e:docker` (or any docker test variant)
-- ❌ `npx playwright test` (any arguments or flags)
-- ❌ `playwright test` (standalone or via npm script)
-- ❌ Any command containing `test:e2e`, `playwright test`, or similar E2E test execution
-- ❌ Any integration or end-to-end test execution command
-
-### Rationale
-
-1. **Speed**: E2E tests take 2-5 minutes minimum, completely breaking fast TDD cycles (< 5 seconds)
-2. **Resource Cost**: Launches browsers, Docker containers, and services unnecessarily during development
-3. **Workflow Violation**: Only human developers decide when to run E2E tests as part of pre-push validation
-4. **TDD Philosophy**: Active coding = unit tests only. E2E tests are for validation, not development.
-
-### When E2E Tests ARE Run
-
-- ✅ **Human developer** runs manually before `git push` as pre-push validation
-- ✅ **CI/CD** runs automatically in GitHub Actions on push/PR
-- ❌ **NEVER** during active development or TDD cycles by Claude Code
-
-### What Claude Code CAN Do
-
-- ✅ **Write** E2E test files (*.spec.ts in tests/e2e/ directory)
-- ✅ **Update** existing E2E test files when refactoring components
-- ✅ **Mention** that E2E tests may need updates after changes
-- ✅ **Suggest** the human run E2E tests before pushing
-- ✅ **Run** unit tests only (Vitest for frontend, Jest for backend)
-- ❌ **NEVER** execute E2E tests under any circumstances
-
-### Violation Consequences
-
-If Claude Code runs E2E tests:
-1. Wastes 2-5 minutes of development time
-2. Breaks TDD workflow and fast feedback loop
-3. Violates explicit project conventions
-4. May cause confusion with test results during active coding
-
-**Remember**: E2E tests are a **human decision**, not an automated development step.
-
-### Detailed Guidance
-
-For comprehensive testing strategy including:
-- Test pyramid structure and rationale
-- When to run which tests
-- Performance expectations
-- TDD workflow integration
-- Pre-push validation process
-
-**See**: `.claude/skills/tdd-workflow/workflow.yaml`
-
-This skill contains the authoritative testing guidance that Claude Code must follow.
+See `.claude/skills/tdd-workflow/workflow.yaml` for complete testing strategy.
 
 ## Monorepo Structure
 
