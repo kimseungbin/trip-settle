@@ -18,8 +18,9 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
-# Copy workspace root package files
+# Copy workspace root package files and TypeScript config
 COPY package*.json ./
+COPY tsconfig.base.json ./
 
 # ==================================================
 # Stage: backend-deps
