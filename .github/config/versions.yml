@@ -1,0 +1,33 @@
+# Centralized version configuration for GitHub Actions workflows
+# This file provides a single source of truth for versions used across all workflows
+#
+# Usage in workflows:
+#   1. Read versions using yq or other YAML parser
+#   2. Set as environment variables or use directly in steps
+#
+# When updating versions, only change this file to maintain consistency
+
+# Runtime versions
+node: '24'
+
+# Browser testing
+playwright: 'v1.56.1'
+playwright_base_image: 'mcr.microsoft.com/playwright:v1.56.1-noble'
+
+# Cache versions (increment when cache needs invalidation)
+cache_version: 'v1'
+npm_cache_version: 'v1'
+docker_cache_version: 'v1'
+
+# GitHub Actions versions
+actions_checkout: 'v4'
+actions_setup_node: 'v4'
+actions_cache: 'v4'
+actions_upload_artifact: 'v4'
+actions_download_artifact: 'v4'
+actions_github_script: 'v7'
+docker_setup_buildx: 'v3'
+docker_build_push: 'v6'
+aws_configure_credentials: 'v4'
+upload_pages_artifact: 'v3'
+deploy_pages: 'v4'

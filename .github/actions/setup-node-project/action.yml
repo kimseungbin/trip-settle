@@ -1,0 +1,43 @@
+name: 'Setup Node.js Project'
+description: 'Checkout code, setup Node.js, and install dependencies with caching'
+author: 'Trip Settle Team'
+
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '24'
+  working-directory:
+    description: 'Working directory for npm ci (defaults to repository root)'
+    required: false
+    default: '.'
+
+outputs:
+  cache-hit:
+    description: 'Whether npm cache was hit'
+    value: ${{ steps.cache-npm.outputs.cache-hit }}
+  node-version:
+    description: 'Node.js version that was installed'
+    value: ${{ steps.setup-node.outputs.node-version }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      id: setup-node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "📦 Installing dependencies..."
+        npm ci
+        echo "✅ Dependencies installed successfully"

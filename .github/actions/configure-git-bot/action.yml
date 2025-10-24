@@ -1,0 +1,19 @@
+name: 'Configure Git Bot'
+description: 'Configure git for GitHub Actions bot commits'
+author: 'Trip Settle Team'
+
+outputs:
+  user-name:
+    description: 'Git user name that was configured'
+    value: 'github-actions[bot]'
+  user-email:
+    description: 'Git user email that was configured'
+    value: 'github-actions[bot]@users.noreply.github.com'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure git for bot
+      shell: bash
+      run: |
+        ${{ github.action_path }}/../../../.github/scripts/git/configure-bot.sh

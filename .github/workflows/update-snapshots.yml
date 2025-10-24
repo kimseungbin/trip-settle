@@ -45,44 +45,12 @@ jobs:
       should_run: ${{ steps.check.outputs.should_run }}
       branch: ${{ steps.check.outputs.branch }}
     steps:
+      - name: Checkout code (for scripts)
+        uses: actions/checkout@v4
+
       - name: Check trigger condition
         id: check
-        run: |
-          SHOULD_RUN="false"
-          BRANCH="${{ github.ref_name }}"
-
-          # Manual workflow_dispatch
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            SHOULD_RUN="true"
-            if [ -n "${{ github.event.inputs.branch }}" ]; then
-              BRANCH="${{ github.event.inputs.branch }}"
-            fi
-          fi
-
-          # PR comment "/update-snapshots"
-          if [ "${{ github.event_name }}" = "issue_comment" ]; then
-            COMMENT="${{ github.event.comment.body }}"
-            if [[ "$COMMENT" == "/update-snapshots"* ]] && [ "${{ github.event.issue.pull_request }}" != "" ]; then
-              SHOULD_RUN="true"
-              # Get PR branch (requires additional API call, simplified here)
-              echo "PR comment trigger detected"
-            fi
-          fi
-
-          # Push with [update-snapshots] in commit message
-          if [ "${{ github.event_name }}" = "push" ]; then
-            # Use heredoc to safely handle multi-line commit messages
-            COMMIT_MSG=$(cat <<'EOF'
-          ${{ github.event.head_commit.message }}
-          EOF
-          )
-            if [[ "$COMMIT_MSG" == *"[update-snapshots]"* ]]; then
-              SHOULD_RUN="true"
-            fi
-          fi
-
-          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+        run: ./.github/scripts/snapshots/check-trigger.sh
 
   # Update snapshots
   update-snapshots:
@@ -104,13 +72,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Cleanup existing Docker resources
-        run: |
-          echo "🧹 Cleaning up Docker resources..."
-          # Stop and remove containers (anonymous volumes auto-cleaned with -v)
-          docker compose -f docker-compose.e2e.yml down -v --remove-orphans 2>/dev/null || true
-
-          # Remove any dangling images to free up space
-          docker image prune -f || true
+        run: ./.github/scripts/docker/cleanup-resources.sh docker-compose.e2e.yml
 
       - name: Run visual tests with snapshot update
         run: |
@@ -133,12 +95,13 @@ jobs:
             echo "✅ Snapshot changes detected"
           fi
 
+      - name: Configure git for bot
+        if: steps.check_changes.outputs.has_changes == 'true'
+        uses: ./.github/actions/configure-git-bot
+
       - name: Commit and push snapshot updates
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
           git add packages/frontend/tests
 
           # Create descriptive commit message
