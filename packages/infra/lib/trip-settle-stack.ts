@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib'
 import { Construct } from 'constructs'
-// import * as ec2 from 'aws-cdk-lib/aws-ec2'
+import * as ec2 from 'aws-cdk-lib/aws-ec2'
 // import * as rds from 'aws-cdk-lib/aws-rds'
 
 export class TripSettleStack extends cdk.Stack {
@@ -8,9 +8,36 @@ export class TripSettleStack extends cdk.Stack {
 		super(scope, id, props)
 
 		/*
+		 * VPC INFRASTRUCTURE
+		 *
+		 * Basic VPC setup without NAT Gateway to minimize costs.
+		 * Provides network foundation for future AWS resources.
+		 *
+		 * Current configuration:
+		 * - 2 Availability Zones for high availability
+		 * - Public and Private subnets
+		 * - NO NAT Gateway (saves ~$32/month)
+		 * - Internet Gateway for public subnet access
+		 *
+		 * Cost: ~$0/month (VPC itself is free, only data transfer charges apply)
+		 */
+
+		// VPC - No NAT Gateway to minimize costs
+		const vpc = new ec2.Vpc(this, 'TripSettleVpc', {
+			maxAzs: 2,
+			natGateways: 0, // No NAT Gateway = no $32/month charge
+		})
+
+		// Output VPC ID for reference
+		new cdk.CfnOutput(this, 'VpcId', {
+			value: vpc.vpcId,
+			description: 'VPC ID',
+		})
+
+		/*
 		 * DATABASE INFRASTRUCTURE - CURRENTLY DISABLED
 		 *
-		 * This infrastructure is commented out to eliminate AWS costs (~$47-52/month).
+		 * This infrastructure is commented out to eliminate AWS costs (~$15-20/month).
 		 * The backend currently uses pg-mem (in-memory PostgreSQL) for development,
 		 * which provides full PostgreSQL compatibility with zero setup.
 		 *
@@ -24,7 +51,7 @@ export class TripSettleStack extends cdk.Stack {
 		 * Option 1: Uncomment AWS RDS below (~$15-20/month)
 		 *   - Managed PostgreSQL on AWS
 		 *   - Automatic backups, high availability
-		 *   - Requires uncommenting VPC and RDS resources below
+		 *   - Requires uncommenting RDS resources below
 		 *
 		 * Option 2: Use free external services (0-500MB free tier)
 		 *   - Neon (https://neon.tech) - 0.5GB free, serverless Postgres
@@ -36,12 +63,6 @@ export class TripSettleStack extends cdk.Stack {
 		 *   - Free for 12 months, then ~$15-20/month
 		 *   - Change instanceType below to t2.micro for free tier
 		 */
-
-		// // VPC - Costs ~$32/month for NAT Gateway
-		// const vpc = new ec2.Vpc(this, 'TripSettleVpc', {
-		// 	maxAzs: 2,
-		// 	natGateways: 1,
-		// })
 
 		// // RDS PostgreSQL Database - Costs ~$15-20/month
 		// const database = new rds.DatabaseInstance(this, 'TripSettleDatabase', {
