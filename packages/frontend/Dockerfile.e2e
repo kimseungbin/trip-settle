@@ -1,10 +1,11 @@
-# Dockerfile for running Playwright E2E tests
-# Based on official Playwright Docker image with pre-installed browsers
+# Multi-stage Dockerfile for Playwright E2E tests
+# Optimized for CI/CD with dependency caching
 
-# Use official Playwright image with specific version (must match package.json)
-FROM mcr.microsoft.com/playwright:v1.56.1-noble
+# ============================================
+# Stage 1: Dependencies - Install npm packages
+# ============================================
+FROM mcr.microsoft.com/playwright:v1.56.1-noble AS dependencies
 
-# Set working directory
 WORKDIR /app
 
 # Copy package files for dependency installation
@@ -13,7 +14,13 @@ COPY package*.json ./
 COPY packages/frontend/package*.json ./packages/frontend/
 
 # Install dependencies (run as root for native modules)
+# This layer is cached unless package.json changes
 RUN npm ci --workspace=frontend --include=dev
+
+# ============================================
+# Stage 2: Runtime - Setup user and copy code
+# ============================================
+FROM dependencies AS runtime
 
 # Create pwuser if it doesn't exist (before COPY to preserve cache)
 RUN if ! id -u pwuser > /dev/null 2>&1; then \
