@@ -4,11 +4,11 @@
 services:
   # Backend service (multi-stage build with cached dependencies)
   backend:
-    image: ${BACKEND_IMAGE:-}
+    image: ${BACKEND_IMAGE:-trip-settle-backend:local}
     build:
       context: .
       dockerfile: Dockerfile
-      target: backend-dev
+      target: ${BACKEND_TARGET:-backend-dev}
     working_dir: /app/packages/backend
     volumes:
       # Mount source code for hot reload
@@ -30,7 +30,7 @@ services:
 
   # Frontend service (multi-stage build with cached dependencies)
   frontend:
-    image: ${FRONTEND_IMAGE:-}
+    image: ${FRONTEND_IMAGE:-trip-settle-frontend:local}
     build:
       context: .
       dockerfile: Dockerfile

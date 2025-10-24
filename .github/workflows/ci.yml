@@ -82,7 +82,65 @@ jobs:
           path: build-log.txt
           retention-days: 30
 
-  # Job 3: Unit tests
+  # Job 3: Build and cache Docker base images
+  docker-images:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build]  # Run after TypeScript build succeeds
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and cache backend-e2e image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: backend-e2e
+          push: false
+          load: true
+          tags: trip-settle-backend:ci
+          cache-from: type=gha,scope=backend-e2e
+          cache-to: type=gha,mode=max,scope=backend-e2e
+
+      - name: Build and cache frontend-dev image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: frontend-dev
+          push: false
+          load: true
+          tags: trip-settle-frontend:ci
+          cache-from: type=gha,scope=frontend-dev
+          cache-to: type=gha,mode=max,scope=frontend-dev
+
+      - name: Save backend image
+        run: docker save trip-settle-backend:ci -o /tmp/backend-image.tar
+
+      - name: Save frontend image
+        run: docker save trip-settle-frontend:ci -o /tmp/frontend-image.tar
+
+      - name: Upload backend image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-image
+          path: /tmp/backend-image.tar
+          retention-days: 1
+
+      - name: Upload frontend image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-image
+          path: /tmp/frontend-image.tar
+          retention-days: 1
+
+  # Job 4: Unit tests
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -113,12 +171,12 @@ jobs:
             npm run test --workspace=${{ matrix.package }} -- --passWithNoTests
           fi
 
-  # Job 4: E2E tests with Docker
+  # Job 5: E2E tests with Docker
   e2e-tests:
     name: E2E Tests (Docker)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [build]  # Run after build passes (quality runs in parallel)
+    needs: [docker-images]  # Run after Docker images are built
     # Prevent multiple E2E test runs from conflicting
     concurrency:
       group: e2e-tests-${{ github.ref }}
@@ -130,6 +188,26 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: Download backend image
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-image
+          path: /tmp
+
+      - name: Download frontend image
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-image
+          path: /tmp
+
+      - name: Load pre-built images
+        run: |
+          echo "📦 Loading pre-built Docker images..."
+          docker load -i /tmp/backend-image.tar
+          docker load -i /tmp/frontend-image.tar
+          echo "✅ Images loaded successfully"
+          docker images | grep trip-settle
 
       - name: Cache Playwright base image
         id: cache-playwright-image
@@ -305,10 +383,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run E2E tests with pre-built image
+      - name: Run E2E tests with pre-built images
         run: |
-          # Use pre-built image in docker-compose
-          PLAYWRIGHT_IMAGE=trip-settle-playwright:ci docker compose -f docker-compose.e2e.yml up --abort-on-container-exit
+          # Use pre-built images in docker-compose
+          BACKEND_IMAGE=trip-settle-backend:ci \
+          BACKEND_TARGET=backend-e2e \
+          FRONTEND_IMAGE=trip-settle-frontend:ci \
+          PLAYWRIGHT_IMAGE=trip-settle-playwright:ci \
+          docker compose -f docker-compose.e2e.yml up --abort-on-container-exit
         env:
           DOCKER_USER: root  # Run as root in CI to avoid permission issues with bind mounts
 

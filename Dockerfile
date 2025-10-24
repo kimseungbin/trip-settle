@@ -59,6 +59,33 @@ ENTRYPOINT ["dumb-init", "--"]
 CMD ["npm", "run", "dev"]
 
 # ==================================================
+# Stage: backend-e2e
+# Backend for E2E testing (build once, no watch)
+# ==================================================
+FROM backend-deps AS backend-e2e
+
+# Copy shared config
+COPY config ./config
+
+# Copy backend source code
+COPY packages/backend ./packages/backend
+
+# Set working directory to backend
+WORKDIR /app/packages/backend
+
+# Build TypeScript once (no watch mode needed for E2E tests)
+RUN npm run build
+
+# Expose NestJS port
+EXPOSE 3000
+
+# Use dumb-init to handle signals properly (graceful shutdown)
+ENTRYPOINT ["dumb-init", "--"]
+
+# Run compiled JavaScript (production mode, no watch)
+CMD ["npm", "run", "start"]
+
+# ==================================================
 # Stage: frontend-deps
 # Install frontend dependencies
 # ==================================================
