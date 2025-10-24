@@ -1,5 +1,5 @@
 name: 'Setup Node.js Project'
-description: 'Checkout code, setup Node.js, and install dependencies with caching'
+description: 'Setup Node.js and install dependencies with caching (requires prior checkout)'
 author: 'Trip Settle Team'
 
 inputs:
@@ -23,9 +23,6 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
     - name: Setup Node.js
       id: setup-node
       uses: actions/setup-node@v4

@@ -458,6 +458,7 @@ Pre-commit hooks validate code quality before commits:
 - Code formatting (Prettier)
 - Linting (ESLint)
 - Build compilation (all packages)
+- **Visual snapshot validation** (enforced when UI files changed)
 
 **Location**: `.githooks/` directory (version-controlled)
 
@@ -468,6 +469,24 @@ chmod +x .githooks/*
 ```
 
 **Note**: E2E tests NOT run in hooks (too slow). Run manually before push: `npm run test:e2e:docker`
+
+### Snapshot Handling Enforcement
+
+When committing changes to `.svelte` or `.css` files, the pre-commit hook **requires** explicit snapshot handling:
+
+**Required keywords (add to commit message):**
+
+1. **`[update-snapshots]`** - UI appearance changed
+   - Use when: Styling, layout, colors, new visual elements
+   - CI will automatically update snapshots after push
+   - Example: `git commit -m "feat: Redesign button [update-snapshots]"`
+
+2. **`[skip-snapshots]`** - UI files changed but appearance unchanged
+   - Use when: Internal refactoring, prop renaming, type changes
+   - You confirm no visual changes occurred
+   - Example: `git commit -m "refactor: Extract component logic [skip-snapshots]"`
+
+**Why this matters**: Visual regression tests fail when UI changes aren't reflected in snapshots. Explicit declaration prevents forgotten updates and CI failures.
 
 **Bypass hook** (use sparingly):
 ```bash
