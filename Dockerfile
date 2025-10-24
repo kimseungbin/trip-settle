@@ -22,6 +22,11 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.base.json ./
 
+# Install root dependencies once (shared by all workspaces)
+# These include: typescript, eslint, prettier, etc.
+# Cached unless root package.json changes
+RUN npm ci --ignore-scripts --omit=optional
+
 # ==================================================
 # Stage: backend-deps
 # Install backend dependencies
@@ -31,7 +36,8 @@ FROM base AS backend-deps
 # Copy backend package files
 COPY packages/backend/package*.json ./packages/backend/
 
-# Install backend dependencies (cached unless package.json changes)
+# Install backend-specific dependencies (root deps already installed in base)
+# Cached unless backend package.json changes
 RUN npm ci --workspace=backend --include=dev
 
 # ==================================================
@@ -94,7 +100,8 @@ FROM base AS frontend-deps
 # Copy frontend package files
 COPY packages/frontend/package*.json ./packages/frontend/
 
-# Install frontend dependencies (cached unless package.json changes)
+# Install frontend-specific dependencies (root deps already installed in base)
+# Cached unless frontend package.json changes
 RUN npm ci --workspace=frontend --include=dev
 
 # ==================================================
