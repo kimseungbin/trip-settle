@@ -474,63 +474,27 @@ Note: The development environment uses pg-mem for zero-configuration PostgreSQL.
 
 ## Git Hooks
 
-The project uses custom git hooks stored in the `.githooks/` directory to ensure code quality before commits. These hooks are version-controlled and shared across the team.
+Pre-commit hooks validate code quality before commits:
+- Code formatting (Prettier)
+- Linting (ESLint)
+- Build compilation (all packages)
 
-### Available Hooks
+**Location**: `.githooks/` directory (version-controlled)
 
-- **pre-commit**: Runs before each commit to validate:
-  - Code formatting (Prettier)
-  - Linting (ESLint)
-  - Build compilation (all packages)
-  - Cleans build artifacts after validation
-
-**Note**: E2E tests are NOT run in pre-commit hooks due to slow execution time (several minutes with Docker). Run E2E tests manually before pushing:
-
+**Setup** (one-time, after cloning):
 ```bash
-npm run test:e2e:docker
-```
-
-### Setting Up Git Hooks
-
-Git hooks must be enabled manually after cloning the repository. Run these commands once:
-
-```bash
-# Configure git to use the .githooks directory
 git config core.hooksPath .githooks
-
-# Make all hooks executable (required on Unix-based systems)
 chmod +x .githooks/*
 ```
 
-### Verification
+**Note**: E2E tests NOT run in hooks (too slow). Run manually before push: `npm run test:e2e:docker`
 
-To verify the hooks are configured correctly, check your git config:
-
-```bash
-git config core.hooksPath
-# Should output: .githooks
-```
-
-Try making a test commit - you should see the pre-commit hook output.
-
-### Why Custom Hooks Directory?
-
-By default, git hooks live in `.git/hooks/` which is **not tracked by version control**. Using a custom directory (`.githooks/`) allows us to:
-
-1. **Version control hooks**: All team members get the same hooks
-2. **Easy updates**: Hook changes propagate via git pull
-3. **No external dependencies**: Works without tools like husky
-4. **Explicit opt-in**: Developers consciously enable hooks after understanding what they do
-
-### Disabling Hooks Temporarily
-
-If you need to bypass hooks for a specific commit (e.g., work-in-progress):
-
+**Bypass hook** (use sparingly):
 ```bash
 git commit --no-verify -m "WIP: Your message"
 ```
 
-**Note**: Use `--no-verify` sparingly. It's better to fix issues caught by hooks than to bypass them.
+For setup, verification, and troubleshooting, see `.claude/skills/git-hooks-setup/SKILL.md`
 
 ## TypeScript Configuration
 

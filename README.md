@@ -100,6 +100,51 @@ By default, git hooks live in `.git/hooks/` which is **not tracked by version co
 3. **No external dependencies**: Works without tools like husky
 4. **Explicit opt-in**: Developers consciously enable hooks after understanding what they do
 
+### Git Hooks
+
+The project uses pre-commit hooks to validate code quality before commits. These hooks run automatically before each commit to check:
+
+- Code formatting (Prettier)
+- Linting (ESLint)
+- Build compilation (all packages)
+
+**Note**: E2E tests are NOT run in hooks due to slow execution time. Run them manually before pushing: `npm run test:e2e:docker`
+
+#### Setting Up Git Hooks
+
+After cloning the repository, enable custom hooks (one-time setup):
+
+```bash
+# Configure git to use the .githooks directory
+git config core.hooksPath .githooks
+
+# Make all hooks executable (required on Unix-based systems)
+chmod +x .githooks/*
+```
+
+#### Verification
+
+Verify hooks are configured correctly:
+
+```bash
+git config core.hooksPath
+# Should output: .githooks
+```
+
+Try making a test commit - you should see the pre-commit hook output.
+
+#### Bypassing Hooks Temporarily
+
+If you need to bypass hooks for a specific commit (e.g., work-in-progress):
+
+```bash
+git commit --no-verify -m "WIP: Your message"
+```
+
+**Note**: Use `--no-verify` sparingly. It's better to fix issues caught by hooks than to bypass them.
+
+For detailed troubleshooting and hook internals, see `.claude/skills/git-hooks-setup/SKILL.md`
+
 **Why No .env Files?**
 
 The project uses TypeScript-based configuration for:
