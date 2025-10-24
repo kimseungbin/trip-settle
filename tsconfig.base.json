@@ -19,6 +19,7 @@
 		// Interop constraints
 		"isolatedModules": true,
 		"forceConsistentCasingInFileNames": true,
+		"experimentalDecorators": true,
 
 		// Type roots for monorepo structure
 		"typeRoots": ["./node_modules/@types", "../node_modules/@types"]

@@ -5,7 +5,6 @@
 		"module": "commonjs",
 		"target": "ES2021",
 		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
 
 		// Output
 		"outDir": "./dist",
@@ -24,7 +23,6 @@
 		"noFallthroughCasesInSwitch": false,
 
 		// Monorepo type resolution
-		"typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
 		"types": []
 	},
 	"include": ["src/**/*", "../../config/**/*"]
