@@ -149,6 +149,8 @@ test.describe('Keyboard Navigation', () => {
 	})
 
 	test('can fill form entirely with keyboard', async ({ page }) => {
+		const submitButton = page.getByRole('button', { name: 'Add' })
+
 		// Start from beginning (press Tab until we reach the form)
 		await page.keyboard.press('Tab')
 
@@ -159,13 +161,16 @@ test.describe('Keyboard Navigation', () => {
 		await page.keyboard.press('Tab')
 		await page.keyboard.type('42.99')
 
-		// Tab through currency selector (or skip if auto-focused)
+		// Tab through currency selector
 		await page.keyboard.press('Tab')
 
 		// Tab to submit button
 		await page.keyboard.press('Tab')
 
-		// Submit with Enter or Space
+		// Verify submit button has focus
+		await expect(submitButton).toBeFocused()
+
+		// Submit with Enter
 		await page.keyboard.press('Enter')
 
 		// Verify expense was added
