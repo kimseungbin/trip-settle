@@ -26,6 +26,12 @@ on:
     branches:
       - '**'
 
+# Prevent simultaneous snapshot update runs on the same branch
+# Queue new runs to ensure all updates complete without conflicts
+concurrency:
+  group: update-snapshots-${{ github.ref }}
+  cancel-in-progress: false
+
 # Sets permissions of the GITHUB_TOKEN to allow pushing commits
 permissions:
   contents: write

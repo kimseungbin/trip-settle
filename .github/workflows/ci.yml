@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+# Prevent simultaneous workflow runs on the same branch
+# Queue new runs to ensure all commits are validated
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write  # Required to push git notes (Docker cache metrics)
 
@@ -116,7 +122,7 @@ jobs:
     # Prevent multiple E2E test runs from conflicting
     concurrency:
       group: e2e-tests-${{ github.ref }}
-      cancel-in-progress: true
+      cancel-in-progress: false
 
     steps:
       - name: Checkout code
