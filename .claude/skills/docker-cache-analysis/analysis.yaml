@@ -111,24 +111,43 @@ instructions: |
 
   ## Step 2: Extract Recent Metrics
 
-  Retrieve cache metrics from recent commits (default: last 20):
+  Retrieve cache metrics from recent commits.
+
+  **IMPORTANT**: Claude Code's Bash tool has issues with complex while loops.
+  Use these simpler commands instead:
 
   ```bash
-  # Get last 20 commits with cache metrics
-  git log --all --format="%H|%h|%s|%ar" -20 | while IFS='|' read full_hash short_hash subject rel_time; do
-    NOTE=$(git notes --ref=ci/cache-metrics show $full_hash 2>/dev/null)
-    if [ -n "$NOTE" ]; then
-      # Parse INI-style note
-      timestamp=$(echo "$NOTE" | grep "^timestamp" | cut -d'=' -f2 | xargs)
-      commit=$(echo "$NOTE" | grep "^commit" | cut -d'=' -f2 | xargs)
-      base_status=$(echo "$NOTE" | grep "^base_image" | cut -d'=' -f2 | xargs)
-      cache_status=$(echo "$NOTE" | grep "^cache_status" | cut -d'=' -f2 | xargs)
-      change_type=$(echo "$NOTE" | grep "^change_type" | cut -d'=' -f2 | xargs)
+  # Step 1: List all commits with cache notes
+  git notes --ref=ci/cache-metrics list
 
-      # Output structured data
-      echo "$timestamp|$commit|$base_status|$cache_status|$change_type|$subject"
-    fi
-  done
+  # Step 2: Show metrics for specific commits (use commit hashes from step 1)
+  # Extract commit hash from second column of notes list output
+  git notes --ref=ci/cache-metrics show <commit-hash>
+
+  # Step 3: Get commit context (subject, date)
+  git show --no-patch --format="%h: %s (%ar)" <commit-hash>
+  ```
+
+  **Recommended workflow**:
+  1. Get list of all commits with notes
+  2. Extract commit hashes (second column)
+  3. For each hash, run separate commands to get:
+     - The note content: `git notes --ref=ci/cache-metrics show <hash>`
+     - The commit context: `git show --no-patch --format="%h: %s (%ar)" <hash>`
+  4. Parse the INI-format note data using grep
+
+  **Example extraction**:
+  ```bash
+  # Get all commits with notes
+  git notes --ref=ci/cache-metrics list
+
+  # For each commit hash (e.g., 14f36b2):
+  git notes --ref=ci/cache-metrics show 14f36b2
+  git show --no-patch --format="%h: %s (%ar)" 14f36b2
+
+  # Parse specific fields from note
+  git notes --ref=ci/cache-metrics show 14f36b2 | grep "^base_image" | cut -d'=' -f2 | xargs
+  git notes --ref=ci/cache-metrics show 14f36b2 | grep "^timestamp" | cut -d'=' -f2 | xargs
   ```
 
   ## Step 3: Analyze Trends
