@@ -142,14 +142,15 @@
 		<p class="tagline">Select the default currency for all expenses</p>
 
 		<div class="currency-selection">
+			<p class="currency-keyboard-hint">
+				<span class="hint-icon">⌨️</span>
+				Type to search • <kbd>↑</kbd><kbd>↓</kbd> to navigate • <kbd>Enter</kbd> to select •
+				<kbd>Esc</kbd> to close
+			</p>
+
 			<div class="currency-selector-wrapper">
 				<label for="default-currency">Default Currency:</label>
 				<CurrencySelector bind:value={defaultCurrency} autofocus={true} initialOpen={true} />
-				<p class="currency-keyboard-hint">
-					<span class="hint-icon">⌨️</span>
-					Type to search • <kbd>↑</kbd><kbd>↓</kbd> to navigate • <kbd>Enter</kbd> to select •
-					<kbd>Esc</kbd> to close
-				</p>
 			</div>
 
 			<div class="actions">
@@ -359,7 +360,7 @@
 	.currency-keyboard-hint {
 		color: #666;
 		font-size: 0.9rem;
-		margin-top: 0.75rem;
+		margin-bottom: 1.5rem;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
