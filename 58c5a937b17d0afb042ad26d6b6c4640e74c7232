@@ -1,0 +1,29 @@
+=== DOCKER BUILD CACHE METRICS ===
+
+[metadata]
+timestamp = 2025-10-24T05:39:46Z
+commit    = 58c5a93
+branch    = main
+run_url   = https://github.com/kimseungbin/trip-settle/actions/runs/18770713651
+
+[cache]
+base_image       = HIT
+cache_key        = playwright-base-image-v1.56.1-noble-f60a6c4950d7c02ba604ad10d507d007f0eb32fa9b24dfeed7be08e9d5223cea
+cache_primary_key =
+cache_matched_key =
+dockerfile_hash  = f60a6c4950d7c02ba604ad10d507d007f0eb32fa9b24dfeed7be08e9d5223cea
+layer_cache      = gha (GitHub Actions cache backend)
+build_action     = docker/build-push-action@v6
+
+[diagnostics]
+cache_source        = restored
+load_duration_sec   = 29
+tar_file_exists     = true
+tar_file_size_mb    = 2581
+expected_size_mb    = 786
+cache_restore_issue = none
+
+[info]
+note          = Enhanced metrics with diagnostics for cache debugging
+build_summary = See job summary for detailed layer breakdown
+next_run      = If tar_exists=true and size ~786MB, cache should save/restore
