@@ -25,5 +25,6 @@
 		// Monorepo type resolution
 		"types": []
 	},
-	"include": ["src/**/*", "../../config/**/*"]
+	"include": ["src/**/*", "../../config/**/*"],
+	"exclude": ["src/**/*.spec.ts", "test/**/*"]
 }
