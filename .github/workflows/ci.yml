@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write  # Required to push git notes (Docker cache metrics)
+
 jobs:
   # Job 1: Code quality checks (fast feedback)
   quality:
