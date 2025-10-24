@@ -1112,3 +1112,86 @@ git push
 - **No Local Setup**: Developers don't need Docker/Playwright installed locally
 
 **Golden Rule**: Visual snapshots are a **CI-only concern**. Developers write code, CI validates visuals.
+
+#### When to Update Visual Snapshots
+
+Visual snapshots capture the exact pixel-perfect appearance of your UI. They need updating whenever you intentionally change how something looks.
+
+**Always update snapshots after these changes:**
+
+1. **CSS Styling Modifications**
+   - Colors, backgrounds, borders
+   - Spacing (padding, margin, gap)
+   - Shadows, gradients, opacity
+   - Font sizes, weights, or families
+   - Focus/hover/active state styling
+
+2. **Visual Elements Added/Removed**
+   - Icons, emojis, badges
+   - Decorative elements
+   - Loading spinners, animations
+   - Visual feedback indicators
+
+3. **Component Layout Changes**
+   - Flexbox/grid structure
+   - Element positioning
+   - Component sizing
+   - Responsive breakpoints
+
+4. **Text Content Changes**
+   - Labels, placeholders, help text
+   - Error messages
+   - Button text
+
+**Do NOT update snapshots for these changes:**
+
+- Logic/behavior changes (state management, event handlers)
+- Test code modifications
+- Backend API changes
+- Documentation updates
+- Configuration changes
+
+**Detection and Workflow:**
+
+The project includes automated detection to prevent forgotten snapshot updates:
+
+1. **Pre-commit Hook Warning**: When you commit changes to `.svelte` or `.css` files, the pre-commit hook displays:
+   ```
+   ⚠️  UI Changes Detected
+   You've modified UI files that may affect visual snapshots:
+     📄 packages/frontend/src/components/Button.svelte
+
+   If this changes visual appearance, remember to update snapshots:
+     • Add [update-snapshots] to commit message, OR
+     • Comment /update-snapshots on PR after pushing
+   ```
+
+2. **CI Validation**: If you push without updating snapshots, CI will fail with visual diff errors
+
+3. **Snapshot Update Process**: Use any of the three methods documented above (commit message trigger recommended)
+
+**Best Practices:**
+
+- Update snapshots in the same PR that changes the UI (keeps changes atomic)
+- Review the visual diff artifacts in CI to verify changes are intentional
+- If CI visual tests fail unexpectedly, check for unintended style side effects
+- Never commit `*-darwin.png` or platform-specific snapshots (CI will reject them)
+
+**Example Workflow:**
+
+```bash
+# 1. Make UI changes
+git add packages/frontend/src/components/Button.svelte
+
+# 2. Commit with snapshot update flag
+git commit -m "feat(frontend): Redesign primary button [update-snapshots]"
+
+# 3. Push to trigger CI snapshot update
+git push
+
+# 4. CI automatically updates snapshots and commits
+# 5. Pull the updated snapshots
+git pull
+
+# 6. Done! CI will pass on next run
+```
