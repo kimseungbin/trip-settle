@@ -1,0 +1,16 @@
+=== DOCKER BUILD CACHE METRICS ===
+
+[metadata]
+timestamp = 2025-10-24T02:12:01Z
+commit    = fe7047c
+branch    = main
+run_url   = https://github.com/kimseungbin/trip-settle/actions/runs/18767399966
+
+[cache]
+base_image    = MISS
+layer_cache   = gha (GitHub Actions cache backend)
+build_action  = docker/build-push-action@v6
+
+[info]
+note          = Metrics captured from CI run
+build_summary = See job summary for detailed layer breakdown
