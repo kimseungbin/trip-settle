@@ -530,6 +530,50 @@ jobs:
           path: packages/frontend/test-results/
           retention-days: 30
 
+      - name: Capture E2E test failure metadata
+        if: always()  # Run even if tests fail
+        run: |
+          echo "📊 Capturing E2E test failure metadata..."
+
+          # Check if results.json exists
+          if [ ! -f packages/frontend/test-results/results.json ]; then
+            echo "⚠️ No results.json found - tests may not have run or JSON reporter not configured"
+            echo "Skipping failure metadata capture"
+            exit 0
+          fi
+
+          # Extract failure metadata using Node.js script
+          node .github/scripts/extract-e2e-failures.js \
+            packages/frontend/test-results/results.json \
+            e2e-failure-note.txt
+
+          # Store in git notes
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Fetch existing notes (may not exist yet)
+          git fetch origin refs/notes/ci/e2e-failures:refs/notes/ci/e2e-failures 2>/dev/null || \
+            echo "ℹ️ No existing notes found (first run)"
+
+          # Add note to current commit
+          if git notes --ref=ci/e2e-failures add -F e2e-failure-note.txt ${{ github.sha }} 2>/dev/null; then
+            echo "✅ E2E failure metadata note created"
+          else
+            # Note already exists, append instead
+            echo "ℹ️ Note already exists, updating..."
+            git notes --ref=ci/e2e-failures append -F e2e-failure-note.txt ${{ github.sha }}
+          fi
+
+          # Push to remote
+          if git push origin refs/notes/ci/e2e-failures --force 2>&1; then
+            echo "✅ E2E failure metadata pushed to git notes"
+          else
+            echo "❌ ERROR: Failed to push E2E failure metadata notes"
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Verify cache will be saved
         if: always()
         run: |

@@ -49,7 +49,7 @@ open packages/frontend/playwright-report/index.html
 
 ## How It Works
 
-### Phase 1: Local Analysis (Current)
+### Phase 1: Local Analysis
 
 **Data Sources:**
 - `packages/frontend/test-results/` - Test execution results
@@ -63,18 +63,29 @@ open packages/frontend/playwright-report/index.html
 - Reference debugging artifacts (screenshots, videos, traces)
 - Provide error-specific fix recommendations
 
-**Limitations:**
-- No historical trend analysis
-- Manual analysis required for each run
-- CI failures require artifact download
+### Phase 2: Git Notes Integration (Current)
 
-### Phase 2: Git Notes Integration (Coming Soon)
+**Enhancements (ACTIVE):**
+- ✅ Store failure metadata in `refs/notes/ci/e2e-failures`
+- ✅ CI automatically captures failures on every run
+- ✅ No artifact download needed for basic diagnosis
+- ✅ Fast analysis (metadata already extracted)
 
-**Enhancement:**
-- Store failure metadata in `refs/notes/ci/e2e-failures`
-- Track failure history across commits
-- Identify new vs recurring failures
-- No artifact download needed for basic diagnosis
+**How it works:**
+```bash
+# Fetch E2E failure notes
+git fetch origin refs/notes/ci/e2e-failures:refs/notes/ci/e2e-failures
+
+# View failures for current commit
+git notes --ref=ci/e2e-failures show HEAD
+
+# Skill automatically parses INI-format notes
+```
+
+**CI Integration:**
+- `.github/workflows/ci.yml` - Captures failures after E2E tests
+- `.github/scripts/extract-e2e-failures.js` - Parses JSON results
+- Git notes pushed to `refs/notes/ci/e2e-failures` namespace
 
 ### Phase 3: Advanced Features (Future)
 

@@ -12,9 +12,60 @@ description: |
 instructions: |
   When the user requests E2E failure analysis or mentions failed E2E tests:
 
-  ## Step 1: Locate Test Results
+  ## Step 1: Check for CI Failure Metadata (Git Notes)
 
-  Playwright generates multiple output formats. Check for them in this order:
+  **NEW in Phase 2**: E2E test failures from CI are automatically captured in git notes.
+  This is the FASTEST way to analyze CI failures without downloading artifacts.
+
+  ```bash
+  # Fetch E2E failure notes from remote
+  git fetch origin refs/notes/ci/e2e-failures:refs/notes/ci/e2e-failures 2>/dev/null || \
+    echo "No E2E failure notes found (CI capture may not be set up yet)"
+
+  # Check if notes exist for current commit
+  git notes --ref=ci/e2e-failures show HEAD
+
+  # Or check specific commit
+  git notes --ref=ci/e2e-failures show <commit-hash>
+
+  # List all commits with E2E failure notes
+  git notes --ref=ci/e2e-failures list | head -10
+  ```
+
+  **If notes exist**: Parse the INI-format data (see "Parse Git Notes" section below).
+  **If notes don't exist**: Fall back to Step 2 (local test results).
+
+  ### Parse Git Notes Format
+
+  Git notes contain INI-format failure metadata:
+
+  ```bash
+  # Show note for current commit
+  git notes --ref=ci/e2e-failures show HEAD
+
+  # Extract specific fields
+  git notes --ref=ci/e2e-failures show HEAD | grep "^total_tests" | cut -d'=' -f2 | xargs
+  git notes --ref=ci/e2e-failures show HEAD | grep "^failed" | cut -d'=' -f2 | xargs
+
+  # Get failure details (each failure has a numbered section)
+  git notes --ref=ci/e2e-failures show HEAD | grep -A 8 "^\[failure\.1\]"
+  ```
+
+  **Note structure**:
+  - `[metadata]` - Timestamp, commit, run URL, test counts
+  - `[summary]` - Status, failure counts by type
+  - `[failure.N]` - Individual failure details (test name, error, artifacts)
+  - `[diagnostics]` - Environment info
+
+  **Advantages of git notes**:
+  - No artifact download needed
+  - Fast analysis (metadata already extracted)
+  - Historical tracking (notes persist across commits)
+  - Team-wide visibility (pushed to remote)
+
+  ## Step 2: Locate Local Test Results (Fallback)
+
+  If git notes unavailable, check local test results:
 
   ### Local Test Results (packages/frontend/test-results/)
 
@@ -46,11 +97,9 @@ instructions: |
   - Artifact name: `playwright-report` (HTML report)
   - Retention: 30 days
 
-  **Important**: Do NOT attempt to download artifacts directly. Instead:
-  1. Inform user where to download artifacts (GitHub Actions → Run → Artifacts)
-  2. Or parse failure info from git notes (Phase 2 feature, coming later)
+  **Important**: For CI failures, prefer git notes (Step 1) over downloading artifacts.
 
-  ## Step 2: Parse Test Results
+  ## Step 3: Parse Test Results
 
   ### Method A: Parse JSON Reporter Output (Preferred)
 
@@ -87,7 +136,7 @@ instructions: |
   #   waiting for getByRole('button', { name: 'Delete' })
   ```
 
-  ## Step 3: Categorize Failures
+  ## Step 4: Categorize Failures
 
   Classify each failure by error type to provide targeted recommendations:
 
@@ -118,7 +167,7 @@ instructions: |
   - Cause: Test fixture setup failed
   - Common in: Database setup, authentication, cleanup
 
-  ## Step 4: Extract Artifact References
+  ## Step 5: Extract Artifact References
 
   For each failed test, identify available debugging artifacts:
 
@@ -145,7 +194,7 @@ instructions: |
   - Diff: `*-diff.png`
   - Use: Compare visual changes pixel-by-pixel
 
-  ## Step 5: Generate Failure Report
+  ## Step 6: Generate Failure Report
 
   Present findings in clear, actionable format:
 
@@ -224,7 +273,7 @@ instructions: |
   4. Review network tab in trace viewer
   5. Ensure test environment is properly set up
 
-  ## Step 6: Provide Local Reproduction Steps
+  ## Step 7: Provide Local Reproduction Steps
 
   Help user reproduce failures locally:
 
@@ -245,7 +294,7 @@ instructions: |
   npm run test:e2e:docker:update-snapshots
   ```
 
-  ## Step 7: Browser-Specific Analysis
+  ## Step 8: Browser-Specific Analysis
 
   If failures occur in only one browser, highlight this:
 

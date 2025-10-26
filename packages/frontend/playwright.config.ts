@@ -50,6 +50,8 @@ export default defineConfig({
 		['list'],
 		// JUnit XML reporter for WebStorm test runner integration
 		['junit', { outputFile: 'test-results/junit.xml' }],
+		// JSON reporter for failure analysis skill
+		['json', { outputFile: 'test-results/results.json' }],
 		...(process.env.CI ? [['github'] as const] : []),
 	],
 
