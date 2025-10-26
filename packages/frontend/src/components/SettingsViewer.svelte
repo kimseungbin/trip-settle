@@ -68,16 +68,8 @@
 	<h3>⚙️ Settings</h3>
 
 	<div class="settings-section">
-		<div class="section-header">Feature Settings (Immutable)</div>
-		<div class="settings-grid">
-			<div class="setting-item">
-				<span class="setting-label">Onboarded:</span>
-				<span class="setting-value">
-					{settings.isOnboarded ? '✅ Yes' : '❌ No'}
-				</span>
-				<button class="toggle-button" onclick={toggleOnboarding} tabindex="-1">Toggle</button>
-			</div>
-		</div>
+		<div class="section-header">Onboarding</div>
+		<button class="reset-onboarding-button" onclick={toggleOnboarding} tabindex="-1"> Reset Onboarding </button>
 	</div>
 
 	<div class="settings-section">
@@ -165,33 +157,23 @@
 		gap: 0.75em;
 	}
 
-	.setting-item {
-		display: flex;
-		align-items: center;
-		gap: 0.75em;
-		padding: 0.75em;
-		background: #f9f9f9;
+	.reset-onboarding-button {
+		width: 100%;
+		padding: 0.75em 1.2em;
+		font-size: 0.9em;
+		background: #2196f3;
+		color: white;
+		border: none;
 		border-radius: 6px;
-		border-left: 3px solid #4caf50;
-	}
-
-	.setting-label {
+		cursor: pointer;
 		font-weight: 600;
-		color: #555;
-		min-width: 150px;
+		transition: all 0.2s;
 	}
 
-	.setting-value {
-		flex: 1;
-		font-family: 'Courier New', monospace;
-		color: #333;
-		background: white;
-		padding: 0.4em 0.6em;
-		border-radius: 4px;
-		border: 1px solid #e0e0e0;
-		word-break: break-word;
-		overflow-wrap: break-word;
-		min-width: 0; /* Allow flex item to shrink below content size */
+	.reset-onboarding-button:hover {
+		background: #1976d2;
+		transform: translateY(-1px);
+		box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
 	}
 
 	.toggle-button {
@@ -332,19 +314,6 @@
 	}
 
 	@media (max-width: 640px) {
-		.setting-item {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-
-		.setting-label {
-			min-width: unset;
-		}
-
-		.setting-value {
-			width: 100%;
-		}
-
 		.actions {
 			flex-direction: column;
 		}
