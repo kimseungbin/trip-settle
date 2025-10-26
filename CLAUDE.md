@@ -12,30 +12,14 @@ Trip Settle is a full-stack TypeScript monorepo for managing trip expense settle
 
 ## Design Principles
 
-When implementing features, ensure:
+Follow these requirements when implementing features:
+- **Keyboard accessibility**: All features must work without mouse (Enter/Escape/Arrow keys)
+- **Accessibility**: ARIA guidelines, screen reader support
+- **Responsive design**: Mobile-first, desktop enhancements
+- **Performance**: Fast, smooth interactions with minimal latency
+- **User feedback**: Clear visual feedback for all actions
 
-**Keyboard Support** (all features must be keyboard accessible):
-- Forms: Enter to submit, Escape to cancel/clear
-- Lists: Arrow key navigation where appropriate
-- Logical tab order
-- Keyboard shortcuts for common actions
-
-**Accessibility**:
-- Follow ARIA guidelines
-- Support screen readers and assistive technologies
-
-**Responsive Design**:
-- Mobile-first approach
-- Desktop enhancements
-
-**Performance**:
-- Fast, smooth interactions
-- Minimal latency
-
-**User Feedback**:
-- Clear visual feedback for all actions
-
-See README.md "Design Philosophy" section for rationale and detailed explanations.
+See README.md "Design Philosophy" for detailed rationale.
 
 ## Feature Development Workflow (MANDATORY)
 
@@ -474,6 +458,42 @@ git commit --no-verify -m "WIP: Your message"
 
 For setup, verification, and troubleshooting, see `.claude/skills/git-hooks-setup/SKILL.md`
 
+## Git Notes for CI Metadata
+
+Git notes are used to store CI/CD metadata (cache metrics, test failures) alongside commits without modifying commit history.
+
+**Namespaces**:
+- `refs/notes/ci/cache-metrics` - Docker build cache efficiency metrics
+- `refs/notes/ci/e2e-failures` - Playwright E2E test failure metadata
+
+**Helper Skill**: `.claude/skills/git-notes-helper/helper.yaml`
+- **Purpose**: Provides reusable git notes operations (fetch, parse, compare, historical analysis)
+- **Used by**: `docker-cache-analysis`, `e2e-failure-analysis` skills
+- **Operations**: Fetch notes, show note content, parse INI fields, compare commits, historical walking
+
+**Usage**:
+```bash
+# Fetch notes from remote (not fetched by default)
+git fetch origin refs/notes/ci/<namespace>:refs/notes/ci/<namespace>
+
+# Show note for commit
+git notes --ref=ci/<namespace> show <commit-hash>
+
+# List all commits with notes
+git notes --ref=ci/<namespace> list
+```
+
+**Why git notes?**
+- No external database needed (metadata stored in git)
+- Version-controlled and auditable
+- Team-wide visibility (pushed to remote)
+- Perfect for CI metadata that doesn't belong in commits
+
+**See also**:
+- Docker cache analysis: `.claude/skills/docker-cache-analysis/`
+- E2E failure analysis: `.claude/skills/e2e-failure-analysis/`
+- Git notes helper: `.claude/skills/git-notes-helper/`
+
 ## TypeScript Configuration
 
 - Frontend: ESNext target with bundler module resolution
@@ -802,6 +822,12 @@ Building 8.5s (12/12) FINISHED
 
 **Monitoring**: Check "e2e-tests" job summary after each CI run for detailed metrics.
 
+**Historical Analysis**: Use the `docker-cache-analysis` skill to analyze cache performance trends over time:
+- **Skill**: `.claude/skills/docker-cache-analysis/analysis.yaml`
+- **Purpose**: Track cache hit rates, identify degradation patterns, get optimization recommendations
+- **Dependencies**: Uses `git-notes-helper` skill for git notes operations
+- **Usage**: Cache metrics are automatically captured in git notes (`refs/notes/ci/cache-metrics`) by CI
+
 ### Performance Benchmarks
 
 | Metric | Before Optimization | After Optimization | Improvement |
@@ -861,6 +887,17 @@ npm run test:e2e:ui --workspace=frontend
 - `tests/e2e/` - User workflows and interactions
 - `tests/visual/` - Screenshot comparisons
 - `tests/accessibility/` - WCAG compliance (currently test.fixme())
+
+### Failure Analysis
+
+When E2E tests fail, use the `e2e-failure-analysis` skill for quick diagnosis:
+- **Skill**: `.claude/skills/e2e-failure-analysis/analysis.yaml`
+- **Purpose**: Categorize failures, identify root causes, provide fix recommendations
+- **Dependencies**: Uses `git-notes-helper` skill for historical analysis (Phase 2-3 features)
+- **Features**:
+  - Basic: Parse test results, categorize errors, show artifacts
+  - Advanced (Phase 3): Flaky test detection, trend analysis, blame integration, regression detection
+- **Usage**: E2E failure metadata is automatically captured in git notes (`refs/notes/ci/e2e-failures`) by CI
 
 ### Key Commands
 
