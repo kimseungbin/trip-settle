@@ -58,7 +58,7 @@
 					<h1>{$t('app.title')}</h1>
 					<p>{$t('app.tagline')}</p>
 				</div>
-				<div class="header-actions">
+				<div class="header-actions desktop-only">
 					<ThemeToggle />
 					<button class="settings-link" onclick={() => navigate('/settings')} aria-label="Settings">
 						⚙️ {$t('settings.title')}
@@ -68,6 +68,13 @@
 		</div>
 
 		<ExpenseTracker />
+
+		<div class="footer-actions mobile-only">
+			<ThemeToggle />
+			<button class="settings-link" onclick={() => navigate('/settings')} aria-label="Settings">
+				⚙️ {$t('settings.title')}
+			</button>
+		</div>
 	{/if}
 
 	{#if isLocalMode}
@@ -155,6 +162,22 @@
 		outline-offset: 2px;
 	}
 
+	.footer-actions {
+		display: flex;
+		gap: 1em;
+		justify-content: center;
+		margin-top: 2em;
+		padding: 1em;
+	}
+
+	.desktop-only {
+		display: flex;
+	}
+
+	.mobile-only {
+		display: none;
+	}
+
 	@media (min-width: 640px) {
 		main {
 			max-width: 700px;
@@ -172,12 +195,20 @@
 			gap: 1em;
 		}
 
-		.header-actions {
-			flex-direction: column;
-			width: 100%;
+		.desktop-only {
+			display: none;
 		}
 
-		.settings-link {
+		.mobile-only {
+			display: flex;
+		}
+
+		.footer-actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.footer-actions .settings-link {
 			width: 100%;
 		}
 	}

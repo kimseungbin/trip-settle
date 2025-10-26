@@ -50,6 +50,6 @@
 		margin: 2em 0;
 		padding: 1.5em;
 		border-radius: 8px;
-		background: #f9f9f9;
+		background: var(--color-surface-1);
 	}
 </style>
