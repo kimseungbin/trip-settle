@@ -73,6 +73,15 @@
 	function goBack() {
 		navigate('/')
 	}
+
+	/**
+	 * Handle language change
+	 */
+	function handleLanguageChange(event: Event) {
+		const target = event.target as HTMLSelectElement
+		const value = target.value as 'en' | 'ko'
+		setLocale(value)
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -110,13 +119,10 @@
 
 			<div class="setting-item">
 				<span class="setting-label">{$t('settings.language.label')}</span>
-				<span class="setting-value">
-					{#if currentLocale === 'ko'}
-						🇰🇷 {$t('settings.language.korean')}
-					{:else}
-						🇺🇸 {$t('settings.language.english')}
-					{/if}
-				</span>
+				<select class="language-dropdown" value={currentLocale} onchange={handleLanguageChange}>
+					<option value="en">🇺🇸 English</option>
+					<option value="ko">🇰🇷 한국어</option>
+				</select>
 			</div>
 
 			<div class="actions">
@@ -126,19 +132,6 @@
 			<div class="info-box">
 				<p class="info-icon">ℹ️</p>
 				<p class="info-text">{$t('settings.info')}</p>
-			</div>
-		</div>
-
-		<!-- Language Switcher (always available) -->
-		<div class="settings-section">
-			<h2>{$t('settings.languageSection')}</h2>
-			<div class="language-buttons">
-				<button class="language-button" class:active={currentLocale === 'en'} onclick={() => setLocale('en')}>
-					🇺🇸 English
-				</button>
-				<button class="language-button" class:active={currentLocale === 'ko'} onclick={() => setLocale('ko')}>
-					🇰🇷 한국어
-				</button>
 			</div>
 		</div>
 	{:else}
@@ -287,6 +280,29 @@
 		border: 1px solid var(--color-border);
 	}
 
+	.language-dropdown {
+		font-family: inherit;
+		font-size: 1rem;
+		color: var(--color-text);
+		background: var(--color-surface);
+		padding: 0.5rem 1rem;
+		border-radius: 6px;
+		border: 1px solid var(--color-border);
+		cursor: pointer;
+		transition: all var(--transition-fast);
+		min-width: 150px;
+	}
+
+	.language-dropdown:hover {
+		border-color: var(--color-primary);
+	}
+
+	.language-dropdown:focus {
+		outline: 2px solid var(--color-focus-ring);
+		outline-offset: 2px;
+		border-color: var(--color-primary);
+	}
+
 	.mode-selection {
 		margin-bottom: 2rem;
 	}
@@ -348,42 +364,6 @@
 
 	.currency-selection {
 		margin-bottom: 2rem;
-	}
-
-	.language-buttons {
-		display: flex;
-		gap: 1rem;
-		justify-content: center;
-	}
-
-	.language-button {
-		padding: 0.75rem 2rem;
-		font-size: 1.1rem;
-		border: 2px solid var(--color-border);
-		background: var(--color-surface);
-		color: var(--color-text);
-		border-radius: 8px;
-		cursor: pointer;
-		transition:
-			all var(--transition-fast),
-			background-color var(--transition-fast);
-		font-weight: 500;
-	}
-
-	.language-button:hover {
-		border-color: var(--color-primary);
-		background: var(--color-primary-light);
-	}
-
-	.language-button.active {
-		border-color: var(--color-primary);
-		background: var(--color-primary);
-		color: var(--color-surface);
-	}
-
-	.language-button:focus {
-		outline: 2px solid var(--color-focus-ring);
-		outline-offset: 2px;
 	}
 
 	.actions {
@@ -508,14 +488,6 @@
 		}
 
 		button {
-			width: 100%;
-		}
-
-		.language-buttons {
-			flex-direction: column;
-		}
-
-		.language-button {
 			width: 100%;
 		}
 	}
