@@ -14,8 +14,8 @@
 		"space": "Space"
 	},
 	"onboarding": {
-		"welcome": "Welcome to Trip Settle",
-		"tagline": "Expense settlement made easy",
+		"welcome": "Trip Settle",
+		"tagline": "Settle any trip, any currency, any situation",
 		"currencyModeTitle": "How do you want to track expenses?",
 		"singleCurrency": {
 			"icon": "💵",

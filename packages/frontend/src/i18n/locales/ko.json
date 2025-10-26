@@ -14,8 +14,8 @@
 		"space": "스페이스"
 	},
 	"onboarding": {
-		"welcome": "Trip Settle에 오신 것을 환영합니다",
-		"tagline": "여행 경비 정산을 쉽게",
+		"welcome": "Trip Settle",
+		"tagline": "모든 여행, 모든 통화, 모든 경우의 수",
 		"currencyModeTitle": "경비를 어떻게 추적하시겠습니까?",
 		"singleCurrency": {
 			"icon": "💵",
