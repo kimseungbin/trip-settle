@@ -21,6 +21,7 @@
 	let expandedMode = $state<'single' | 'multi' | null>(null)
 	let payerInput = $state<HTMLInputElement | undefined>(undefined)
 	let payerListContainer = $state<HTMLDivElement | undefined>(undefined)
+	let lastAddedPayer = $state<string | null>(null)
 
 	/**
 	 * Focus the first interactive element on mount for keyboard accessibility
@@ -44,12 +45,17 @@
 	function addPayer(name: string) {
 		if (name && !payers.includes(name)) {
 			payers = [name, ...payers]
+			lastAddedPayer = name
 			// Scroll to top to show the newly added item
 			setTimeout(() => {
 				if (payerListContainer) {
 					payerListContainer.scrollTop = 0
 				}
 			}, 0)
+			// Clear the animation marker after animation completes
+			setTimeout(() => {
+				lastAddedPayer = null
+			}, 300)
 		}
 	}
 
@@ -207,7 +213,7 @@
 				{:else}
 					<ul>
 						{#each payers as payer, index}
-							<li>
+							<li class:newly-added={payer === lastAddedPayer}>
 								<span class="payer-name">{payer}</span>
 								<button
 									class="remove-btn"
@@ -751,7 +757,7 @@
 		border-radius: 4px;
 	}
 
-	.payer-list li:first-child {
+	.payer-list li.newly-added {
 		animation: slideInFromTop 0.3s ease-out;
 	}
 
