@@ -425,7 +425,7 @@
 	}
 
 	.currency-selector-wrapper {
-		margin-bottom: 2rem;
+		margin-bottom: 24rem;
 		text-align: left;
 	}
 
