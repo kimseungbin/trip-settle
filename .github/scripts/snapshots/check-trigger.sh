@@ -5,6 +5,9 @@
 #   1. Manual workflow_dispatch
 #   2. PR comment containing "/update-snapshots"
 #   3. Commit message containing "[update-snapshots]"
+#      NOTE: Checks ALL commits in a push, not just HEAD commit
+#      This handles multi-commit pushes where [update-snapshots] might
+#      be in an earlier commit.
 #
 # Usage: ./check-trigger.sh
 #
@@ -61,14 +64,21 @@ case "${GITHUB_EVENT_NAME:-}" in
   push)
     echo "🔍 Checking commit message trigger..."
     if [ -f "$GITHUB_EVENT_PATH" ]; then
-      # Use jq to safely extract commit message
-      COMMIT_MSG=$(jq -r '.head_commit.message // empty' "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
+      # Check ALL commits in the push, not just HEAD
+      # This handles multi-commit pushes where [update-snapshots] might not be in HEAD
+      COMMIT_COUNT=$(jq -r '.commits | length' "$GITHUB_EVENT_PATH" 2>/dev/null || echo "0")
+      echo "   Checking $COMMIT_COUNT commit(s) in push..."
 
-      if [[ "$COMMIT_MSG" == *"[update-snapshots]"* ]]; then
+      # Extract all commit messages and check if any contain [update-snapshots]
+      MATCHING_COMMITS=$(jq -r '.commits[] | select(.message | contains("[update-snapshots]")) | .id[0:7] + ": " + (.message | split("\n")[0])' "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
+
+      if [ -n "$MATCHING_COMMITS" ]; then
         echo "✅ Commit message trigger detected: [update-snapshots]"
+        echo "   Matching commits:"
+        echo "$MATCHING_COMMITS" | sed 's/^/     /'
         SHOULD_RUN="true"
       else
-        echo "ℹ️  Commit message does not contain [update-snapshots]"
+        echo "ℹ️  No commits in push contain [update-snapshots]"
       fi
     fi
     ;;

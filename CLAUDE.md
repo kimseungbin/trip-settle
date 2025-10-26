@@ -1080,6 +1080,8 @@ git push
 # Workflow runs automatically and updates snapshots
 ```
 
+**Note**: When pushing multiple commits, the workflow checks ALL commits in the push. If ANY commit contains `[update-snapshots]`, the workflow will run, even if it's not the HEAD commit.
+
 **Verifying Changes**:
 1. CI workflow commits snapshot updates with detailed message
 2. Review the git diff in the snapshot files
