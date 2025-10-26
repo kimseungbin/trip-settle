@@ -86,6 +86,9 @@
 		}}
 		onkeydown={handleKeydown}
 	>
+		{#if showPayerSelector}
+			<PayerSelector bind:value={selectedPayer} payers={settings.payers} />
+		{/if}
 		<input
 			type="text"
 			autocomplete="off"
@@ -103,9 +106,6 @@
 		/>
 		{#if showCurrencySelector}
 			<CurrencySelector bind:value={selectedCurrency} {sessionCurrencies} onselect={handleCurrencySelect} />
-		{/if}
-		{#if showPayerSelector}
-			<PayerSelector bind:value={selectedPayer} payers={settings.payers} />
 		{/if}
 		<button type="submit" bind:this={submitButton} onclick={handleButtonClick} tabindex="0"
 			>{$t('expenseForm.addButton')}</button
