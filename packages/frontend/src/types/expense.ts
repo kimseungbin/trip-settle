@@ -3,6 +3,7 @@ export interface Expense {
 	name: string
 	amount: number
 	currency: string
+	payer?: string // Optional: only present in multi-payer mode
 }
 
 export interface Currency {

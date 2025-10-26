@@ -24,6 +24,8 @@
 
 	// In single-currency mode, don't show currency badges since all amounts are the same currency
 	const showCurrencyBadges = $derived(settings.currencyMode === 'multi')
+	// In single-payer mode, don't show payer info since all expenses are from the same payer
+	const showPayerInfo = $derived(settings.paymentMode === 'multi')
 </script>
 
 <div class="list-container">
@@ -34,7 +36,12 @@
 		<ul class="expense-list">
 			{#each expenses as expense (expense.id)}
 				<li class="expense-item">
-					<span class="expense-name">{expense.name}</span>
+					<div class="expense-info">
+						<span class="expense-name">{expense.name}</span>
+						{#if showPayerInfo && expense.payer}
+							<span class="expense-payer">by {expense.payer}</span>
+						{/if}
+					</div>
 					<span class="expense-amount">
 						{expense.amount.toFixed(2)}
 						{#if showCurrencyBadges}
@@ -98,10 +105,22 @@
 		border: 1px solid #e0e0e0;
 	}
 
-	.expense-name {
+	.expense-info {
 		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25em;
 		text-align: left;
+	}
+
+	.expense-name {
 		font-weight: 500;
+	}
+
+	.expense-payer {
+		font-size: 0.85em;
+		color: #666;
+		font-style: italic;
 	}
 
 	.expense-amount {

@@ -8,12 +8,19 @@
 	import { locale, t } from 'svelte-i18n'
 	import { setLocale } from '../i18n'
 	import { toast } from '../stores/toast.svelte'
+	import type { PaymentMode } from '../stores/settings.svelte'
 
 	let currencyMode = $state<CurrencyMode>('multi')
 	let defaultCurrency = $state(DEFAULT_CURRENCY)
+	let paymentMode = $state<PaymentMode>('single')
+	let payers = $state<string[]>([])
 	let showCurrencySelector = $state(false)
+	let showPaymentModeSelector = $state(false)
+	let showPayerCollection = $state(false)
 	let firstButton = $state<HTMLButtonElement | undefined>(undefined)
 	let expandedMode = $state<'single' | 'multi' | null>(null)
+	let payerInput = $state<HTMLInputElement | undefined>(undefined)
+	let payerListContainer = $state<HTMLDivElement | undefined>(undefined)
 
 	/**
 	 * Focus the first interactive element on mount for keyboard accessibility
@@ -23,14 +30,51 @@
 	})
 
 	/**
-	 * Select currency mode and proceed to currency selection if needed
+	 * Focus the payer input when the payer collection screen is shown
+	 */
+	$effect(() => {
+		if (showPayerCollection && payerInput) {
+			payerInput.focus()
+		}
+	})
+
+	/**
+	 * Add a new payer to the list
+	 */
+	function addPayer(name: string) {
+		if (name && !payers.includes(name)) {
+			payers = [name, ...payers]
+			// Scroll to top to show the newly added item
+			setTimeout(() => {
+				if (payerListContainer) {
+					payerListContainer.scrollTop = 0
+				}
+			}, 0)
+		}
+	}
+
+	/**
+	 * Select currency mode and proceed to payment mode selection
 	 */
 	function selectCurrencyMode(mode: CurrencyMode) {
 		currencyMode = mode
 		if (mode === 'single') {
 			showCurrencySelector = true
 		} else {
-			// For multi-currency mode, complete onboarding immediately
+			// For multi-currency mode, proceed to payment mode selection
+			showPaymentModeSelector = true
+		}
+	}
+
+	/**
+	 * Select payment mode and proceed accordingly
+	 */
+	function selectPaymentMode(mode: PaymentMode) {
+		paymentMode = mode
+		if (mode === 'multi') {
+			showPayerCollection = true
+		} else {
+			// For single-payer mode, complete onboarding immediately
 			completeOnboarding()
 		}
 	}
@@ -40,7 +84,7 @@
 	 */
 	function completeOnboarding() {
 		// Save settings to store
-		settings.completeOnboarding(currencyMode, defaultCurrency)
+		settings.completeOnboarding(currencyMode, defaultCurrency, paymentMode, payers)
 
 		// Show toast notification if single currency mode with custom currency
 		if (currencyMode === 'single' && defaultCurrency !== DEFAULT_CURRENCY) {
@@ -54,34 +98,75 @@
 	}
 
 	/**
-	 * Skip onboarding and use default multi-currency mode
+	 * Skip onboarding and use default multi-currency, single-payer mode
 	 */
 	function skipOnboarding() {
 		currencyMode = 'multi'
 		defaultCurrency = DEFAULT_CURRENCY
+		paymentMode = 'single'
+		payers = []
 		completeOnboarding()
 	}
 
 	/**
-	 * Go back to currency mode selection
+	 * After currency selection, proceed to payment mode selection
+	 */
+	function onCurrencySelected() {
+		showPaymentModeSelector = true
+	}
+
+	/**
+	 * Go back to currency mode selection or payment mode selection
 	 */
 	function goBack() {
-		showCurrencySelector = false
+		if (showPayerCollection) {
+			showPayerCollection = false
+			showPaymentModeSelector = true
+		} else if (showPaymentModeSelector) {
+			showPaymentModeSelector = false
+			showCurrencySelector = false
+		} else if (showCurrencySelector) {
+			showCurrencySelector = false
+		}
 	}
 
 	/**
 	 * Handle keyboard events for accessibility
 	 */
 	function handleKeydown(event: KeyboardEvent) {
-		if (showCurrencySelector) {
-			if (event.key === 'Escape') {
+		if (event.key === 'Escape') {
+			if (showPayerCollection || showPaymentModeSelector || showCurrencySelector) {
 				event.preventDefault()
 				goBack()
-			}
-		} else {
-			if (event.key === 'Escape') {
+			} else {
 				skipOnboarding()
 			}
+		}
+	}
+
+	/**
+	 * Handle keydown on payer input (Enter to add)
+	 */
+	function handlePayerInputKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault()
+			const input = e.currentTarget as HTMLInputElement
+			const name = input.value.trim()
+			addPayer(name)
+			input.value = ''
+			input.focus()
+		}
+	}
+
+	/**
+	 * Handle add payer button click
+	 */
+	function handleAddPayerClick() {
+		if (payerInput) {
+			const name = payerInput.value.trim()
+			addPayer(name)
+			payerInput.value = ''
+			payerInput.focus()
 		}
 	}
 </script>
@@ -110,7 +195,125 @@
 		</button>
 	</div>
 
-	{#if !showCurrencySelector}
+	{#if showPayerCollection}
+		<!-- Step 4: Payer Collection (Multi-Payer Mode Only) -->
+		<h1>Add Payers</h1>
+		<p class="tagline">Enter names of people who will be paying for expenses</p>
+
+		<div class="payer-collection">
+			<div class="payer-list" bind:this={payerListContainer}>
+				{#if payers.length === 0}
+					<p class="empty-state">No payers added yet. Add at least 1 payer to continue.</p>
+				{:else}
+					<ul>
+						{#each payers as payer, index}
+							<li>
+								<span class="payer-name">{payer}</span>
+								<button
+									class="remove-btn"
+									onclick={() => {
+										payers = payers.filter((_, i) => i !== index)
+									}}
+								>
+									✕
+								</button>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</div>
+
+			<div class="payer-input">
+				<input
+					bind:this={payerInput}
+					type="text"
+					placeholder="Enter payer name"
+					onkeydown={handlePayerInputKeydown}
+				/>
+				<button onclick={handleAddPayerClick}>Add</button>
+			</div>
+
+			<div class="actions">
+				<button class="secondary" onclick={goBack}>Back</button>
+				<button onclick={completeOnboarding} disabled={payers.length < 1} class:disabled={payers.length < 1}>
+					Complete
+				</button>
+			</div>
+		</div>
+
+		<p class="keyboard-hint">Press <kbd>Esc</kbd> to go back • Add at least 1 payer to continue</p>
+	{:else if showPaymentModeSelector}
+		<!-- Step 3: Payment Mode Selection -->
+		<h1>Payment Mode</h1>
+		<p class="tagline">Choose how expenses will be tracked</p>
+
+		<div class="currency-mode-section">
+			<h2 class="section-title">Select Payment Mode</h2>
+
+			<div class="mode-options">
+				<div class="mode-card">
+					<button class="mode-option" tabindex="0" onclick={() => selectPaymentMode('single')}>
+						<div class="mode-icon">👤</div>
+						<div class="mode-title">Single Payer</div>
+						<p class="mode-description desktop-only">All expenses paid by one person</p>
+					</button>
+				</div>
+
+				<div class="mode-card">
+					<button class="mode-option" tabindex="0" onclick={() => selectPaymentMode('multi')}>
+						<div class="mode-icon">👥</div>
+						<div class="mode-title">Multiple Payers</div>
+						<p class="mode-description desktop-only">Track who paid for each expense</p>
+					</button>
+				</div>
+			</div>
+
+			<button class="skip-link" tabindex="0" onclick={skipOnboarding}>Skip</button>
+		</div>
+
+		<p class="keyboard-hint">Press <kbd>Esc</kbd> to go back</p>
+	{:else if showCurrencySelector}
+		<!-- Step 2: Currency Selection (Single-Currency Mode Only) -->
+		<h1>{$t('onboarding.currencySelection.title')}</h1>
+		<p class="tagline">{$t('onboarding.currencySelection.tagline')}</p>
+
+		<div class="currency-selection">
+			<p class="currency-keyboard-hint">
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html $t('onboarding.currencySelection.keyboardHintSimple', {
+					values: {
+						up: `<kbd>${$t('keyboard.up')}</kbd>`,
+						down: `<kbd>${$t('keyboard.down')}</kbd>`,
+						enter: `<kbd>${$t('keyboard.enter')}</kbd>`,
+						esc: `<kbd>${$t('keyboard.esc')}</kbd>`,
+					},
+				})}
+			</p>
+
+			<div class="currency-selector-wrapper">
+				<label for="default-currency">{$t('onboarding.currencySelection.label')}</label>
+				<CurrencySelector
+					bind:value={defaultCurrency}
+					autofocus={true}
+					initialOpen={true}
+					onselect={onCurrencySelected}
+				/>
+			</div>
+
+			<div class="actions">
+				<button class="secondary" onclick={goBack}>{$t('onboarding.currencySelection.backButton')}</button>
+			</div>
+		</div>
+
+		<p class="keyboard-hint">
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+			{@html $t('onboarding.currencySelection.bottomHintSimple', {
+				values: {
+					esc: `<kbd>${$t('keyboard.esc')}</kbd>`,
+				},
+			})}
+		</p>
+	{:else}
 		<!-- Step 1: Currency Mode Selection -->
 		<h1>{$t('onboarding.welcome')}</h1>
 		<p class="tagline">{$t('onboarding.tagline')}</p>
@@ -201,47 +404,6 @@
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			{@html $t('onboarding.keyboardHint.skip', {
 				values: { esc: `<kbd>${$t('keyboard.esc')}</kbd>` },
-			})}
-		</p>
-	{:else}
-		<!-- Step 2: Currency Selection (Single-Currency Mode Only) -->
-		<h1>{$t('onboarding.currencySelection.title')}</h1>
-		<p class="tagline">{$t('onboarding.currencySelection.tagline')}</p>
-
-		<div class="currency-selection">
-			<p class="currency-keyboard-hint">
-				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-				{@html $t('onboarding.currencySelection.keyboardHintSimple', {
-					values: {
-						up: `<kbd>${$t('keyboard.up')}</kbd>`,
-						down: `<kbd>${$t('keyboard.down')}</kbd>`,
-						enter: `<kbd>${$t('keyboard.enter')}</kbd>`,
-						esc: `<kbd>${$t('keyboard.esc')}</kbd>`,
-					},
-				})}
-			</p>
-
-			<div class="currency-selector-wrapper">
-				<label for="default-currency">{$t('onboarding.currencySelection.label')}</label>
-				<CurrencySelector
-					bind:value={defaultCurrency}
-					autofocus={true}
-					initialOpen={true}
-					onselect={() => completeOnboarding()}
-				/>
-			</div>
-
-			<div class="actions">
-				<button class="secondary" onclick={goBack}>{$t('onboarding.currencySelection.backButton')}</button>
-			</div>
-		</div>
-
-		<p class="keyboard-hint">
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-			{@html $t('onboarding.currencySelection.bottomHintSimple', {
-				values: {
-					esc: `<kbd>${$t('keyboard.esc')}</kbd>`,
-				},
 			})}
 		</p>
 	{/if}
@@ -556,6 +718,133 @@
 	}
 	.hint-icon {
 		font-size: 1.2rem;
+	}
+
+	/* Payer collection styles */
+	.payer-collection {
+		max-width: 500px;
+		margin: 0 auto;
+		padding: 2rem;
+	}
+
+	.payer-list {
+		margin-bottom: 1.5rem;
+		min-height: 80px;
+		max-height: 200px;
+		overflow-y: auto;
+	}
+
+	.payer-list ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.payer-list li {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.75rem 1rem;
+		margin-bottom: 0.5rem;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 4px;
+	}
+
+	.payer-list li:first-child {
+		animation: slideInFromTop 0.3s ease-out;
+	}
+
+	@keyframes slideInFromTop {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+			background: var(--color-primary-alpha-20);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+			background: var(--color-surface);
+		}
+	}
+
+	.payer-name {
+		font-weight: 500;
+		color: var(--color-text);
+	}
+
+	.remove-btn {
+		padding: 0.25rem 0.5rem;
+		font-size: 1rem;
+		background: transparent;
+		color: var(--color-text-tertiary);
+		border: 1px solid var(--color-border);
+		cursor: pointer;
+		transition: all var(--transition-fast);
+		min-width: 32px;
+		flex-shrink: 0;
+	}
+
+	.remove-btn:hover {
+		background: #f44336;
+		color: white;
+		border-color: #f44336;
+	}
+
+	/* Mobile: Smaller remove button */
+	@media (max-width: 640px) {
+		.remove-btn {
+			padding: 0.2rem 0.4rem;
+			font-size: 0.9rem;
+			min-width: 28px;
+		}
+
+		.payer-list li {
+			padding: 0.6rem 0.8rem;
+		}
+	}
+
+	.empty-state {
+		text-align: center;
+		color: var(--color-text-tertiary);
+		font-style: italic;
+		padding: 2rem;
+	}
+
+	.payer-input {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.payer-input input {
+		flex: 1;
+		padding: 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: 4px;
+		font-size: 1rem;
+	}
+
+	.payer-input button {
+		padding: 0.75rem 1.5rem;
+		background: var(--color-primary);
+		color: white;
+	}
+
+	.payer-input button:hover {
+		background: var(--color-primary-hover);
+	}
+
+	button.disabled,
+	button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	button.disabled:hover,
+	button:disabled:hover {
+		background-color: var(--color-surface-1);
+		transform: none;
 	}
 
 	/* Keyboard key styles are now injected via {@html} in translations */

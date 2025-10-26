@@ -1,5 +1,6 @@
 <script lang="ts">
 	import CurrencySelector from './CurrencySelector.svelte'
+	import PayerSelector from './PayerSelector.svelte'
 	import { DEFAULT_CURRENCY } from '../data/currencies'
 	import { settings } from '../stores/settings.svelte'
 	import { onMount } from 'svelte'
@@ -10,7 +11,7 @@
 		onMouseSubmit = undefined,
 		sessionCurrencies = [],
 	}: {
-		onAdd: (name: string, amount: number, currency: string) => void
+		onAdd: (name: string, amount: number, currency: string, payer?: string) => void
 		onMouseSubmit?: (() => void) | undefined
 		sessionCurrencies?: string[]
 	} = $props()
@@ -20,20 +21,24 @@
 	let expenseName = $state('')
 	let expenseAmount = $state('')
 	let selectedCurrency = $state(settings.currencyMode === 'single' ? settings.defaultCurrency : DEFAULT_CURRENCY)
+	let selectedPayer = $state('')
 	let nameInput = $state<HTMLInputElement | undefined>(undefined)
 	let submitButton = $state<HTMLButtonElement | undefined>(undefined)
 	let isMouseClick = $state(false)
 
 	// Derived state: show currency selector only in multi-currency mode
 	const showCurrencySelector = $derived(settings.currencyMode === 'multi')
+	// Derived state: show payer selector only in multi-payer mode
+	const showPayerSelector = $derived(settings.paymentMode === 'multi')
 
 	function handleSubmit() {
 		if (!expenseName.trim() || !expenseAmount) return
+		if (showPayerSelector && !selectedPayer) return
 
 		const amount = parseFloat(expenseAmount)
 		if (isNaN(amount) || amount <= 0) return
 
-		onAdd(expenseName.trim(), amount, selectedCurrency)
+		onAdd(expenseName.trim(), amount, selectedCurrency, showPayerSelector ? selectedPayer : undefined)
 
 		// Trigger mouse submit callback if this was a mouse click
 		if (isMouseClick && onMouseSubmit) {
@@ -42,6 +47,7 @@
 
 		expenseName = ''
 		expenseAmount = ''
+		selectedPayer = ''
 		nameInput?.focus()
 		isMouseClick = false
 	}
@@ -97,6 +103,9 @@
 		/>
 		{#if showCurrencySelector}
 			<CurrencySelector bind:value={selectedCurrency} {sessionCurrencies} onselect={handleCurrencySelect} />
+		{/if}
+		{#if showPayerSelector}
+			<PayerSelector bind:value={selectedPayer} payers={settings.payers} />
 		{/if}
 		<button type="submit" bind:this={submitButton} onclick={handleButtonClick} tabindex="0"
 			>{$t('expenseForm.addButton')}</button

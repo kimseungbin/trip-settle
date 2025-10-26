@@ -14,6 +14,8 @@ describe('Settings Store', () => {
 			expect(store.isOnboarded).toBe(false)
 			expect(store.currencyMode).toBe('multi')
 			expect(store.defaultCurrency).toBe('KRW')
+			expect(store.paymentMode).toBe('single')
+			expect(store.payers).toEqual([])
 			expect(store.hasSeenKeyboardHint).toBe(false)
 		})
 
@@ -23,6 +25,8 @@ describe('Settings Store', () => {
 					isOnboarded: true,
 					currencyMode: 'single',
 					defaultCurrency: 'USD',
+					paymentMode: 'multi',
+					payers: ['Alice', 'Bob'],
 				},
 				system: {
 					keyboardHints: {},
@@ -36,6 +40,8 @@ describe('Settings Store', () => {
 			expect(store.isOnboarded).toBe(true)
 			expect(store.currencyMode).toBe('single')
 			expect(store.defaultCurrency).toBe('USD')
+			expect(store.paymentMode).toBe('multi')
+			expect(store.payers).toEqual(['Alice', 'Bob'])
 			expect(store.hasSeenKeyboardHint).toBe(true)
 		})
 
@@ -47,6 +53,8 @@ describe('Settings Store', () => {
 			expect(store.isOnboarded).toBe(false)
 			expect(store.currencyMode).toBe('multi')
 			expect(store.defaultCurrency).toBe('KRW')
+			expect(store.paymentMode).toBe('single')
+			expect(store.payers).toEqual([])
 			expect(store.hasSeenKeyboardHint).toBe(false)
 		})
 
@@ -63,6 +71,8 @@ describe('Settings Store', () => {
 			expect(store.isOnboarded).toBe(true)
 			expect(store.currencyMode).toBe('multi') // Should use default
 			expect(store.defaultCurrency).toBe('KRW') // Should use default
+			expect(store.paymentMode).toBe('single') // Should use default
+			expect(store.payers).toEqual([]) // Should use default
 			expect(store.hasSeenKeyboardHint).toBe(false) // Should use default
 		})
 	})
@@ -92,6 +102,8 @@ describe('Settings Store', () => {
 					isOnboarded: false,
 					currencyMode: 'single',
 					defaultCurrency: 'EUR',
+					paymentMode: 'multi',
+					payers: ['Alice'],
 				},
 				system: {
 					keyboardHints: {},
@@ -108,54 +120,62 @@ describe('Settings Store', () => {
 	})
 
 	describe('Complete Onboarding (Feature Settings)', () => {
-		it('should update feature settings when completing onboarding with multi-currency mode', () => {
+		it('should update feature settings when completing onboarding with multi-currency and single-payer mode', () => {
 			const store = settingsStore()
 
-			store.completeOnboarding('multi', 'USD')
+			store.completeOnboarding('multi', 'USD', 'single', [])
 
 			expect(store.isOnboarded).toBe(true)
 			expect(store.currencyMode).toBe('multi')
 			expect(store.defaultCurrency).toBe('USD')
+			expect(store.paymentMode).toBe('single')
+			expect(store.payers).toEqual([])
 		})
 
-		it('should update feature settings when completing onboarding with single-currency mode', () => {
+		it('should update feature settings when completing onboarding with single-currency and multi-payer mode', () => {
 			const store = settingsStore()
 
-			store.completeOnboarding('single', 'EUR')
+			store.completeOnboarding('single', 'EUR', 'multi', ['Alice', 'Bob', 'Charlie'])
 
 			expect(store.isOnboarded).toBe(true)
 			expect(store.currencyMode).toBe('single')
 			expect(store.defaultCurrency).toBe('EUR')
+			expect(store.paymentMode).toBe('multi')
+			expect(store.payers).toEqual(['Alice', 'Bob', 'Charlie'])
 		})
 
 		it('should persist feature settings to localStorage after onboarding', () => {
 			const store = settingsStore()
 
-			store.completeOnboarding('single', 'JPY')
+			store.completeOnboarding('single', 'JPY', 'multi', ['Alice', 'Bob'])
 
 			const stored = JSON.parse(localStorage.getItem('appSettings')!)
 			expect(stored.features).toEqual({
 				isOnboarded: true,
 				currencyMode: 'single',
 				defaultCurrency: 'JPY',
+				paymentMode: 'multi',
+				payers: ['Alice', 'Bob'],
 			})
 		})
 
 		it('should not allow changing feature settings after onboarding is complete', () => {
 			const store = settingsStore()
 
-			store.completeOnboarding('single', 'USD')
-			store.completeOnboarding('multi', 'EUR') // This should be ignored
+			store.completeOnboarding('single', 'USD', 'single', [])
+			store.completeOnboarding('multi', 'EUR', 'multi', ['Alice']) // This should be ignored
 
 			expect(store.currencyMode).toBe('single')
 			expect(store.defaultCurrency).toBe('USD')
+			expect(store.paymentMode).toBe('single')
+			expect(store.payers).toEqual([])
 		})
 
 		it('should preserve system preferences when completing onboarding', () => {
 			const store = settingsStore()
 			store.updateSystemPreferences({ hasSeenKeyboardHint: true })
 
-			store.completeOnboarding('single', 'GBP')
+			store.completeOnboarding('single', 'GBP', 'multi', ['Alice'])
 
 			expect(store.hasSeenKeyboardHint).toBe(true)
 		})
@@ -164,18 +184,20 @@ describe('Settings Store', () => {
 	describe('Update System Preferences', () => {
 		it('should update system preferences without affecting feature settings', () => {
 			const store = settingsStore()
-			store.completeOnboarding('single', 'USD')
+			store.completeOnboarding('single', 'USD', 'multi', ['Alice'])
 
 			store.updateSystemPreferences({ hasSeenKeyboardHint: true })
 
 			expect(store.hasSeenKeyboardHint).toBe(true)
 			expect(store.currencyMode).toBe('single')
 			expect(store.defaultCurrency).toBe('USD')
+			expect(store.paymentMode).toBe('multi')
+			expect(store.payers).toEqual(['Alice'])
 		})
 
 		it('should allow updating system preferences even after onboarding', () => {
 			const store = settingsStore()
-			store.completeOnboarding('multi', 'EUR')
+			store.completeOnboarding('multi', 'EUR', 'single', [])
 
 			store.updateSystemPreferences({ hasSeenKeyboardHint: true })
 			expect(store.hasSeenKeyboardHint).toBe(true)
@@ -208,7 +230,7 @@ describe('Settings Store', () => {
 	describe('Reset Settings', () => {
 		it('should reset all settings to defaults', () => {
 			const store = settingsStore()
-			store.completeOnboarding('single', 'USD')
+			store.completeOnboarding('single', 'USD', 'multi', ['Alice', 'Bob'])
 			store.updateSystemPreferences({ hasSeenKeyboardHint: true })
 
 			store.resetSettings()
@@ -216,12 +238,14 @@ describe('Settings Store', () => {
 			expect(store.isOnboarded).toBe(false)
 			expect(store.currencyMode).toBe('multi')
 			expect(store.defaultCurrency).toBe('KRW')
+			expect(store.paymentMode).toBe('single')
+			expect(store.payers).toEqual([])
 			expect(store.hasSeenKeyboardHint).toBe(false)
 		})
 
 		it('should clear localStorage when resetting all settings', () => {
 			const store = settingsStore()
-			store.completeOnboarding('single', 'USD')
+			store.completeOnboarding('single', 'USD', 'multi', ['Alice'])
 
 			store.resetSettings()
 
@@ -232,21 +256,23 @@ describe('Settings Store', () => {
 
 		it('should allow onboarding again after reset', () => {
 			const store = settingsStore()
-			store.completeOnboarding('single', 'USD')
+			store.completeOnboarding('single', 'USD', 'single', [])
 			store.resetSettings()
 
-			store.completeOnboarding('multi', 'EUR')
+			store.completeOnboarding('multi', 'EUR', 'multi', ['Alice', 'Bob'])
 
 			expect(store.isOnboarded).toBe(true)
 			expect(store.currencyMode).toBe('multi')
 			expect(store.defaultCurrency).toBe('EUR')
+			expect(store.paymentMode).toBe('multi')
+			expect(store.payers).toEqual(['Alice', 'Bob'])
 		})
 	})
 
 	describe('Reset System Preferences Only', () => {
 		it('should reset only system preferences while keeping feature settings', () => {
 			const store = settingsStore()
-			store.completeOnboarding('single', 'USD')
+			store.completeOnboarding('single', 'USD', 'multi', ['Alice', 'Bob'])
 			store.updateSystemPreferences({ hasSeenKeyboardHint: true })
 
 			store.resetSystemPreferences()
@@ -255,11 +281,13 @@ describe('Settings Store', () => {
 			expect(store.isOnboarded).toBe(true)
 			expect(store.currencyMode).toBe('single')
 			expect(store.defaultCurrency).toBe('USD')
+			expect(store.paymentMode).toBe('multi')
+			expect(store.payers).toEqual(['Alice', 'Bob'])
 		})
 
 		it('should persist changes when resetting system preferences', () => {
 			const store = settingsStore()
-			store.completeOnboarding('single', 'USD')
+			store.completeOnboarding('single', 'USD', 'multi', ['Alice'])
 			store.updateSystemPreferences({ hasSeenKeyboardHint: true })
 
 			store.resetSystemPreferences()
@@ -277,10 +305,12 @@ describe('Settings Store', () => {
 
 			expect(store.isOnboarded).toBe(false)
 
-			store.completeOnboarding('single', 'USD')
+			store.completeOnboarding('single', 'USD', 'multi', ['Alice'])
 
 			expect(store.isOnboarded).toBe(true)
 			expect(store.currencyMode).toBe('single')
+			expect(store.paymentMode).toBe('multi')
+			expect(store.payers).toEqual(['Alice'])
 		})
 
 		it('should reflect changes immediately after system preference updates', () => {
@@ -347,6 +377,8 @@ describe('Settings Store', () => {
 						isOnboarded: false,
 						currencyMode: 'multi',
 						defaultCurrency: 'KRW',
+						paymentMode: 'single',
+						payers: [],
 					},
 					system: {
 						keyboardHints: {
@@ -372,6 +404,8 @@ describe('Settings Store', () => {
 						isOnboarded: false,
 						currencyMode: 'multi',
 						defaultCurrency: 'KRW',
+						paymentMode: 'single',
+						payers: [],
 					},
 					system: {
 						hasSeenKeyboardHint: true,

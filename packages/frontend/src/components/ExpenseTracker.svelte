@@ -17,8 +17,8 @@
 		return Array.from(uniqueCurrencies)
 	}
 
-	function addExpense(name: string, amount: number, currency: string) {
-		expenses = [...expenses, { id: nextId++, name, amount, currency }]
+	function addExpense(name: string, amount: number, currency: string, payer?: string) {
+		expenses = [...expenses, { id: nextId++, name, amount, currency, payer }]
 	}
 
 	function removeExpense(id: number) {

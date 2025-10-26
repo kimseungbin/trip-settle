@@ -42,8 +42,8 @@
 	function saveChanges() {
 		// Reset settings to trigger onboarding again
 		settings.resetSettings()
-		// Complete onboarding with new settings
-		settings.completeOnboarding(newCurrencyMode, newDefaultCurrency)
+		// Complete onboarding with new settings (preserve current payment mode and payers)
+		settings.completeOnboarding(newCurrencyMode, newDefaultCurrency, settings.paymentMode, settings.payers)
 		// Navigate to home to see changes take effect
 		navigate('/')
 		editMode = false

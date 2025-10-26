@@ -8,6 +8,13 @@ import { DEFAULT_CURRENCY } from '../data/currencies'
 export type CurrencyMode = 'single' | 'multi'
 
 /**
+ * Payment mode determines how payers are tracked
+ * - 'single': Single payer for all expenses (no payer selector shown)
+ * - 'multi': Each expense can have a different payer (payer selector shown)
+ */
+export type PaymentMode = 'single' | 'multi'
+
+/**
  * Feature Settings - Core app behavior that cannot be changed after onboarding
  * These settings affect data structure and business logic
  */
@@ -18,6 +25,10 @@ export interface FeatureSettings {
 	currencyMode: CurrencyMode
 	/** Default currency for expenses (immutable after onboarding) */
 	defaultCurrency: string
+	/** Payment mode for the trip (immutable after onboarding) */
+	paymentMode: PaymentMode
+	/** List of payer names (only used in multi-payer mode) */
+	payers: string[]
 }
 
 /**
@@ -48,6 +59,8 @@ const DEFAULT_FEATURE_SETTINGS: FeatureSettings = {
 	isOnboarded: false,
 	currencyMode: 'multi',
 	defaultCurrency: DEFAULT_CURRENCY,
+	paymentMode: 'single',
+	payers: [],
 }
 
 /**
@@ -174,6 +187,14 @@ export function settingsStore() {
 			ensureLoaded()
 			return settings.features.defaultCurrency
 		},
+		get paymentMode() {
+			ensureLoaded()
+			return settings.features.paymentMode
+		},
+		get payers() {
+			ensureLoaded()
+			return settings.features.payers
+		},
 
 		// Expose system preferences (read-only for consumers)
 		get hasSeenKeyboardHint() {
@@ -215,7 +236,12 @@ export function settingsStore() {
 		 * Complete onboarding with feature settings
 		 * This can only be called once - settings become immutable afterward
 		 */
-		completeOnboarding(currencyMode: CurrencyMode, defaultCurrency: string) {
+		completeOnboarding(
+			currencyMode: CurrencyMode,
+			defaultCurrency: string,
+			paymentMode: PaymentMode,
+			payers: string[]
+		) {
 			if (settings.features.isOnboarded) {
 				console.warn('Onboarding already completed. Feature settings are immutable.')
 				return
@@ -227,6 +253,8 @@ export function settingsStore() {
 					isOnboarded: true,
 					currencyMode,
 					defaultCurrency,
+					paymentMode,
+					payers,
 				},
 			}
 
@@ -332,6 +360,12 @@ export const settings = {
 	get defaultCurrency() {
 		return getSettingsInstance().defaultCurrency
 	},
+	get paymentMode() {
+		return getSettingsInstance().paymentMode
+	},
+	get payers() {
+		return getSettingsInstance().payers
+	},
 	get hasSeenKeyboardHint() {
 		return getSettingsInstance().hasSeenKeyboardHint
 	},
@@ -341,8 +375,13 @@ export const settings = {
 	dismissHint(hintId: string) {
 		return getSettingsInstance().dismissHint(hintId)
 	},
-	completeOnboarding(currencyMode: CurrencyMode, defaultCurrency: string) {
-		return getSettingsInstance().completeOnboarding(currencyMode, defaultCurrency)
+	completeOnboarding(
+		currencyMode: CurrencyMode,
+		defaultCurrency: string,
+		paymentMode: PaymentMode,
+		payers: string[]
+	) {
+		return getSettingsInstance().completeOnboarding(currencyMode, defaultCurrency, paymentMode, payers)
 	},
 	updateSystemPreferences(preferences: Partial<SystemPreferences>) {
 		return getSettingsInstance().updateSystemPreferences(preferences)
