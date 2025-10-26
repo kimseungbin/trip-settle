@@ -35,7 +35,6 @@
 	const inputMin = $derived(
 		currency ? (currency.decimalPlaces === 0 ? '1' : `0.${'0'.repeat(currency.decimalPlaces - 1)}1`) : '0.01'
 	)
-	const inputMode = $derived(currency?.decimalPlaces === 0 ? 'numeric' : 'decimal')
 
 	function handleSubmit() {
 		if (!expenseName.trim() || !expenseAmount) return
@@ -99,7 +98,7 @@
 		/>
 		<input
 			type="number"
-			inputmode={inputMode}
+			inputmode="decimal"
 			placeholder={$t('expenseForm.amountPlaceholder')}
 			bind:value={expenseAmount}
 			step={inputStep}
