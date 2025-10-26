@@ -13,6 +13,9 @@
 		"down": "아래",
 		"space": "스페이스"
 	},
+	"toast": {
+		"currencySelected": "기본 통화가 {currency}(으)로 설정되었습니다"
+	},
 	"onboarding": {
 		"welcome": "Trip Settle",
 		"tagline": "모든 여행, 모든 통화, 모든 경우의 수",

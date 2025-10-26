@@ -5,6 +5,7 @@
 	import Settings from './components/Settings.svelte'
 	import DevTools from './components/DevTools.svelte'
 	import ThemeToggle from './components/ThemeToggle.svelte'
+	import Toast from './components/Toast.svelte'
 	import { config } from './config'
 	import { initRouter, destroyRouter, getRoute, navigate } from './lib/router.svelte'
 	import { settings } from './stores/settings.svelte'
@@ -72,6 +73,9 @@
 	{#if isLocalMode}
 		<DevTools />
 	{/if}
+
+	<!-- Global toast notifications -->
+	<Toast />
 </main>
 
 <style>

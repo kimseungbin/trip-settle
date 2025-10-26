@@ -3,10 +3,11 @@
 	import { settings } from '../stores/settings.svelte'
 	import type { CurrencyMode } from '../stores/settings.svelte'
 	import CurrencySelector from './CurrencySelector.svelte'
-	import { DEFAULT_CURRENCY } from '../data/currencies'
+	import { DEFAULT_CURRENCY, getCurrencyByCode } from '../data/currencies'
 	import { onMount } from 'svelte'
 	import { locale, t } from 'svelte-i18n'
 	import { setLocale } from '../i18n'
+	import { toast } from '../stores/toast.svelte'
 
 	let currencyMode = $state<CurrencyMode>('multi')
 	let defaultCurrency = $state(DEFAULT_CURRENCY)
@@ -40,6 +41,13 @@
 	function completeOnboarding() {
 		// Save settings to store
 		settings.completeOnboarding(currencyMode, defaultCurrency)
+
+		// Show toast notification if single currency mode with custom currency
+		if (currencyMode === 'single' && defaultCurrency !== DEFAULT_CURRENCY) {
+			const currency = getCurrencyByCode(defaultCurrency)
+			const currencyDisplay = currency ? `${currency.code}` : defaultCurrency
+			toast.success($t('toast.currencySelected', { values: { currency: currencyDisplay } }), 4000)
+		}
 
 		// Navigate to home page
 		navigate('/')

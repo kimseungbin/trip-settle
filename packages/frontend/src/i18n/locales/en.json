@@ -13,6 +13,9 @@
 		"down": "↓",
 		"space": "Space"
 	},
+	"toast": {
+		"currencySelected": "Default currency set to {currency}"
+	},
 	"onboarding": {
 		"welcome": "Trip Settle",
 		"tagline": "Settle any trip, any currency, any situation",

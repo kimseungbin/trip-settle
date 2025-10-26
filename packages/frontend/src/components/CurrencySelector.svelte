@@ -279,6 +279,7 @@
 		color: var(--color-text);
 		font-size: 0.9em;
 		outline: none;
+		box-sizing: border-box; /* Include padding in width calculation */
 	}
 
 	.search-input::placeholder {
