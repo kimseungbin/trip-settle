@@ -357,6 +357,22 @@ examples:
       - "Recommend specific fixes based on most common failure point"
 
 common_issues:
+  stale_running_status:
+    symptom: "Commits show 'status = running' hours after workflow completed"
+    cause: "Post-job metadata capture occurred before workflow timed out or failed"
+    solution: |
+      Check the timestamp field - if it's old (>30 minutes), the workflow likely:
+      1. Timed out (check timeout-minutes setting in workflow)
+      2. Failed without proper error propagation
+      3. Got stuck in Docker operations
+
+      Investigation steps:
+      - Check GitHub Actions logs via run_url in metadata
+      - Look for "SIGTERM" or "timeout" in workflow logs
+      - Verify Docker compose exit codes are being captured
+
+      Prevention: Ensure workflow has proper timeout and error handling
+
   no_notes_found:
     symptom: "No git notes found"
     solution: |
@@ -407,6 +423,9 @@ tips:
   - "Compare trigger methods - manual triggers (workflow_dispatch) often more reliable"
   - "Check if failures correlate with large snapshot changes (many files)"
   - "Review GitHub Actions run logs via run_url for detailed error messages"
+  - "IMPORTANT: Avoid complex while loops with pipes - use simple for loops with explicit commit lists"
+  - "Check timestamp age - 'status=running' with old timestamp (>30min) indicates timeout or stale metadata"
+  - "When playwright_tests fails consistently, check: timeout duration, Docker resource limits, test flakiness"
 
 output_format: |
   Present analysis in clear sections:

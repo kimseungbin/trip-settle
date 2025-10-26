@@ -92,11 +92,14 @@ jobs:
 
       - name: Run visual tests with snapshot update
         id: record_playwright
-        timeout-minutes: 15  # Prevent indefinite hangs (Playwright tests should complete < 10 min)
+        timeout-minutes: 25  # Full snapshot updates with 4 browsers can take 15-20 minutes
         run: |
+          set -e  # Exit immediately on any error
+
           TEST_SCOPE="${{ needs.check-trigger.outputs.test_scope }}"
           echo "📸 Updating visual snapshots in remote CI environment..."
           echo "ℹ️  Test scope: $TEST_SCOPE"
+          echo "⏰ Started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 
           # Build Playwright test pattern based on scope
           case "$TEST_SCOPE" in
@@ -116,12 +119,49 @@ jobs:
 
           # Pass test pattern to Playwright via environment variable
           export PLAYWRIGHT_TEST_PATTERN="$TEST_PATTERN"
+
+          echo "🚀 Starting Docker compose..."
           PLAYWRIGHT_ARGS="--update-snapshots" docker compose -f docker-compose.e2e.yml up --build --abort-on-container-exit
+          EXIT_CODE=$?
+
+          echo "⏰ Completed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "📊 Docker compose exit code: $EXIT_CODE"
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Playwright tests failed with exit code $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
+
           echo "success=true" >> $GITHUB_OUTPUT
         env:
           DOCKER_USER: root
           TEST_ENV: ci-docker
           UPDATING_SNAPSHOTS: true
+
+      - name: Capture Docker logs on failure
+        if: failure() && steps.record_playwright.outcome == 'failure'
+        run: |
+          echo "📋 Capturing Docker compose logs..."
+          docker compose -f docker-compose.e2e.yml logs --tail=500 > docker-logs.txt 2>&1 || echo "Failed to capture logs"
+
+          if [ -f docker-logs.txt ]; then
+            echo "--- Playwright Service Logs ---"
+            docker compose -f docker-compose.e2e.yml logs playwright --tail=200 || echo "No playwright logs available"
+
+            echo "--- Frontend Service Logs ---"
+            docker compose -f docker-compose.e2e.yml logs frontend --tail=100 || echo "No frontend logs available"
+
+            echo "--- Backend Service Logs ---"
+            docker compose -f docker-compose.e2e.yml logs backend --tail=100 || echo "No backend logs available"
+          fi
+
+      - name: Upload Docker logs
+        if: failure() && steps.record_playwright.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-logs
+          path: docker-logs.txt
+          retention-days: 7
 
       - name: Check for snapshot changes
         id: check_changes
