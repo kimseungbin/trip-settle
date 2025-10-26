@@ -227,7 +227,7 @@
 					bind:value={defaultCurrency}
 					autofocus={true}
 					initialOpen={true}
-					onselect={completeOnboarding}
+					onselect={() => completeOnboarding()}
 				/>
 			</div>
 
