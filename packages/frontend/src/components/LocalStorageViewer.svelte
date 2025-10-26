@@ -220,6 +220,9 @@
 		border-radius: 3px;
 		flex: 1;
 		font-size: 0.9em;
+		word-break: break-word;
+		overflow-wrap: break-word;
+		min-width: 0; /* Allow flex item to shrink below content size */
 	}
 
 	.clear-btn {

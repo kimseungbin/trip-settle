@@ -197,6 +197,9 @@
 		padding: 0.4em 0.6em;
 		border-radius: 4px;
 		border: 1px solid #e0e0e0;
+		word-break: break-word;
+		overflow-wrap: break-word;
+		min-width: 0; /* Allow flex item to shrink below content size */
 	}
 
 	.toggle-button {
@@ -285,6 +288,9 @@
 		font-family: 'Courier New', monospace;
 		color: #555;
 		font-weight: 500;
+		word-break: break-word;
+		overflow-wrap: break-word;
+		min-width: 0; /* Allow flex item to shrink below content size */
 	}
 
 	.hint-status {

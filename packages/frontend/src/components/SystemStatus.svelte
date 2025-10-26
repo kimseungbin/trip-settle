@@ -75,6 +75,8 @@
 		font-size: 0.9em;
 		color: #666;
 		margin: 0.5em 0 1em;
+		word-break: break-all; /* Break URLs at any character to prevent overflow */
+		overflow-wrap: break-word;
 	}
 
 	.status-row {
