@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Currency } from '../types/expense'
+	import type { Currency } from '../types/currency'
 	import { DEFAULT_CURRENCY, getCurrencyByCode, searchCurrencies } from '../data/currencies'
 
 	let {

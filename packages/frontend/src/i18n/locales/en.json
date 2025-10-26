@@ -1,0 +1,127 @@
+{
+	"app": {
+		"title": "Trip Settle",
+		"tagline": "Expense settlement made easy"
+	},
+	"keyboard": {
+		"enter": "Enter",
+		"tab": "Tab",
+		"esc": "Esc",
+		"ctrl": "Ctrl",
+		"shift": "Shift",
+		"up": "↑",
+		"down": "↓",
+		"space": "Space"
+	},
+	"onboarding": {
+		"welcome": "Welcome to Trip Settle",
+		"tagline": "Expense settlement made easy",
+		"currencyModeTitle": "How do you want to track expenses?",
+		"singleCurrency": {
+			"icon": "💵",
+			"title": "Single Currency",
+			"description": "All expenses in one currency (simpler)"
+		},
+		"multiCurrency": {
+			"icon": "🌍",
+			"title": "Multiple Currencies",
+			"description": "Track expenses in different currencies"
+		},
+		"keyboardHint": {
+			"icon": "⌨️",
+			"navigate": "Use {tab} to navigate and {enter} to select",
+			"skip": "Press {esc} to skip"
+		},
+		"skipButton": "Skip and use multi-currency mode",
+		"currencySelection": {
+			"title": "Choose Your Currency",
+			"tagline": "Select the default currency for all expenses",
+			"label": "Default Currency:",
+			"keyboardHint": "Type to search • {up}{down} to navigate • {enter} to select • {esc} to close",
+			"continueButton": "Continue",
+			"backButton": "Go Back",
+			"bottomHint": "{ctrl}+{enter} to continue • {tab} to Continue button • {esc} to go back"
+		}
+	},
+	"expenseTracker": {
+		"title": "Track Your Expenses"
+	},
+	"expenseForm": {
+		"title": "Add Expense",
+		"namePlaceholder": "Expense name",
+		"amountPlaceholder": "Amount",
+		"addButton": "Add"
+	},
+	"expenseList": {
+		"title": "Expenses",
+		"empty": "No expenses yet",
+		"removeButton": "×",
+		"total": "Total:"
+	},
+	"currencySelector": {
+		"icon": "⌨️",
+		"searching": "Searching...",
+		"placeholder": "Type to search all currencies",
+		"recommended": "Recommended",
+		"checkMark": "●",
+		"noResults": "No currencies found"
+	},
+	"keyboardHint": {
+		"icon": "💡",
+		"title": "Keyboard tip:",
+		"content": "Press {enter} to add, {tab} to move between fields",
+		"dismissButton": "×",
+		"dismissAriaLabel": "Dismiss tip"
+	},
+	"systemStatus": {
+		"title": "System Status",
+		"backend": "Backend:",
+		"database": "Database:",
+		"checking": "⏳ Checking...",
+		"healthy": "✅ Healthy",
+		"error": "❌ Error",
+		"connected": "✅ Connected",
+		"disconnected": "❌ Disconnected"
+	},
+	"devTools": {
+		"title": "🔧 Developer Tools",
+		"localOnlyBadge": "Local Only"
+	},
+	"localStorageViewer": {
+		"title": "📦 LocalStorage State",
+		"empty": "No localStorage items found. This is a fresh browser session.",
+		"descriptions": {
+			"hasSeenOnboarding": "Tracks whether user has completed onboarding",
+			"keyboardHintDismissed": "Tracks whether user dismissed keyboard hints",
+			"unknown": "Unknown key"
+		},
+		"yes": "✅ Yes",
+		"no": "❌ No",
+		"clearButton": "Clear",
+		"clearAllButton": "🗑️ Clear All LocalStorage",
+		"info": "This viewer displays all localStorage keys and values. Use the clear buttons to reset state for testing.",
+		"confirmClearAll": "Clear all localStorage? This will reset onboarding, hints, and any other saved state.",
+		"clearAriaLabel": "Clear {key}"
+	},
+	"settingsViewer": {
+		"title": "⚙️ Settings",
+		"featureSettings": "Feature Settings (Immutable)",
+		"onboarded": "Onboarded:",
+		"yes": "✅ Yes",
+		"no": "❌ No",
+		"toggleButton": "Toggle",
+		"currencyMode": "Currency Mode:",
+		"defaultCurrency": "Default Currency:",
+		"systemPreferences": "System Preferences (Mutable)",
+		"expandIcon": "▼",
+		"collapseIcon": "▶",
+		"keyboardHints": "Keyboard Hints ({count} dismissed)",
+		"noHintsDismissed": "No hints dismissed yet",
+		"dismissed": "✅ Dismissed",
+		"active": "❌ Active",
+		"resetAllButton": "Reset All Settings",
+		"resetPreferencesButton": "Reset System Preferences",
+		"confirmResetAll": "Reset onboarding? This will clear all settings and redirect to onboarding screen.",
+		"confirmResetPreferences": "Reset system preferences only? Feature settings will be preserved."
+	}
+}

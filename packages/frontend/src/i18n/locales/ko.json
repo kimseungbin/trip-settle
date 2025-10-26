@@ -1,0 +1,127 @@
+{
+	"app": {
+		"title": "Trip Settle",
+		"tagline": "여행 경비 정산을 쉽게"
+	},
+	"keyboard": {
+		"enter": "엔터",
+		"tab": "탭",
+		"esc": "ESC",
+		"ctrl": "Ctrl",
+		"shift": "Shift",
+		"up": "위",
+		"down": "아래",
+		"space": "스페이스"
+	},
+	"onboarding": {
+		"welcome": "Trip Settle에 오신 것을 환영합니다",
+		"tagline": "여행 경비 정산을 쉽게",
+		"currencyModeTitle": "경비를 어떻게 추적하시겠습니까?",
+		"singleCurrency": {
+			"icon": "💵",
+			"title": "단일 통화",
+			"description": "모든 경비를 하나의 통화로 (간단함)"
+		},
+		"multiCurrency": {
+			"icon": "🌍",
+			"title": "다중 통화",
+			"description": "다양한 통화로 경비 추적"
+		},
+		"keyboardHint": {
+			"icon": "⌨️",
+			"navigate": "{tab}으로 이동하고 {enter}로 선택하세요",
+			"skip": "{esc}를 눌러 건너뛰기"
+		},
+		"skipButton": "건너뛰고 다중 통화 모드 사용",
+		"currencySelection": {
+			"title": "통화를 선택하세요",
+			"tagline": "모든 경비에 사용할 기본 통화를 선택하세요",
+			"label": "기본 통화:",
+			"keyboardHint": "검색하려면 입력 • {up}{down}로 탐색 • {enter}로 선택 • {esc}로 닫기",
+			"continueButton": "계속",
+			"backButton": "뒤로",
+			"bottomHint": "{ctrl}+{enter}로 계속 • {tab}으로 계속 버튼 • {esc}로 돌아가기"
+		}
+	},
+	"expenseTracker": {
+		"title": "경비 추적하기"
+	},
+	"expenseForm": {
+		"title": "경비 추가",
+		"namePlaceholder": "경비 이름",
+		"amountPlaceholder": "금액",
+		"addButton": "추가"
+	},
+	"expenseList": {
+		"title": "경비 목록",
+		"empty": "아직 경비가 없습니다",
+		"removeButton": "×",
+		"total": "합계:"
+	},
+	"currencySelector": {
+		"icon": "⌨️",
+		"searching": "검색 중...",
+		"placeholder": "모든 통화를 검색하려면 입력하세요",
+		"recommended": "추천",
+		"checkMark": "●",
+		"noResults": "통화를 찾을 수 없습니다"
+	},
+	"keyboardHint": {
+		"icon": "💡",
+		"title": "키보드 팁:",
+		"content": "{enter}를 눌러 추가하거나, {tab}으로 필드 사이를 이동하세요",
+		"dismissButton": "×",
+		"dismissAriaLabel": "팁 닫기"
+	},
+	"systemStatus": {
+		"title": "시스템 상태",
+		"backend": "백엔드:",
+		"database": "데이터베이스:",
+		"checking": "⏳ 확인 중...",
+		"healthy": "✅ 정상",
+		"error": "❌ 오류",
+		"connected": "✅ 연결됨",
+		"disconnected": "❌ 연결 끊김"
+	},
+	"devTools": {
+		"title": "🔧 개발자 도구",
+		"localOnlyBadge": "로컬 전용"
+	},
+	"localStorageViewer": {
+		"title": "📦 LocalStorage 상태",
+		"empty": "localStorage 항목을 찾을 수 없습니다. 새로운 브라우저 세션입니다.",
+		"descriptions": {
+			"hasSeenOnboarding": "사용자가 온보딩을 완료했는지 추적",
+			"keyboardHintDismissed": "사용자가 키보드 힌트를 닫았는지 추적",
+			"unknown": "알 수 없는 키"
+		},
+		"yes": "✅ 예",
+		"no": "❌ 아니오",
+		"clearButton": "지우기",
+		"clearAllButton": "🗑️ 모든 LocalStorage 지우기",
+		"info": "이 뷰어는 모든 localStorage 키와 값을 표시합니다. 지우기 버튼을 사용하여 테스트용 상태를 초기화하세요.",
+		"confirmClearAll": "모든 localStorage를 지우시겠습니까? 온보딩, 힌트 및 기타 저장된 상태가 초기화됩니다.",
+		"clearAriaLabel": "{key} 지우기"
+	},
+	"settingsViewer": {
+		"title": "⚙️ 설정",
+		"featureSettings": "기능 설정 (변경 불가)",
+		"onboarded": "온보딩 완료:",
+		"yes": "✅ 예",
+		"no": "❌ 아니오",
+		"toggleButton": "전환",
+		"currencyMode": "통화 모드:",
+		"defaultCurrency": "기본 통화:",
+		"systemPreferences": "시스템 환경설정 (변경 가능)",
+		"expandIcon": "▼",
+		"collapseIcon": "▶",
+		"keyboardHints": "키보드 힌트 ({count}개 닫힘)",
+		"noHintsDismissed": "아직 닫힌 힌트가 없습니다",
+		"dismissed": "✅ 닫힘",
+		"active": "❌ 활성",
+		"resetAllButton": "모든 설정 초기화",
+		"resetPreferencesButton": "시스템 환경설정 초기화",
+		"confirmResetAll": "온보딩을 초기화하시겠습니까? 모든 설정이 지워지고 온보딩 화면으로 이동합니다.",
+		"confirmResetPreferences": "시스템 환경설정만 초기화하시겠습니까? 기능 설정은 유지됩니다."
+	}
+}
