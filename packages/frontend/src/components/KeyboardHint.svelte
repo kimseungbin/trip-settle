@@ -150,12 +150,7 @@
 
 	@media (max-width: 600px) {
 		.toast {
-			width: 90%;
-			padding: 0.875em 1em;
-		}
-
-		.content {
-			font-size: 0.875em;
+			display: none; /* Hide keyboard hints on mobile */
 		}
 	}
 </style>
