@@ -40,9 +40,11 @@
 			"tagline": "모든 경비에 사용할 기본 통화를 선택하세요",
 			"label": "기본 통화:",
 			"keyboardHint": "검색하려면 입력 • {up}{down}로 탐색 • {enter}로 선택 • {esc}로 닫기",
+			"keyboardHintSimple": "검색하려면 입력 • {up}{down}로 탐색 • {enter}로 선택",
 			"continueButton": "계속",
 			"backButton": "뒤로",
-			"bottomHint": "{ctrl}+{enter}로 계속 • {tab}으로 계속 버튼 • {esc}로 돌아가기"
+			"bottomHint": "{ctrl}+{enter}로 계속 • {tab}으로 계속 버튼 • {esc}로 돌아가기",
+			"bottomHintSimple": "{esc}를 눌러 돌아가기"
 		}
 	},
 	"expenseTracker": {

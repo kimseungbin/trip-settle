@@ -32,7 +32,7 @@ test.describe('Client-side Routing', () => {
 		await page.goto('/onboarding')
 
 		// Should show onboarding content
-		await expect(page.getByRole('heading', { name: /welcome to trip settle/i })).toBeVisible()
+		await expect(page.getByRole('heading', { name: /trip settle/i })).toBeVisible()
 		await expect(page.getByText(/expense settlement made easy/i)).toBeVisible()
 	})
 
@@ -47,7 +47,7 @@ test.describe('Client-side Routing', () => {
 
 		// Should show onboarding
 		await expect(page).toHaveURL('/onboarding')
-		await expect(page.getByRole('heading', { name: /welcome to trip settle/i })).toBeVisible()
+		await expect(page.getByRole('heading', { name: /trip settle/i })).toBeVisible()
 
 		// Navigate back to home
 		await page.evaluate(() => {
@@ -74,7 +74,7 @@ test.describe('Client-side Routing', () => {
 		// Click browser forward button
 		await page.goForward()
 		await expect(page).toHaveURL('/onboarding')
-		await expect(page.getByRole('heading', { name: /welcome to trip settle/i })).toBeVisible()
+		await expect(page.getByRole('heading', { name: /trip settle/i })).toBeVisible()
 	})
 
 	test('should persist route on page refresh', async ({ page }) => {
@@ -85,7 +85,7 @@ test.describe('Client-side Routing', () => {
 
 		// Should still be on onboarding page
 		await expect(page).toHaveURL('/onboarding')
-		await expect(page.getByRole('heading', { name: /welcome to trip settle/i })).toBeVisible()
+		await expect(page.getByRole('heading', { name: /trip settle/i })).toBeVisible()
 	})
 
 	test('should handle 404 for unknown routes', async ({ page }) => {

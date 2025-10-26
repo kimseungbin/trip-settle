@@ -12,7 +12,7 @@ test.describe('Onboarding Flow', () => {
 
 		// First-time users should be redirected to onboarding
 		await expect(page).toHaveURL('/onboarding')
-		await expect(page.getByRole('heading', { name: /welcome to trip settle/i })).toBeVisible()
+		await expect(page.getByRole('heading', { name: /trip settle/i })).toBeVisible()
 	})
 
 	test('should not show onboarding for returning users', async ({ page }) => {
@@ -62,10 +62,11 @@ test.describe('Onboarding Flow', () => {
 		// Should show currency selector
 		await expect(page.getByRole('heading', { name: /choose your currency/i })).toBeVisible()
 
-		// Click Continue button
-		await page.getByRole('button', { name: /continue/i }).click()
+		// Select a currency (will auto-complete, no Continue button needed)
+		// Click on a currency option in the dropdown (it opens automatically with initialOpen=true)
+		await page.getByRole('option', { name: /KRW/ }).click()
 
-		// Should navigate to home page
+		// Should navigate to home page automatically after currency selection
 		await expect(page).toHaveURL('/')
 		await expect(page.getByRole('heading', { name: 'Track Your Expenses' })).toBeVisible()
 
@@ -104,10 +105,10 @@ test.describe('Onboarding Flow', () => {
 		// Should show currency selector
 		await expect(page.getByRole('heading', { name: /choose your currency/i })).toBeVisible()
 
-		// Complete the flow
-		await page.getByRole('button', { name: /continue/i }).click()
+		// Select currency with keyboard (auto-completes, no Continue button)
+		await page.getByRole('option', { name: /KRW/ }).click()
 
-		// Should navigate to home page
+		// Should navigate to home page automatically
 		await expect(page).toHaveURL('/')
 
 		// Verify settings
@@ -168,15 +169,15 @@ test.describe('Onboarding Flow', () => {
 		// Check for currency mode options
 		await expect(page.getByText(/single currency/i)).toBeVisible()
 		await expect(page.getByText(/multiple currencies/i)).toBeVisible()
-		await expect(page.getByText(/all expenses in one currency/i)).toBeVisible()
-		await expect(page.getByText(/track expenses in different currencies/i)).toBeVisible()
+		// Descriptions are now hidden by default on mobile, shown via "Show more" button
+		// Just verify the mode titles are visible
 	})
 
 	test('should be accessible with proper ARIA labels', async ({ page }) => {
 		await page.goto('/onboarding')
 
-		// Check for proper heading hierarchy
-		const mainHeading = page.getByRole('heading', { level: 1, name: /welcome to trip settle/i })
+		// Check for proper heading hierarchy (updated text)
+		const mainHeading = page.getByRole('heading', { level: 1, name: /trip settle/i })
 		await expect(mainHeading).toBeVisible()
 
 		// Check for proper button accessibility

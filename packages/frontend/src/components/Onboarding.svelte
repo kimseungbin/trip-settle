@@ -69,10 +69,6 @@
 			if (event.key === 'Escape') {
 				event.preventDefault()
 				goBack()
-			} else if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && currencyMode === 'single') {
-				// Ctrl/Cmd+Enter to continue (doesn't conflict with currency selector's Enter key)
-				event.preventDefault()
-				completeOnboarding()
 			}
 		} else {
 			if (event.key === 'Escape') {
@@ -207,7 +203,7 @@
 		<div class="currency-selection">
 			<p class="currency-keyboard-hint">
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-				{@html $t('onboarding.currencySelection.keyboardHint', {
+				{@html $t('onboarding.currencySelection.keyboardHintSimple', {
 					values: {
 						up: `<kbd>${$t('keyboard.up')}</kbd>`,
 						down: `<kbd>${$t('keyboard.down')}</kbd>`,
@@ -219,24 +215,23 @@
 
 			<div class="currency-selector-wrapper">
 				<label for="default-currency">{$t('onboarding.currencySelection.label')}</label>
-				<CurrencySelector bind:value={defaultCurrency} autofocus={true} initialOpen={true} />
+				<CurrencySelector
+					bind:value={defaultCurrency}
+					autofocus={true}
+					initialOpen={true}
+					onselect={completeOnboarding}
+				/>
 			</div>
 
 			<div class="actions">
-				<button class="primary" onclick={completeOnboarding}
-					>{$t('onboarding.currencySelection.continueButton')}</button
-				>
 				<button class="secondary" onclick={goBack}>{$t('onboarding.currencySelection.backButton')}</button>
 			</div>
 		</div>
 
 		<p class="keyboard-hint">
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-			{@html $t('onboarding.currencySelection.bottomHint', {
+			{@html $t('onboarding.currencySelection.bottomHintSimple', {
 				values: {
-					ctrl: `<kbd>${$t('keyboard.ctrl')}</kbd>`,
-					enter: `<kbd>${$t('keyboard.enter')}</kbd>`,
-					tab: `<kbd>${$t('keyboard.tab')}</kbd>`,
 					esc: `<kbd>${$t('keyboard.esc')}</kbd>`,
 				},
 			})}
@@ -325,22 +320,6 @@
 		font-weight: 500;
 	}
 
-	button.primary {
-		background-color: var(--color-primary);
-		color: var(--color-surface);
-	}
-
-	button.primary:hover {
-		background-color: var(--color-primary-hover);
-		transform: translateY(-2px);
-		box-shadow: var(--shadow-md);
-	}
-
-	button.primary:focus {
-		outline: 2px solid var(--color-focus-ring);
-		outline-offset: 2px;
-	}
-
 	button.secondary {
 		background-color: transparent;
 		color: var(--color-text-secondary);
@@ -380,6 +359,17 @@
 		flex-direction: column;
 		gap: 0.75rem;
 		height: 100%;
+	}
+
+	/* Mobile: Prevent grid from stretching cards when one expands */
+	@media (max-width: 640px) {
+		.mode-options {
+			align-items: start;
+		}
+
+		.mode-card {
+			height: auto;
+		}
 	}
 
 	.mode-option {

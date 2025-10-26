@@ -40,9 +40,11 @@
 			"tagline": "Select the default currency for all expenses",
 			"label": "Default Currency:",
 			"keyboardHint": "Type to search • {up}{down} to navigate • {enter} to select • {esc} to close",
+			"keyboardHintSimple": "Type to search • {up}{down} to navigate • {enter} to select",
 			"continueButton": "Continue",
 			"backButton": "Go Back",
-			"bottomHint": "{ctrl}+{enter} to continue • {tab} to Continue button • {esc} to go back"
+			"bottomHint": "{ctrl}+{enter} to continue • {tab} to Continue button • {esc} to go back",
+			"bottomHintSimple": "Press {esc} to go back"
 		}
 	},
 	"expenseTracker": {
