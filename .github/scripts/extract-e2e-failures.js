@@ -78,7 +78,7 @@ function extractFailures(suite, suitePath = []) {
 	suite.specs?.forEach(spec => {
 		spec.tests?.forEach(test => {
 			const result = test.results?.[0]
-			if (!result || result.status === 'passed') return
+			if (!result || result.status === 'passed' || result.status === 'skipped') return
 
 			// Classify error type
 			const error = result.error || {}
