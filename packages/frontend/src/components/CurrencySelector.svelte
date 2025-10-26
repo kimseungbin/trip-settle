@@ -270,6 +270,13 @@
 		flex-direction: column;
 	}
 
+	/* Mobile responsive - remove min-width on small screens */
+	@media (max-width: 640px) {
+		.dropdown {
+			min-width: auto;
+		}
+	}
+
 	.search-input {
 		width: 100%;
 		padding: 0.75em;

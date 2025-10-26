@@ -87,6 +87,7 @@
 			'Helvetica Neue', sans-serif;
 		background-color: var(--color-surface);
 		color: var(--color-text);
+		overflow-x: hidden; /* Prevent horizontal scroll on mobile */
 	}
 
 	main {
