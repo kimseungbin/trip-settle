@@ -352,6 +352,10 @@
 		cursor: pointer;
 		transition: all 0.3s;
 		text-align: center;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		height: 100%;
 	}
 
 	.mode-option:hover {
