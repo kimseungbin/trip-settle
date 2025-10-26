@@ -12,6 +12,23 @@ description: |
 instructions: |
   When the user requests cache analysis or cache trend review:
 
+  ## Prerequisites: Git Notes Helper Skill
+
+  This skill uses git notes to store and retrieve cache metrics. Before starting analysis:
+
+  1. **Reference git-notes-helper skill** for common operations:
+     - Read `.claude/skills/git-notes-helper/helper.yaml` for git notes operations
+     - Use namespace: `ci/cache-metrics`
+     - Follow patterns from git-notes-helper for fetching, parsing, and historical analysis
+
+  2. **Key operations from git-notes-helper**:
+     - Fetch notes: Operation 1
+     - Check existence: Operation 2
+     - Show note: Operation 3
+     - Parse INI fields: Operation 5
+     - Historical analysis: Operation 7
+     - Compare commits: Operation 8
+
   ## Background: How Metrics Are Captured
 
   Before analyzing metrics, understand how they're generated in the CI pipeline:
@@ -94,16 +111,16 @@ instructions: |
   - Review extraction script regex patterns
   - Compare manual calculation vs script output
 
-  ## Step 1: Fetch Cache Metrics Notes
+  ## Step 1: Fetch and Validate Cache Metrics Notes
 
-  First, ensure git notes are available locally:
+  Use **git-notes-helper** Operations 1-2:
 
   ```bash
-  # Fetch cache metrics notes from remote
+  # Operation 1: Fetch notes from remote
   git fetch origin refs/notes/ci/cache-metrics:refs/notes/ci/cache-metrics 2>/dev/null || \
     echo "No remote cache metrics found (notes may not be set up yet)"
 
-  # Check if any notes exist locally
+  # Operation 2: Check if any notes exist locally
   git notes --ref=ci/cache-metrics list | head -5
   ```
 
@@ -111,44 +128,31 @@ instructions: |
 
   ## Step 2: Extract Recent Metrics
 
-  Retrieve cache metrics from recent commits.
+  Use **git-notes-helper** Operations 3-7 to retrieve cache metrics:
 
-  **IMPORTANT**: Claude Code's Bash tool has issues with complex while loops.
-  Use these simpler commands instead:
+  **Reference**: See `.claude/skills/git-notes-helper/helper.yaml` → Operation 7 (Historical Analysis) for detailed patterns.
+
+  **Simplified workflow** (follows git-notes-helper best practices):
 
   ```bash
-  # Step 1: List all commits with cache notes
-  git notes --ref=ci/cache-metrics list
+  # List recent commits with cache notes (Operation 4)
+  git notes --ref=ci/cache-metrics list | head -20
 
-  # Step 2: Show metrics for specific commits (use commit hashes from step 1)
-  # Extract commit hash from second column of notes list output
+  # For each commit hash, extract data (Operations 3, 5, 6):
+
+  # Show note content (Operation 3)
   git notes --ref=ci/cache-metrics show <commit-hash>
 
-  # Step 3: Get commit context (subject, date)
+  # Parse specific fields (Operation 5)
+  git notes --ref=ci/cache-metrics show <commit-hash> | grep "^base_image" | cut -d'=' -f2 | xargs
+  git notes --ref=ci/cache-metrics show <commit-hash> | grep "^cache_status" | cut -d'=' -f2 | xargs
+  git notes --ref=ci/cache-metrics show <commit-hash> | grep "^change_type" | cut -d'=' -f2 | xargs
+
+  # Get commit context (Operation 6)
   git show --no-patch --format="%h: %s (%ar)" <commit-hash>
   ```
 
-  **Recommended workflow**:
-  1. Get list of all commits with notes
-  2. Extract commit hashes (second column)
-  3. For each hash, run separate commands to get:
-     - The note content: `git notes --ref=ci/cache-metrics show <hash>`
-     - The commit context: `git show --no-patch --format="%h: %s (%ar)" <hash>`
-  4. Parse the INI-format note data using grep
-
-  **Example extraction**:
-  ```bash
-  # Get all commits with notes
-  git notes --ref=ci/cache-metrics list
-
-  # For each commit hash (e.g., 14f36b2):
-  git notes --ref=ci/cache-metrics show 14f36b2
-  git show --no-patch --format="%h: %s (%ar)" 14f36b2
-
-  # Parse specific fields from note
-  git notes --ref=ci/cache-metrics show 14f36b2 | grep "^base_image" | cut -d'=' -f2 | xargs
-  git notes --ref=ci/cache-metrics show 14f36b2 | grep "^timestamp" | cut -d'=' -f2 | xargs
-  ```
+  **Important**: Follow git-notes-helper "Best Practices" → Avoid complex while loops, use simple sequential commands.
 
   ## Step 3: Analyze Trends
 
@@ -317,12 +321,14 @@ common_issues:
       - dockerfile: LOW (full rebuild)
 
 tips:
-  - "Always fetch notes before analysis: `git fetch origin refs/notes/ci/cache-metrics`"
-  - "Use `--since` and `--until` with git log to filter time ranges"
-  - "Parse INI format with `grep "^key" | cut -d'=' -f2 | xargs`"
-  - "Group data by change_type for meaningful insights"
-  - "Compare current metrics to historical baseline"
-  - "Look for sudden changes in cache_status (HIT -> MISS)"
+  - "Reference git-notes-helper skill for all git notes operations"
+  - "Use namespace: `ci/cache-metrics` for all cache metrics notes"
+  - "Follow git-notes-helper best practices for parsing and historical analysis"
+  - "Group data by change_type for meaningful insights (code-only, deps, dockerfile)"
+  - "Compare current metrics to historical baseline using Operation 8 (Compare)"
+  - "Look for sudden changes in cache_status (HIT -> MISS) that indicate degradation"
+  - "Cache misses are expected for dependency and Dockerfile changes"
+  - "Code-only changes should have >80% cache hit rate"
 
 output_format: |
   Present analysis in clear sections:

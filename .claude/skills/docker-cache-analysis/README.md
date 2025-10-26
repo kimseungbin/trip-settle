@@ -10,6 +10,16 @@ This skill helps you understand and optimize Docker build cache performance by:
 - Correlating cache performance with different types of changes
 - Providing actionable recommendations for improvement
 
+## Dependencies
+
+This skill uses **git-notes-helper** for common git notes operations:
+- Fetching notes from remote
+- Parsing INI-format note data
+- Historical analysis across commits
+- Comparing commits
+
+For detailed git notes operations, see `.claude/skills/git-notes-helper/helper.yaml`
+
 ## Usage
 
 ### Invoke the Skill

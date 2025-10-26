@@ -24,27 +24,39 @@ When analyzing E2E test failures:
    - Read `.claude/skills/e2e-failure-analysis/analysis.yaml`
    - Understand the failure analysis workflow
 
-2. **Locate failure data**:
-   - Check `packages/frontend/test-results/` for local test results
-   - Parse `results.json` or `.json` reporter output
-   - Fall back to parsing test output logs if JSON unavailable
+2. **Use git-notes-helper for git notes operations** (Phase 2-3 features):
+   - This skill depends on `.claude/skills/git-notes-helper/helper.yaml`
+   - Reference git-notes-helper Operations 1-8 for fetching, parsing, and analyzing notes
+   - Use namespace: `ci/e2e-failures`
 
-3. **Extract failure information**:
+3. **Locate failure data**:
+   - **Prefer git notes** (fastest, for CI failures)
+   - Fall back to `packages/frontend/test-results/` for local analysis
+   - Parse `results.json` or `.json` reporter output
+
+4. **Extract failure information**:
    - Which tests failed (file, test name, browser)
    - Error messages and stack traces
    - Artifact locations (screenshots, videos, traces)
 
-4. **Categorize failures**:
+5. **Categorize failures**:
    - Timeout errors
    - Assertion failures
    - Visual regressions
    - Setup/teardown errors
 
-5. **Present findings**:
+6. **Present findings**:
    - Summary of failures
    - Detailed error information per test
    - Links to debugging artifacts
    - Actionable fix recommendations
+
+7. **Use Phase 3 features** (advanced analysis):
+   - Flaky Test Detection (Operation 7)
+   - Failure Trend Analysis (Operations 6, 7)
+   - Blame Integration (Operation 6)
+   - Comparison Reports (Operation 8)
+   - Automatic Regression Detection (Operations 2, 3, 5, 8)
 
 ## Example Workflow
 

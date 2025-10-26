@@ -24,16 +24,18 @@ When analyzing Docker build cache performance:
    - Read `.claude/skills/docker-cache-analysis/analysis.yaml`
    - Understand the metrics structure and analysis steps
 
-2. **Fetch git notes** (cache metrics storage):
-   ```bash
-   git fetch origin refs/notes/ci/cache-metrics:refs/notes/ci/cache-metrics
-   ```
+2. **Use git-notes-helper for git notes operations**:
+   - This skill depends on `.claude/skills/git-notes-helper/helper.yaml`
+   - Reference git-notes-helper Operations 1-8 for fetching, parsing, and analyzing notes
+   - Use namespace: `ci/cache-metrics`
 
-3. **Extract recent metrics** (last 20 commits):
-   - Use git log with notes to retrieve cache data
+3. **Extract and analyze cache metrics**:
+   - Fetch notes using git-notes-helper Operation 1
    - Parse INI-format notes (timestamp, cache_status, change_type, etc.)
+   - Use git-notes-helper Operation 5 for field extraction
+   - Use git-notes-helper Operation 7 for historical analysis
 
-4. **Analyze trends**:
+4. **Analyze trends** (domain-specific):
    - Calculate base image cache hit rate
    - Group by change type (code-only, deps, dockerfile)
    - Identify degradation points or anomalies

@@ -12,24 +12,43 @@ description: |
 instructions: |
   When the user requests E2E failure analysis or mentions failed E2E tests:
 
+  ## Prerequisites: Git Notes Helper Skill
+
+  This skill uses git notes extensively for historical analysis (Phase 3 features). Before starting:
+
+  1. **Reference git-notes-helper skill** for common operations:
+     - Read `.claude/skills/git-notes-helper/helper.yaml` for git notes operations
+     - Use namespace: `ci/e2e-failures`
+     - Follow patterns from git-notes-helper for fetching, parsing, and historical analysis
+
+  2. **Key operations from git-notes-helper**:
+     - Fetch notes: Operation 1
+     - Check existence: Operation 2
+     - Show note: Operation 3
+     - List commits: Operation 4
+     - Parse INI fields: Operation 5
+     - Get commit context: Operation 6
+     - Historical analysis: Operation 7
+     - Compare commits: Operation 8
+
   ## Step 1: Check for CI Failure Metadata (Git Notes)
 
   **NEW in Phase 2**: E2E test failures from CI are automatically captured in git notes.
   This is the FASTEST way to analyze CI failures without downloading artifacts.
 
+  Use **git-notes-helper** Operations 1-3:
+
   ```bash
-  # Fetch E2E failure notes from remote
+  # Operation 1: Fetch E2E failure notes from remote
   git fetch origin refs/notes/ci/e2e-failures:refs/notes/ci/e2e-failures 2>/dev/null || \
     echo "No E2E failure notes found (CI capture may not be set up yet)"
 
-  # Check if notes exist for current commit
-  git notes --ref=ci/e2e-failures show HEAD
+  # Operation 2: Check if notes exist
+  git notes --ref=ci/e2e-failures show HEAD  # Current commit
+  git notes --ref=ci/e2e-failures list | head -10  # All recent commits
 
-  # Or check specific commit
+  # Operation 3: Show note content
   git notes --ref=ci/e2e-failures show <commit-hash>
-
-  # List all commits with E2E failure notes
-  git notes --ref=ci/e2e-failures list | head -10
   ```
 
   **If notes exist**: Parse the INI-format data (see "Parse Git Notes" section below).
@@ -37,18 +56,20 @@ instructions: |
 
   ### Parse Git Notes Format
 
-  Git notes contain INI-format failure metadata:
+  Git notes contain INI-format failure metadata. Use **git-notes-helper** Operation 5:
+
+  **Reference**: See `.claude/skills/git-notes-helper/helper.yaml` → Operation 5 (Parse INI Format Fields)
 
   ```bash
-  # Show note for current commit
-  git notes --ref=ci/e2e-failures show HEAD
-
-  # Extract specific fields
+  # Extract top-level fields (Operation 5)
   git notes --ref=ci/e2e-failures show HEAD | grep "^total_tests" | cut -d'=' -f2 | xargs
   git notes --ref=ci/e2e-failures show HEAD | grep "^failed" | cut -d'=' -f2 | xargs
 
-  # Get failure details (each failure has a numbered section)
+  # Get failure details from numbered sections (Operation 5)
   git notes --ref=ci/e2e-failures show HEAD | grep -A 8 "^\[failure\.1\]"
+
+  # Count failure sections
+  git notes --ref=ci/e2e-failures show HEAD | grep -c "^\[failure\."
   ```
 
   **Note structure**:
@@ -322,22 +343,21 @@ instructions: |
 
   Identify tests that intermittently fail without code changes (unreliable tests).
 
-  **Workflow:**
+  **Workflow** (uses **git-notes-helper** Operations 1, 4, 5, 7):
+
+  **Reference**: See `.claude/skills/git-notes-helper/helper.yaml` → Operation 7 (Historical Analysis)
 
   ```bash
-  # Step 1: Fetch git notes for last 20 commits
+  # Step 1: Fetch git notes (Operation 1)
   git fetch origin refs/notes/ci/e2e-failures:refs/notes/ci/e2e-failures
 
-  # Step 2: Get list of recent commits with E2E notes
-  git log --oneline -20 --format="%H" | while read commit; do
-    if git notes --ref=ci/e2e-failures show "$commit" >/dev/null 2>&1; then
-      echo "$commit"
-    fi
-  done
+  # Step 2: Get recent commits with E2E notes (Operation 4 + 7)
+  # Simplified approach (avoids complex while loops):
+  git notes --ref=ci/e2e-failures list | head -20 | awk '{print $2}'
 
-  # Step 3: For each commit, extract test pass/fail status
-  # Parse [metadata] section for total_tests, passed, failed
-  # Parse [failure.N] sections to get failed test names
+  # Step 3: For each commit, extract test pass/fail status (Operation 5)
+  # Extract test names from note
+  git notes --ref=ci/e2e-failures show <commit> | grep "^test_name" | cut -d'=' -f2
 
   # Step 4: Build pass/fail history for each unique test
   # Example: "ExpenseTracker › should add expense with Enter key"
@@ -345,7 +365,6 @@ instructions: |
   #   Commit 2: ❌ (in [failure.1])
   #   Commit 3: ✅ (not in failures)
   #   Commit 4: ❌ (in [failure.2])
-  #   ...
 
   # Step 5: Calculate flakiness metrics
   # Flip rate = (number of status changes) / (total runs - 1)
@@ -354,18 +373,16 @@ instructions: |
   # Step 6: Identify flaky tests (flip rate > 30%)
   ```
 
-  **Simplified Commands for Claude:**
+  **Simplified Commands** (follow git-notes-helper best practices):
 
   ```bash
-  # Get last 10 commits with E2E notes
-  git log --oneline -20 | while read hash rest; do
-    git notes --ref=ci/e2e-failures show "$hash" 2>/dev/null && echo "---COMMIT: $hash---"
-  done
+  # Get commit hashes with notes (Operation 4)
+  git notes --ref=ci/e2e-failures list | head -10 | awk '{print $2}'
 
-  # Extract all test names from a note
-  git notes --ref=ci/e2e-failures show <commit> | grep "^test_name" | cut -d'=' -f2 | xargs
+  # Extract all test names from a note (Operation 5)
+  git notes --ref=ci/e2e-failures show <commit> | grep "^test_name" | cut -d'=' -f2
 
-  # Check if specific test failed in a commit
+  # Check if specific test failed in a commit (Operation 5)
   git notes --ref=ci/e2e-failures show <commit> | grep -q "test_name = ExpenseTracker › should add expense"
   echo $?  # 0 = failed, 1 = passed
   ```
@@ -453,17 +470,19 @@ instructions: |
   - Trend direction (getting worse, stable, improving)
   - Recent vs historical comparison
 
-  **Workflow:**
+  **Workflow** (uses **git-notes-helper** Operations 1, 6, 7):
+
+  **Reference**: See `.claude/skills/git-notes-helper/helper.yaml` → Operation 7 (Historical Analysis) → Pattern 3
 
   ```bash
-  # Step 1: Fetch git notes for historical analysis
+  # Step 1: Fetch git notes for historical analysis (Operation 1)
   git fetch origin refs/notes/ci/e2e-failures:refs/notes/ci/e2e-failures
 
-  # Step 2: For each currently failing test, find first failure
+  # Step 2: Find first failure (Operation 7 - Pattern 3: Find First Failure)
   # Walk backwards through commits until test passes or history exhausted
 
   # Step 3: Calculate time-based metrics
-  # - Days since first failure
+  # - Days since first failure (use Operation 6 for commit timestamps)
   # - Failure rate in last 7 days vs last 30 days
   # - Pass rate trend (improving, degrading, stable)
 
@@ -645,23 +664,26 @@ instructions: |
   - Git diff of relevant files
   - Direct links to lines of code (file:line format)
 
-  **Workflow:**
+  **Workflow** (uses **git-notes-helper** Operation 6):
+
+  **Reference**: See `.claude/skills/git-notes-helper/helper.yaml` → Operation 6 (Get Commit Context)
 
   ```bash
   # Step 1: Get first failure commit (from Feature 2)
   FIRST_FAIL_COMMIT="stu901ab"
 
-  # Step 2: Get commit metadata
+  # Step 2: Get commit metadata (Operation 6)
   git show --no-patch --format=full $FIRST_FAIL_COMMIT
+  # Or: git log --format="%an <%ae>%n%ar%n%n%s%n%n%b" -1 $FIRST_FAIL_COMMIT
 
-  # Step 3: Get files changed
+  # Step 3: Get files changed (Operation 6)
   git diff-tree --no-commit-id --name-only -r $FIRST_FAIL_COMMIT
+  # Or with status: git diff-tree --no-commit-id --name-status -r $FIRST_FAIL_COMMIT
 
-  # Step 4: Get detailed diff for relevant files
-  # Filter for test-related files (components, pages, etc.)
+  # Step 4: Get detailed diff for relevant files (Operation 6)
   git show $FIRST_FAIL_COMMIT -- packages/frontend/src/
 
-  # Step 5: Find blame for specific lines (if error mentions line numbers)
+  # Step 5: Find blame for specific lines (Operation 6)
   git blame -L <start>,<end> <file> $FIRST_FAIL_COMMIT
   ```
 
@@ -878,25 +900,27 @@ instructions: |
   - Still passing (continue to pass) - STABLE
   - Summary of changes since last run
 
-  **Workflow:**
+  **Workflow** (uses **git-notes-helper** Operation 8):
+
+  **Reference**: See `.claude/skills/git-notes-helper/helper.yaml` → Operation 8 (Compare Two Commits)
 
   ```bash
-  # Step 1: Get current commit's test results
+  # Step 1: Get current and previous commit hashes
   CURRENT=$(git rev-parse HEAD)
-  git notes --ref=ci/e2e-failures show $CURRENT
-
-  # Step 2: Get previous commit's test results
   PREVIOUS=$(git rev-parse HEAD~1)
+
+  # Step 2: Get test results for both (Operation 3)
+  git notes --ref=ci/e2e-failures show $CURRENT
   git notes --ref=ci/e2e-failures show $PREVIOUS
 
-  # Step 3: Extract test names from both
+  # Step 3: Extract test names from both (Operation 5)
   # Current failures
   git notes --ref=ci/e2e-failures show $CURRENT | grep "^test_name" | cut -d'=' -f2
 
   # Previous failures
   git notes --ref=ci/e2e-failures show $PREVIOUS | grep "^test_name" | cut -d'=' -f2
 
-  # Step 4: Compare and categorize
+  # Step 4: Compare and categorize (Operation 8 pattern)
   # New failures: In current but NOT in previous
   # Fixed tests: In previous but NOT in current
   # Still failing: In both current AND previous
@@ -1111,19 +1135,21 @@ instructions: |
   - **Always**: Run automatically during every E2E failure analysis
   - **Opt-out**: Skip if user specifically requests "no comparison"
 
-  **Workflow (Automatic)**:
+  **Workflow** (uses **git-notes-helper** Operations 2, 3, 5, 8):
+
+  **Reference**: See `.claude/skills/git-notes-helper/helper.yaml` → Operation 8 (Compare Two Commits)
 
   ```bash
-  # Step 1: Check if previous commit has E2E notes
+  # Step 1: Check if previous commit has E2E notes (Operation 2)
   PREV_COMMIT=$(git rev-parse HEAD~1)
   if git notes --ref=ci/e2e-failures show $PREV_COMMIT &>/dev/null; then
     echo "Previous run data found - running automatic regression detection"
 
-    # Step 2: Extract current and previous test names
+    # Step 2: Extract current and previous test names (Operations 3 + 5)
     CURRENT=$(git notes --ref=ci/e2e-failures show HEAD | grep "^test_name" | cut -d'=' -f2 | sort)
     PREVIOUS=$(git notes --ref=ci/e2e-failures show $PREV_COMMIT | grep "^test_name" | cut -d'=' -f2 | sort)
 
-    # Step 3: Find new failures (regressions)
+    # Step 3: Find new failures - regressions (Operation 8 pattern)
     NEW_FAILURES=$(comm -23 <(echo "$CURRENT") <(echo "$PREVIOUS"))
 
     # Step 4: Count regressions
@@ -1432,11 +1458,16 @@ examples:
       ```
 
 tips:
-  - "Always check test-results/ directory first for JSON output (most reliable)"
+  - "Reference git-notes-helper skill for all git notes operations"
+  - "Use namespace: `ci/e2e-failures` for all E2E failure notes"
+  - "Follow git-notes-helper best practices for parsing and historical analysis"
+  - "Always check git notes first (fastest), fall back to test-results/ for local analysis"
   - "Look for patterns in error messages to categorize failures quickly"
   - "Visual regressions often indicate unintentional CSS changes"
   - "Timeout errors usually mean selector changed or element is hidden"
   - "Browser-specific failures suggest rendering or API differences"
+  - "Use Phase 3 features (Flaky Detection, Trend Analysis) for historical insights"
+  - "Automatic Regression Detection runs by default - saves time identifying new failures"
   - "Screenshot artifacts are essential for visual debugging"
   - "Trace files provide the most comprehensive debugging information"
 

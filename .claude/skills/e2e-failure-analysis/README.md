@@ -11,6 +11,17 @@ When E2E tests fail, you need to answer three questions fast:
 
 This skill automates the analysis and provides targeted recommendations based on error type.
 
+## Dependencies
+
+This skill uses **git-notes-helper** for Phase 2-3 features (git notes-based analysis):
+- Fetching failure metadata from remote
+- Parsing INI-format note data
+- Historical analysis (flaky detection, trend analysis)
+- Comparing commits (regression detection)
+- Getting commit context (blame integration)
+
+For detailed git notes operations, see `.claude/skills/git-notes-helper/helper.yaml`
+
 ## Usage
 
 ### Invoke the Skill
