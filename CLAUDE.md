@@ -437,17 +437,31 @@ chmod +x .githooks/*
 
 When committing changes to `.svelte` or `.css` files, the pre-commit hook **requires** explicit snapshot handling:
 
-**Required keywords (add to commit message):**
+**Required footer (add to commit message):**
 
-1. **`[update-snapshots]`** - UI appearance changed
+1. **`Snapshots: update`** - UI appearance changed
    - Use when: Styling, layout, colors, new visual elements
    - CI will automatically update snapshots after push
-   - Example: `git commit -m "feat: Redesign button [update-snapshots]"`
+   - Example:
+     ```
+     feat: Redesign button
 
-2. **`[skip-snapshots]`** - UI files changed but appearance unchanged
+     Changes the button color to blue and adds hover effect.
+
+     Snapshots: update
+     ```
+
+2. **`Snapshots: skip`** - UI files changed but appearance unchanged
    - Use when: Internal refactoring, prop renaming, type changes
    - You confirm no visual changes occurred
-   - Example: `git commit -m "refactor: Extract component logic [skip-snapshots]"`
+   - Example:
+     ```
+     refactor: Extract component logic
+
+     Moves validation logic to separate function.
+
+     Snapshots: skip
+     ```
 
 **Why this matters**: Visual regression tests fail when UI changes aren't reflected in snapshots. Explicit declaration prevents forgotten updates and CI failures.
 
@@ -1072,15 +1086,19 @@ git pull
 # 4. Review and merge
 ```
 
-**Option 3: Commit message trigger**
+**Option 3: Commit footer trigger**
 ```bash
-# Include [update-snapshots] in your commit message
-git commit -m "feat(frontend): Redesign button [update-snapshots]"
+# Add "Snapshots: update" footer to your commit message
+git commit -m "feat(frontend): Redesign button
+
+Changes the button color to blue.
+
+Snapshots: update"
 git push
 # Workflow runs automatically and updates snapshots
 ```
 
-**Note**: When pushing multiple commits, the workflow checks ALL commits in the push. If ANY commit contains `[update-snapshots]`, the workflow will run, even if it's not the HEAD commit.
+**Note**: When pushing multiple commits, the workflow checks ALL commits in the push. If ANY commit contains `Snapshots: update`, the workflow will run, even if it's not the HEAD commit.
 
 **Verifying Changes**:
 1. CI workflow commits snapshot updates with detailed message
@@ -1145,7 +1163,7 @@ The project includes automated detection to prevent forgotten snapshot updates:
      📄 packages/frontend/src/components/Button.svelte
 
    If this changes visual appearance, remember to update snapshots:
-     • Add [update-snapshots] to commit message, OR
+     • Add "Snapshots: update" footer to commit message, OR
      • Comment /update-snapshots on PR after pushing
    ```
 
@@ -1166,8 +1184,12 @@ The project includes automated detection to prevent forgotten snapshot updates:
 # 1. Make UI changes
 git add packages/frontend/src/components/Button.svelte
 
-# 2. Commit with snapshot update flag
-git commit -m "feat(frontend): Redesign primary button [update-snapshots]"
+# 2. Commit with snapshot update footer
+git commit -m "feat(frontend): Redesign primary button
+
+Changes button color and adds hover animation.
+
+Snapshots: update"
 
 # 3. Push to trigger CI snapshot update
 git push

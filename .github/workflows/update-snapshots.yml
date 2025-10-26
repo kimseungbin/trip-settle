@@ -6,7 +6,7 @@ name: Update Visual Snapshots
 # Trigger methods:
 # 1. Manual: Go to Actions tab → "Update Visual Snapshots" → Run workflow
 # 2. PR Comment: Comment "/update-snapshots" on a pull request
-# 3. Commit Message: Include "[update-snapshots]" in commit message
+# 3. Commit Footer: Add "Snapshots: update" footer to commit message
 
 on:
   # Manual trigger from GitHub UI
@@ -21,7 +21,7 @@ on:
   issue_comment:
     types: [created]
 
-  # Trigger via commit message containing [update-snapshots]
+  # Trigger via commit footer containing "Snapshots: update"
   push:
     branches:
       - '**'

@@ -4,9 +4,9 @@
 # This script detects three trigger methods:
 #   1. Manual workflow_dispatch
 #   2. PR comment containing "/update-snapshots"
-#   3. Commit message containing "[update-snapshots]"
+#   3. Commit footer containing "Snapshots: update" or "Snapshots: skip"
 #      NOTE: Checks ALL commits in a push, not just HEAD commit
-#      This handles multi-commit pushes where [update-snapshots] might
+#      This handles multi-commit pushes where snapshot footer might
 #      be in an earlier commit.
 #
 # Usage: ./check-trigger.sh
@@ -62,23 +62,24 @@ case "${GITHUB_EVENT_NAME:-}" in
     ;;
 
   push)
-    echo "🔍 Checking commit message trigger..."
+    echo "🔍 Checking commit footer trigger..."
     if [ -f "$GITHUB_EVENT_PATH" ]; then
       # Check ALL commits in the push, not just HEAD
-      # This handles multi-commit pushes where [update-snapshots] might not be in HEAD
+      # This handles multi-commit pushes where snapshot footer might not be in HEAD
       COMMIT_COUNT=$(jq -r '.commits | length' "$GITHUB_EVENT_PATH" 2>/dev/null || echo "0")
       echo "   Checking $COMMIT_COUNT commit(s) in push..."
 
-      # Extract all commit messages and check if any contain [update-snapshots]
-      MATCHING_COMMITS=$(jq -r '.commits[] | select(.message | contains("[update-snapshots]")) | .id[0:7] + ": " + (.message | split("\n")[0])' "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
+      # Extract all commit messages and check if any contain "Snapshots: update" footer
+      # Also accept legacy [update-snapshots] format for backward compatibility
+      MATCHING_COMMITS=$(jq -r '.commits[] | select(.message | (contains("Snapshots: update") or contains("[update-snapshots]"))) | .id[0:7] + ": " + (.message | split("\n")[0])' "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
 
       if [ -n "$MATCHING_COMMITS" ]; then
-        echo "✅ Commit message trigger detected: [update-snapshots]"
+        echo "✅ Commit footer trigger detected: Snapshots: update"
         echo "   Matching commits:"
         echo "$MATCHING_COMMITS" | sed 's/^/     /'
         SHOULD_RUN="true"
       else
-        echo "ℹ️  No commits in push contain [update-snapshots]"
+        echo "ℹ️  No commits in push contain snapshot update trigger"
       fi
     fi
     ;;
