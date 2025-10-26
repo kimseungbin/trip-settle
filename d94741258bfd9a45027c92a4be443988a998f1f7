@@ -1,0 +1,73 @@
+=== E2E TEST FAILURE REPORT ===
+
+[metadata]
+timestamp = 2025-10-26T08:10:59.522Z
+commit = d947412
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18815097479
+total_tests = 0
+passed = 0
+failed = 0
+skipped = 0
+pass_rate = 0.0%
+duration_sec = 0
+
+[summary]
+status = PASSED
+new_failures = 4
+timeout_failures = 4
+visual_failures = 0
+assertion_failures = 0
+navigation_failures = 0
+setup_failures = 0
+
+[failure.1]
+test_file = e2e/onboarding.spec.ts
+test_name = e2e/onboarding.spec.ts › Onboarding Flow › should complete onboarding with single-currency mode
+browser = chromium
+error_type = timeout
+error_message = [31mTest timeout of 30000ms exceeded.[39m
+duration_ms = 30246
+screenshots = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--3ec85-g-with-single-currency-mode-chromium/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--3ec85-g-with-single-currency-mode-chromium/video.webm
+traces = none
+
+[failure.2]
+test_file = e2e/onboarding.spec.ts
+test_name = e2e/onboarding.spec.ts › Onboarding Flow › should support keyboard navigation - Enter on single-currency button
+browser = chromium
+error_type = timeout
+error_message = [31mTest timeout of 30000ms exceeded.[39m
+duration_ms = 30160
+screenshots = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--8df9e-r-on-single-currency-button-chromium/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--8df9e-r-on-single-currency-button-chromium/video.webm
+traces = none
+
+[failure.3]
+test_file = e2e/onboarding.spec.ts
+test_name = e2e/onboarding.spec.ts › Onboarding Flow › should complete onboarding with single-currency mode
+browser = webkit
+error_type = timeout
+error_message = [31mTest timeout of 30000ms exceeded.[39m
+duration_ms = 30267
+screenshots = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--3ec85-g-with-single-currency-mode-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--3ec85-g-with-single-currency-mode-webkit/video.webm
+traces = none
+
+[failure.4]
+test_file = e2e/onboarding.spec.ts
+test_name = e2e/onboarding.spec.ts › Onboarding Flow › should support keyboard navigation - Enter on single-currency button
+browser = webkit
+error_type = timeout
+error_message = [31mTest timeout of 30000ms exceeded.[39m
+duration_ms = 30244
+screenshots = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--8df9e-r-on-single-currency-button-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--8df9e-r-on-single-currency-button-webkit/video.webm
+traces = none
+
+[diagnostics]
+playwright_version = 1.56.1
+test_env = unknown
+workers = 4
+reporter_output = packages/frontend/test-results/results.json
+artifacts_uploaded = yes (GitHub Actions)
