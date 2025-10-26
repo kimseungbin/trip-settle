@@ -430,6 +430,7 @@
 		font-weight: 600;
 		color: var(--color-text);
 		margin-bottom: 0.5rem;
+		white-space: pre-line; /* Allow newlines in title text */
 	}
 
 	.mode-description {
@@ -598,9 +599,16 @@
 			gap: 0.75rem;
 		}
 
+		.mode-card {
+			display: flex;
+			flex-direction: column;
+			min-height: 200px; /* Ensure equal height for collapsed cards */
+		}
+
 		.mode-option {
 			padding: 1rem 0.75rem;
 			min-height: auto;
+			flex-shrink: 0; /* Prevent button from shrinking */
 		}
 
 		.mode-icon {

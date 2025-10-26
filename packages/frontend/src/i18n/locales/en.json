@@ -19,12 +19,12 @@
 		"currencyModeTitle": "What kind of trip are you planning?",
 		"singleCurrency": {
 			"icon": "💵",
-			"title": "Single Currency",
+			"title": "Single\nCurrency",
 			"description": "Best for:\n• Domestic trips\n• Single country visits\n• Example: Korea trip using only KRW"
 		},
 		"multiCurrency": {
 			"icon": "🌍",
-			"title": "Multiple Currencies",
+			"title": "Multiple\nCurrencies",
 			"description": "Best for:\n• Booking flights/hotels in different currencies\n• Multi-country trips\n• Example: Korea → Japan trip (Flights in KRW + Hotels/expenses in JPY)"
 		},
 		"showMore": "Show more",
