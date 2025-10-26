@@ -16,16 +16,16 @@
 	"onboarding": {
 		"welcome": "Trip Settle",
 		"tagline": "Settle any trip, any currency, any situation",
-		"currencyModeTitle": "How do you want to track expenses?",
+		"currencyModeTitle": "What kind of trip are you planning?",
 		"singleCurrency": {
 			"icon": "💵",
 			"title": "Single Currency",
-			"description": "All expenses in one currency (simpler)"
+			"description": "Best for:\n• Domestic trips\n• Single country visits\n• Example: Korea trip using only KRW"
 		},
 		"multiCurrency": {
 			"icon": "🌍",
 			"title": "Multiple Currencies",
-			"description": "Track expenses in different currencies"
+			"description": "Best for:\n• Booking flights/hotels in different currencies\n• Multi-country trips\n• Example: Korea → Japan trip (Flights in KRW + Hotels/expenses in JPY)"
 		},
 		"keyboardHint": {
 			"icon": "⌨️",

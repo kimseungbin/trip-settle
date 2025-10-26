@@ -400,7 +400,9 @@
 		font-size: 1rem;
 		color: #666;
 		margin: 0;
-		line-height: 1.4;
+		line-height: 1.6;
+		white-space: pre-line;
+		text-align: left;
 	}
 
 	.skip-link {
