@@ -50,18 +50,22 @@ print_step "Cleaning existing build artifacts..."
 find packages/infra -type f \( -name "*.js" -o -name "*.d.ts" -o -name "*.js.map" \) ! -name "jest.config.js" ! -name ".eslintrc.js" -delete 2>/dev/null || true
 print_success "Cleaned existing artifacts"
 
-# 2. Check code formatting
-print_step "Checking code formatting..."
-if npm run format:check; then
-    print_success "Code formatting check passed"
+# 2. Auto-fix code formatting
+print_step "Auto-fixing code formatting..."
+if npm run format; then
+    print_success "Code formatting fixed and staged"
+    # Stage any formatting changes
+    git add -u
 else
-    print_error "Code formatting check failed. Run 'npm run format' to fix."
+    print_error "Code formatting failed. Check the errors above."
 fi
 
-# 3. Run linters
-print_step "Running linters..."
+# 3. Auto-fix linting issues
+print_step "Auto-fixing linting issues..."
 if npm run lint; then
-    print_success "Linting passed"
+    print_success "Linting issues fixed and staged"
+    # Stage any lint fixes
+    git add -u
 else
     print_error "Linting failed. Fix the issues above."
 fi
