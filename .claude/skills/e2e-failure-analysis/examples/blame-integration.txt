@@ -1,0 +1,396 @@
+Example: Blame Integration
+
+=== BLAME INTEGRATION ANALYSIS ===
+
+Connect test failures to specific code changes and authors for faster resolution.
+
+## Blame Report 🔍
+
+---
+
+### 1. ExpenseTracker › should add expense with Enter key [chromium]
+
+**First Failure Commit**: stu901abc
+**Status**: ❌ FAILING for 3 days (15 commits)
+
+---
+
+#### Commit Metadata
+
+```
+Author: John Doe <john.doe@example.com>
+Date: 3 days ago (Wed Oct 23 14:30:00 2025)
+Commit: stu901abc
+
+feat(frontend): Add edit button to expense items
+
+This adds inline editing capability to expense items with
+dedicated Edit and Cancel buttons for better UX.
+
+- Add Edit button with icon
+- Add Cancel button to abandon edits
+- Wire up edit handler with state management
+- Update button styles for consistency
+- Add keyboard shortcuts (Enter to save, Escape to cancel)
+
+Refs #42
+
+Co-authored-by: Jane Smith <jane@example.com>
+```
+
+---
+
+#### Files Changed (4 files)
+
+```
+M  packages/frontend/src/components/ExpenseForm.svelte         (+15 -3)
+M  packages/frontend/src/components/ExpenseList.svelte         (+8 -2)
+A  packages/frontend/src/components/EditButton.svelte          (+25 -0)
+M  packages/frontend/src/styles/buttons.css                    (+12 -0)
+```
+
+---
+
+#### Detailed Diff (ExpenseForm.svelte)
+
+**File**: packages/frontend/src/components/ExpenseForm.svelte
+
+```diff
+@@ -1,6 +1,7 @@
+ <script lang="ts">
+   import { createEventDispatcher } from 'svelte'
+   import CurrencySelector from './CurrencySelector.svelte'
++  import EditButton from './EditButton.svelte'
+
+   const dispatch = createEventDispatcher()
+
+@@ -8,6 +9,8 @@
+   let expenseAmount = $state(0)
+   let selectedCurrency = $state('USD')
+   let nameInput: HTMLInputElement
++  let submitButton: HTMLButtonElement
++  let isEditing = $state(false)
+
+   function handleSubmit() {
+     if (!expenseName || !expenseAmount) return
+@@ -17,6 +20,14 @@
+     expenseAmount = 0
+     nameInput?.focus()
+   }
++
++  function handleEdit() {
++    isEditing = true
++  }
++
++  function handleCancel() {
++    isEditing = false
++  }
+ </script>
+
+ <div class="form-container">
+@@ -45,7 +56,9 @@
+   </script>
+
+   <div class="form-container">
+-    <button type="submit">Add</button>
++    <button class="edit-button" onclick={handleEdit}>Edit</button>
++    <button type="submit" bind:this={submitButton}>Add</button>
++    <button class="cancel-button" onclick={handleCancel}>Cancel</button>
+   </div>
+ </div>
+```
+
+**Key Change**: Line 47-49
+```diff
+- <button type="submit">Add</button>
++ <button class="edit-button" onclick={handleEdit}>Edit</button>
++ <button type="submit" bind:this={submitButton}>Add</button>
++ <button class="cancel-button" onclick={handleCancel}>Cancel</button>
+```
+
+---
+
+#### Git Blame Analysis
+
+**File**: packages/frontend/src/components/ExpenseForm.svelte:47-49
+
+```
+stu901abc (John Doe       2025-10-23 14:30:00 +0000  47)     <button class="edit-button" onclick={handleEdit}>Edit</button>
+stu901abc (John Doe       2025-10-23 14:30:00 +0000  48)     <button type="submit" bind:this={submitButton}>Add</button>
+stu901abc (John Doe       2025-10-23 14:30:00 +0000  49)     <button class="cancel-button" onclick={handleCancel}>Cancel</button>
+```
+
+**Previous State** (commit vwx234ef):
+```
+vwx234ef (Alice Johnson   2025-10-22 10:15:00 +0000  45)     <button type="submit">Add</button>
+```
+
+---
+
+#### Root Cause Analysis
+
+**What Changed:**
+- Single "Add" button → Three buttons (Edit, Add, Cancel)
+- Button structure changed from simple to complex
+- New `submitButton` ref binding added
+- Two new click handlers introduced
+
+**Impact on Test:**
+```typescript
+// Test code (tests/e2e/expense-workflow.spec.ts:15)
+await page.getByRole('button', { name: 'Add' }).click()
+```
+
+**Why It Broke:**
+1. **Selector Ambiguity**: Now three buttons exist, test selector may match multiple
+2. **Rendering Order**: Edit button appears first, changes DOM structure
+3. **Timing Issue**: Ref binding may delay button availability
+4. **Race Condition**: Button click happens before ref binding completes
+
+**Error Message:**
+```
+Timeout 5000ms exceeded.
+waiting for getByRole('button', { name: 'Add' })
+
+Call log:
+  - locator.click()
+  - waiting for getByRole('button', { name: 'Add' })
+```
+
+---
+
+#### Investigation Commands
+
+```bash
+# View full commit
+git show stu901abc
+
+# Compare button changes before/after
+git diff vwx234ef stu901abc -- packages/frontend/src/components/ExpenseForm.svelte
+
+# Find all button-related commits
+git log --oneline -5 -S "button" -- packages/frontend/src/components/ExpenseForm.svelte
+
+# Check test selector
+grep -n "getByRole.*button.*Add" tests/e2e/expense-workflow.spec.ts
+
+# View complete file at commit
+git show stu901abc:packages/frontend/src/components/ExpenseForm.svelte
+
+# See who last touched this file
+git log --oneline -5 -- packages/frontend/src/components/ExpenseForm.svelte
+```
+
+---
+
+#### Responsibility Assignment
+
+**Primary Responsibility**: John Doe (john.doe@example.com)
+- Introduced the code change that broke the test
+- Added multiple buttons affecting test selector
+
+**Secondary Responsibility**: Test Maintainer
+- Test selector needs updating for new button structure
+- Should use more specific selector (type="submit" or data-testid)
+
+**Code Reviewer**: (If applicable)
+- Should have caught selector ambiguity during PR review
+- Should have requested test updates with feature
+
+---
+
+#### Suggested Fix
+
+**Option 1: Use specific selector (recommended)**
+```typescript
+// Current (fails):
+await page.getByRole('button', { name: 'Add' }).click()
+
+// Fixed (specific):
+await page.locator('button[type="submit"]').click()
+// OR
+await page.getByTestId('add-button').click() // Requires data-testid in component
+```
+
+**Option 2: Use position-based selector**
+```typescript
+// Get last button (submit button is last)
+await page.getByRole('button', { name: 'Add' }).last().click()
+```
+
+**Option 3: Wait for specific state**
+```typescript
+// Ensure button is ready
+await page.waitForSelector('button[type="submit"]', { state: 'visible' })
+await page.locator('button[type="submit"]').click()
+```
+
+**Component Fix** (add data-testid):
+```svelte
+<!-- In ExpenseForm.svelte -->
+<button class="edit-button" onclick={handleEdit}>Edit</button>
+<button type="submit" bind:this={submitButton} data-testid="add-button">Add</button>
+<button class="cancel-button" onclick={handleCancel}>Cancel</button>
+```
+
+---
+
+#### Communication Template
+
+```
+Hi @john,
+
+Your commit stu901abc ("feat(frontend): Add edit button") introduced a test failure:
+
+Test: ExpenseTracker › should add expense with Enter key [chromium]
+Error: Timeout waiting for getByRole('button', { name: 'Add' })
+
+Root Cause:
+The new Edit and Cancel buttons affect the test's button selector. The test now
+sees multiple buttons and can't uniquely identify the "Add" button.
+
+Suggested Fix:
+1. Add data-testid to buttons for unique identification:
+   <button type="submit" data-testid="add-button">Add</button>
+
+2. Update test selector:
+   await page.getByTestId('add-button').click()
+
+OR use type-based selector:
+   await page.locator('button[type="submit"]').click()
+
+Can you help fix this? The test has been failing for 3 days and is blocking merges.
+
+Commit: stu901abc
+Files: packages/frontend/src/components/ExpenseForm.svelte
+Test: tests/e2e/expense-workflow.spec.ts:15
+
+Thanks!
+```
+
+---
+
+### 2. CurrencySelector › Visual: Currency dropdown [webkit]
+
+**First Failure Commit**: yza567cd
+**Status**: ❌ FAILING for 1 day (5 commits)
+
+---
+
+#### Commit Metadata
+
+```
+Author: Jane Smith <jane.smith@example.com>
+Date: 1 day ago (Fri Oct 25 10:15:00 2025)
+Commit: yza567cd
+
+style(frontend): Update font sizes for better readability
+
+Increase base font size from 14px to 16px across the application
+for improved readability on all devices.
+
+- Increase base font: 14px → 16px
+- Update heading scale proportionally
+- Adjust spacing to maintain visual balance
+- Update line heights for better text flow
+
+Design approved by UX team.
+```
+
+---
+
+#### Files Changed (3 files)
+
+```
+M  packages/frontend/src/styles/typography.css                 (+5 -5)
+M  packages/frontend/src/components/CurrencySelector.svelte    (+1 -1)
+M  packages/frontend/src/components/ExpenseForm.svelte         (+2 -2)
+```
+
+---
+
+#### Detailed Diff (CurrencySelector.svelte)
+
+**File**: packages/frontend/src/components/CurrencySelector.svelte
+
+```diff
+@@ -10,7 +10,7 @@
+ </script>
+
+ <style>
+-  font-size: 14px;
++  font-size: 16px;
+   font-weight: 500;
+   color: #333;
+ </style>
+```
+
+---
+
+#### Root Cause Analysis
+
+**What Changed:**
+- Font size: 14px → 16px
+- Intentional design change (UX team approved)
+- Affects visual appearance (expected)
+
+**Impact on Test:**
+```
+Visual snapshot comparison failed
+Expected: 127 pixels match baseline
+Actual: 127 pixels differ (0.05% of total)
+```
+
+**Why It "Broke":**
+- Visual change → snapshot no longer matches baseline
+- This is NOT a bug, it's an intentional design update
+- Snapshots need updating to reflect new design
+
+---
+
+#### Fix Action Required
+
+**Type**: Visual Snapshot Update (not a bug fix)
+
+```
+Hi @jane,
+
+Your commit yza567cd ("Update font sizes") changed visual appearance,
+which is causing visual regression tests to fail.
+
+This appears to be an INTENTIONAL design change (approved by UX),
+so we just need to update the visual snapshots:
+
+Option 1 (Recommended): Add keyword to commit message
+  git commit --amend -m "style(frontend): Update font sizes [update-snapshots]"
+
+Option 2: PR comment
+  Comment "/update-snapshots" on your PR
+
+Option 3: Manual (if you have the PR merged)
+  GitHub Actions → "Update Visual Snapshots" workflow → Run
+
+Note: Visual snapshots are ONLY updated in CI (Linux environment).
+Do NOT run visual tests locally.
+
+This is not a bug - just housekeeping to keep snapshots in sync!
+```
+
+---
+
+## Summary
+
+**Total Failures Analyzed**: 2
+
+**Blame Distribution:**
+- John Doe: 1 failure (code change regression)
+- Jane Smith: 1 failure (intentional visual change, needs snapshot update)
+
+**Fix Priorities:**
+1. 🔴 HIGH: ExpenseTracker failure (John) - Code fix required
+2. 🟡 MEDIUM: CurrencySelector failure (Jane) - Snapshot update only
+
+**Detection Metadata:**
+- Analysis run: 2025-10-26 15:00:00 UTC
+- Blame method: Git log + git show + git blame
+- Responsibility: Authors identified for direct communication

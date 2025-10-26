@@ -168,8 +168,50 @@ Historical (last 20): 60% (12/20)
 - Likely introduced by "Add edit button" feature
 ```
 
+**Feature 3: Blame Integration (ACTIVE)**
+
+Connect test failures to specific code changes and authors.
+
+**What it provides:**
+- Commit author and email
+- Full commit message and context
+- Files changed in problematic commit
+- Git diff showing exact changes
+- Direct communication templates for authors
+
+**How it works:**
+```bash
+# Get first failure commit (from Feature 2)
+FIRST_FAIL="stu901abc"
+
+# Extract commit metadata
+git log --format="%an <%ae>%n%ar%n%n%s%n%n%b" -1 $FIRST_FAIL
+
+# Show files changed
+git diff-tree --no-commit-id --name-status -r $FIRST_FAIL
+
+# Show relevant diff
+git show $FIRST_FAIL -- packages/frontend/src/
+```
+
+**Example output:**
+```markdown
+## Blame Integration 🔍
+
+### ExpenseTracker › should add expense
+**First Failure Commit**: stu901abc
+**Author**: John Doe <john@example.com>
+**Date**: 3 days ago
+
+**Files Changed**: ExpenseForm.svelte (+15 -3)
+**Root Cause**: Added 2 new buttons affecting test selector
+
+**Communication**:
+@john: Your commit stu901abc introduced test failure.
+New Edit button affects button selector. Please review.
+```
+
 **Remaining Features:**
-- Blame integration (find commit that introduced failure)
 - Comparison reports (show failures different from last run)
 - Automatic regression detection (newly failing tests)
 

@@ -634,6 +634,239 @@ instructions: |
   - **Duration matters**: Long-failing tests block team velocity
   - **First failure commit = root cause**: Start investigation here
 
+  ### Feature 3: Blame Integration
+
+  Connect test failures to specific code changes, authors, and commits for accountability.
+
+  **What it provides:**
+  - Commit author and timestamp
+  - Full commit message and context
+  - Files changed in problematic commit
+  - Git diff of relevant files
+  - Direct links to lines of code (file:line format)
+
+  **Workflow:**
+
+  ```bash
+  # Step 1: Get first failure commit (from Feature 2)
+  FIRST_FAIL_COMMIT="stu901ab"
+
+  # Step 2: Get commit metadata
+  git show --no-patch --format=full $FIRST_FAIL_COMMIT
+
+  # Step 3: Get files changed
+  git diff-tree --no-commit-id --name-only -r $FIRST_FAIL_COMMIT
+
+  # Step 4: Get detailed diff for relevant files
+  # Filter for test-related files (components, pages, etc.)
+  git show $FIRST_FAIL_COMMIT -- packages/frontend/src/
+
+  # Step 5: Find blame for specific lines (if error mentions line numbers)
+  git blame -L <start>,<end> <file> $FIRST_FAIL_COMMIT
+  ```
+
+  **Detection Logic:**
+
+  ```
+  For failing test with identified first failure commit:
+
+  1. Extract commit metadata:
+     - Author: git log --format="%an <%ae>"
+     - Date: git log --format="%ar (%ad)"
+     - Message: git log --format="%s%n%n%b"
+
+  2. Identify relevant files:
+     - Match test file path to source files
+     - Example: tests/e2e/expense-workflow.spec.ts
+       → packages/frontend/src/components/ExpenseForm.svelte
+
+  3. Show contextual diff:
+     - Full diff of identified files
+     - Highlight added/removed lines
+     - Focus on test-related changes
+
+  4. Provide investigation commands:
+     - git show <commit>
+     - git diff <commit>~1 <commit>
+     - git blame <file>
+  ```
+
+  **Simplified Commands:**
+
+  ```bash
+  # Get commit author and message
+  git log --format="%an <%ae>%n%ar%n%n%s%n%n%b" -1 <commit>
+
+  # Get files changed in commit
+  git diff-tree --no-commit-id --name-status -r <commit>
+
+  # Show full diff for specific file
+  git show <commit> -- path/to/file.ts
+
+  # Get blame for specific line range
+  git blame -L 50,60 packages/frontend/src/components/ExpenseForm.svelte <commit>
+
+  # Find all commits touching a file in range
+  git log --oneline -10 -- packages/frontend/src/components/ExpenseForm.svelte
+  ```
+
+  **Report Format:**
+
+  ```markdown
+  ## Blame Integration 🔍
+
+  ### 1. ExpenseTracker › should add expense with Enter key [chromium]
+
+  **First Failure Commit**: stu901ab
+
+  **Commit Details:**
+  ```
+  Author: John Doe <john@example.com>
+  Date: 3 days ago (2025-10-23 14:30:00)
+  Commit: stu901ab
+
+  feat(frontend): Add edit button to expense items
+
+  - Add edit button with icon
+  - Wire up edit handler
+  - Update button styles
+
+  Refs #42
+  ```
+
+  **Files Changed** (4 files):
+  ```
+  M  packages/frontend/src/components/ExpenseForm.svelte
+  M  packages/frontend/src/components/ExpenseList.svelte
+  A  packages/frontend/src/components/EditButton.svelte
+  M  packages/frontend/src/styles/buttons.css
+  ```
+
+  **Relevant Diff** (ExpenseForm.svelte):
+  ```diff
+  packages/frontend/src/components/ExpenseForm.svelte
+
+  @@ -45,7 +45,9 @@
+   </script>
+
+   <div class="form-container">
+  -  <button type="submit">Add</button>
+  +  <button class="edit-button" onclick={handleEdit}>Edit</button>
+  +  <button type="submit" bind:this={submitButton}>Add</button>
+  +  <button class="cancel-button" onclick={handleCancel}>Cancel</button>
+   </div>
+  ```
+
+  **Blame Analysis**:
+  ```
+  ExpenseForm.svelte:47-49 (stu901ab - John Doe - 3 days ago)
+  + <button class="edit-button" onclick={handleEdit}>Edit</button>
+  + <button type="submit" bind:this={submitButton}>Add</button>
+  + <button class="cancel-button" onclick={handleCancel}>Cancel</button>
+  ```
+
+  **Root Cause Analysis:**
+  - **What changed**: Added 2 new buttons (Edit, Cancel)
+  - **Impact**: Test selector `getByRole('button', { name: 'Add' })` now ambiguous
+  - **Why it broke**: Multiple buttons with same role, selector timing changed
+  - **Responsibility**: John Doe (john@example.com)
+
+  **Investigation Commands:**
+  ```bash
+  # View full commit
+  git show stu901ab
+
+  # Compare before/after
+  git diff stu901ab~1 stu901ab -- packages/frontend/src/components/ExpenseForm.svelte
+
+  # See all button-related changes
+  git log --oneline -5 -S "button" -- packages/frontend/src/components/ExpenseForm.svelte
+
+  # Check test file for selector
+  grep -n "getByRole.*button" tests/e2e/expense-workflow.spec.ts
+  ```
+
+  **Fix Responsibility:**
+  - **Primary**: John Doe (introduced change)
+  - **Secondary**: Test author (should update test for new buttons)
+  - **Suggested Fix**: Use more specific selector or add data-testid
+
+  **Communication:**
+  ```
+  @john: Your commit stu901ab ("Add edit button") introduced a test failure in
+  ExpenseTracker › should add expense. The new Edit button affects the test's
+  button selector. Can you review and update the test selector to be more specific?
+
+  Test error: Timeout waiting for getByRole('button', { name: 'Add' })
+  Suggested fix: Use button[type="submit"] or add data-testid="add-button"
+  ```
+
+  ---
+
+  ### 2. CurrencySelector › Visual snapshot [webkit]
+
+  **First Failure Commit**: yza567cd
+
+  **Commit Details:**
+  ```
+  Author: Jane Smith <jane@example.com>
+  Date: 1 day ago (2025-10-25 10:15:00)
+  Commit: yza567cd
+
+  style(frontend): Update font sizes for better readability
+
+  - Increase base font from 14px to 16px
+  - Update heading hierarchy
+  - Adjust spacing accordingly
+  ```
+
+  **Files Changed** (2 files):
+  ```
+  M  packages/frontend/src/styles/typography.css
+  M  packages/frontend/src/components/CurrencySelector.svelte
+  ```
+
+  **Relevant Diff** (CurrencySelector.svelte):
+  ```diff
+  packages/frontend/src/components/CurrencySelector.svelte
+
+  @@ -10,7 +10,7 @@
+   </script>
+
+   <style>
+  -  font-size: 14px;
+  +  font-size: 16px;
+     font-weight: 500;
+   </style>
+  ```
+
+  **Root Cause Analysis:**
+  - **What changed**: Font size increased 14px → 16px
+  - **Impact**: Visual snapshot pixels differ (intentional design change)
+  - **Why it "broke"**: Snapshots not updated after visual change
+  - **Responsibility**: Jane Smith (janesmith@example.com)
+
+  **Fix Action Required:**
+  ```
+  @jane: Your commit yza567cd changed font sizes, which affected visual snapshots.
+  This appears to be an intentional design change. Please update snapshots:
+
+  Option 1: Add [update-snapshots] to commit message
+  Option 2: Comment /update-snapshots on PR
+  Option 3: Manual: npm run test:e2e:docker:update-snapshots
+
+  Note: Visual snapshots are only updated in CI (Linux environment).
+  ```
+  ```
+
+  **Key Insights:**
+
+  - **Blame != punishment**: Use for context and communication, not finger-pointing
+  - **Author accountability**: Help authors understand impact of their changes
+  - **Faster resolution**: Direct communication with commit author accelerates fixes
+  - **Code ownership**: Identify maintainers for specific components
+  - **Historical context**: Understand why changes were made (commit message)
+
 examples:
   timeout_failure:
     scenario: "Test times out waiting for button"
