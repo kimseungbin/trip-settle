@@ -59,6 +59,14 @@ jobs:
     needs: check-trigger
     if: needs.check-trigger.outputs.should_run == 'true'
     timeout-minutes: 30
+    outputs:
+      checkout_success: ${{ steps.record_checkout.outputs.success }}
+      docker_success: ${{ steps.record_docker.outputs.success }}
+      playwright_success: ${{ steps.record_playwright.outputs.success }}
+      has_changes: ${{ steps.check_changes.outputs.has_changes }}
+      files_changed: ${{ steps.check_changes.outputs.files_count }}
+      commit_success: ${{ steps.record_commit.outputs.success }}
+      push_success: ${{ steps.record_push.outputs.success }}
 
     steps:
       - name: Checkout code
@@ -68,34 +76,27 @@ jobs:
           # Need write access to push changes
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Record workflow start
-        id: record_start
-        run: |
-          echo "CHECKOUT_SUCCESS=true" >> $GITHUB_ENV
-          echo "DOCKER_SUCCESS=false" >> $GITHUB_ENV
-          echo "PLAYWRIGHT_SUCCESS=false" >> $GITHUB_ENV
-          echo "COMMIT_SUCCESS=false" >> $GITHUB_ENV
-          echo "PUSH_SUCCESS=false" >> $GITHUB_ENV
-          echo "HAS_CHANGES=false" >> $GITHUB_ENV
-          echo "CHANGED_FILES_COUNT=0" >> $GITHUB_ENV
-          echo "WORKFLOW_STATUS=running" >> $GITHUB_ENV
-          echo "TRIGGER_METHOD=${{ github.event_name }}" >> $GITHUB_ENV
+      - name: Record checkout success
+        id: record_checkout
+        run: echo "success=true" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Record Docker setup success
-        run: echo "DOCKER_SUCCESS=true" >> $GITHUB_ENV
+        id: record_docker
+        run: echo "success=true" >> $GITHUB_OUTPUT
 
       - name: Cleanup existing Docker resources
         run: ./.github/scripts/docker/cleanup-resources.sh docker-compose.e2e.yml
 
       - name: Run visual tests with snapshot update
+        id: record_playwright
         run: |
           echo "📸 Updating visual snapshots in remote CI environment..."
           echo "ℹ️  Updating all visual snapshots (tests/visual/ and tests/e2e/)"
           PLAYWRIGHT_ARGS="--update-snapshots" docker compose -f docker-compose.e2e.yml up --build --abort-on-container-exit
-          echo "PLAYWRIGHT_SUCCESS=true" >> $GITHUB_ENV
+          echo "success=true" >> $GITHUB_OUTPUT
         env:
           DOCKER_USER: root
           TEST_ENV: ci-docker
@@ -106,14 +107,12 @@ jobs:
         run: |
           if git diff --quiet packages/frontend/tests; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "HAS_CHANGES=false" >> $GITHUB_ENV
-            echo "CHANGED_FILES_COUNT=0" >> $GITHUB_ENV
+            echo "files_count=0" >> $GITHUB_OUTPUT
             echo "ℹ️ No snapshot changes detected"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "HAS_CHANGES=true" >> $GITHUB_ENV
             CHANGED_COUNT=$(git diff --name-only packages/frontend/tests | wc -l | xargs)
-            echo "CHANGED_FILES_COUNT=${CHANGED_COUNT}" >> $GITHUB_ENV
+            echo "files_count=${CHANGED_COUNT}" >> $GITHUB_OUTPUT
             echo "✅ Snapshot changes detected (${CHANGED_COUNT} files)"
           fi
 
@@ -122,6 +121,7 @@ jobs:
         uses: ./.github/actions/configure-git-bot
 
       - name: Commit and push snapshot updates
+        id: record_commit
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           git add packages/frontend/tests
@@ -140,11 +140,14 @@ jobs:
           Workflow: ${{ github.workflow }}
           Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          echo "COMMIT_SUCCESS=true" >> $GITHUB_ENV
+          echo "success=true" >> $GITHUB_OUTPUT
 
+      - name: Push snapshot updates
+        id: record_push
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
           git push
-
-          echo "PUSH_SUCCESS=true" >> $GITHUB_ENV
+          echo "success=true" >> $GITHUB_OUTPUT
 
       - name: Comment on PR (if triggered by PR comment)
         if: github.event_name == 'issue_comment' && steps.check_changes.outputs.has_changes == 'true'
@@ -180,17 +183,53 @@ jobs:
             packages/frontend/tests/**/ui-snapshots.spec.ts-snapshots/*.png
           retention-days: 7
 
-      - name: Capture workflow metadata in git notes
-        if: always()  # Run even if previous steps failed
+      - name: Summary
         run: |
-          # Set final workflow status
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "WORKFLOW_STATUS=success" >> $GITHUB_ENV
+          if [ "${{ steps.check_changes.outputs.has_changes }}" = "true" ]; then
+            echo "### ✅ Snapshots Updated" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Visual regression snapshots have been updated in the remote CI environment." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Changed files:** $(git diff HEAD~1 --name-only packages/frontend/tests | wc -l)" >> $GITHUB_STEP_SUMMARY
           else
-            echo "WORKFLOW_STATUS=failure" >> $GITHUB_ENV
-            echo "ERROR_STEP=${{ job.status }}" >> $GITHUB_ENV
-            echo "ERROR_MESSAGE=Workflow failed - check job logs" >> $GITHUB_ENV
+            echo "### ℹ️ No Changes" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No visual snapshot updates were needed." >> $GITHUB_STEP_SUMMARY
           fi
+
+  # Capture workflow metadata in git notes (post-job)
+  capture-metadata:
+    name: Capture Workflow Metadata
+    runs-on: ubuntu-latest
+    needs: [check-trigger, update-snapshots]
+    if: always() && needs.check-trigger.outputs.should_run == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Capture metadata in git notes
+        run: |
+          # Use needs context to get accurate final status
+          WORKFLOW_STATUS="${{ needs.update-snapshots.result }}"  # success, failure, cancelled, skipped
+          CHECKOUT_SUCCESS="${{ needs.update-snapshots.outputs.checkout_success || 'false' }}"
+          DOCKER_SUCCESS="${{ needs.update-snapshots.outputs.docker_success || 'false' }}"
+          PLAYWRIGHT_SUCCESS="${{ needs.update-snapshots.outputs.playwright_success || 'false' }}"
+          HAS_CHANGES="${{ needs.update-snapshots.outputs.has_changes || 'false' }}"
+          CHANGED_FILES_COUNT="${{ needs.update-snapshots.outputs.files_changed || '0' }}"
+          COMMIT_SUCCESS="${{ needs.update-snapshots.outputs.commit_success || 'false' }}"
+          PUSH_SUCCESS="${{ needs.update-snapshots.outputs.push_success || 'false' }}"
+          TRIGGER_METHOD="${{ github.event_name }}"
+
+          # Export for extraction script
+          export WORKFLOW_STATUS
+          export CHECKOUT_SUCCESS
+          export DOCKER_SUCCESS
+          export PLAYWRIGHT_SUCCESS
+          export HAS_CHANGES
+          export CHANGED_FILES_COUNT
+          export COMMIT_SUCCESS
+          export PUSH_SUCCESS
+          export TRIGGER_METHOD
 
           # Extract metadata
           ./.github/scripts/extract-snapshot-update-metadata.sh snapshot-update-note.txt
@@ -221,17 +260,3 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Summary
-        run: |
-          if [ "${{ steps.check_changes.outputs.has_changes }}" = "true" ]; then
-            echo "### ✅ Snapshots Updated" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Visual regression snapshots have been updated in the remote CI environment." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Changed files:** $(git diff HEAD~1 --name-only packages/frontend/tests | wc -l)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### ℹ️ No Changes" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "No visual snapshot updates were needed." >> $GITHUB_STEP_SUMMARY
-          fi

@@ -48,15 +48,38 @@ if [ "$WORKFLOW_STATUS" = "success" ]; then
 	else
 		OUTCOME="no_changes_needed"
 	fi
-elif [ "$WORKFLOW_STATUS" = "failure" ]; then
+elif [ "$WORKFLOW_STATUS" = "failure" ] || [ "$WORKFLOW_STATUS" = "cancelled" ]; then
 	OUTCOME="failed"
 else
 	OUTCOME="in_progress"
 fi
 
-# Capture error information if available
-ERROR_STEP="${ERROR_STEP:-none}"
-ERROR_MESSAGE="${ERROR_MESSAGE:-none}"
+# Determine which step failed
+ERROR_STEP="none"
+ERROR_MESSAGE="none"
+
+if [ "$OUTCOME" = "failed" ]; then
+	# Identify failed step based on which steps completed successfully
+	if [ "$CHECKOUT_SUCCESS" != "true" ]; then
+		ERROR_STEP="checkout"
+		ERROR_MESSAGE="Failed to checkout code"
+	elif [ "$DOCKER_SUCCESS" != "true" ]; then
+		ERROR_STEP="docker_setup"
+		ERROR_MESSAGE="Failed to setup Docker Buildx"
+	elif [ "$PLAYWRIGHT_SUCCESS" != "true" ]; then
+		ERROR_STEP="playwright_tests"
+		ERROR_MESSAGE="Playwright tests failed or timed out"
+	elif [ "$HAS_CHANGES" = "true" ] && [ "$COMMIT_SUCCESS" != "true" ]; then
+		ERROR_STEP="commit_step"
+		ERROR_MESSAGE="Failed to commit snapshot changes"
+	elif [ "$HAS_CHANGES" = "true" ] && [ "$PUSH_SUCCESS" != "true" ]; then
+		ERROR_STEP="push_step"
+		ERROR_MESSAGE="Failed to push snapshot changes to remote"
+	else
+		ERROR_STEP="unknown"
+		ERROR_MESSAGE="Workflow failed but couldn't identify specific step"
+	fi
+fi
 
 # Generate INI-format note
 cat > "$OUTPUT_PATH" <<EOF
