@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trip Settle - Redirecting...</title>
+    <script>
+        // GitHub Pages SPA redirect solution
+        // When a user refreshes at /trip-settle/onboarding, GitHub Pages serves this 404.html
+        // We capture the intended path and redirect to index.html with the path encoded in the URL
+
+        // Get the current path (e.g., /trip-settle/onboarding)
+        const path = window.location.pathname;
+        const search = window.location.search;
+
+        // Store the intended path in sessionStorage
+        // We'll retrieve this in index.html to restore the correct route
+        sessionStorage.setItem('redirectPath', path + search);
+
+        // Redirect to the base URL (/trip-settle/)
+        // The base path is set via VITE_BASE_PATH during build
+        const basePath = '/trip-settle/';
+        window.location.replace(basePath);
+    </script>
+</head>
+<body>
+    <p>Redirecting...</p>
+</body>
+</html>

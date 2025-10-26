@@ -1,12 +1,17 @@
 /**
  * @file Frontend-specific configuration
- * Uses hardcoded values for browser (can't access process.env)
+ * Uses Vite environment variables (available at build time)
  */
 
+// Determine environment from Vite's MODE
+// - 'production' when running `vite build` (GitHub Pages, deployments)
+// - 'development' when running `vite` or `vite dev`
+const environment = import.meta.env.PROD ? 'production' : 'local'
+
 // In browser, we use hardcoded local development values
-// For production, these should be replaced during build with Vite's define
+// For production, these values aren't needed (static site on GitHub Pages)
 export const config = {
-	environment: 'local' as const,
+	environment: environment as 'local' | 'production',
 	url: 'http://localhost:5173',
 	apiUrl: 'http://localhost:3000/api',
 	port: 5173,
