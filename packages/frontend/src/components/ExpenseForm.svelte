@@ -163,10 +163,12 @@
 		input[type='number'] {
 			width: 100%;
 			flex: none;
+			box-sizing: border-box; /* Include padding in width calculation */
 		}
 
 		button {
 			width: 100%;
+			box-sizing: border-box; /* Include padding in width calculation */
 		}
 	}
 </style>

@@ -647,6 +647,7 @@
 
 		button {
 			width: 100%;
+			box-sizing: border-box; /* Include padding in width calculation */
 		}
 
 		.currency-selection {

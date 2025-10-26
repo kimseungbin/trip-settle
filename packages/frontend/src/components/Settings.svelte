@@ -481,6 +481,7 @@
 
 		.setting-value {
 			width: 100%;
+			box-sizing: border-box; /* Include padding in width calculation */
 		}
 
 		.actions {
@@ -489,6 +490,7 @@
 
 		button {
 			width: 100%;
+			box-sizing: border-box; /* Include padding in width calculation */
 		}
 	}
 </style>

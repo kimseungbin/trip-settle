@@ -165,6 +165,7 @@
 		color: white;
 		border: none;
 		border-radius: 6px;
+		box-sizing: border-box; /* Include padding in width calculation */
 		cursor: pointer;
 		font-weight: 600;
 		transition: all 0.2s;
@@ -211,6 +212,7 @@
 		cursor: pointer;
 		font-size: 1em;
 		text-align: left;
+		box-sizing: border-box; /* Include padding in width calculation */
 		transition: background 0.2s;
 	}
 
@@ -320,6 +322,7 @@
 
 		button {
 			width: 100%;
+			box-sizing: border-box; /* Include padding in width calculation */
 		}
 	}
 </style>
