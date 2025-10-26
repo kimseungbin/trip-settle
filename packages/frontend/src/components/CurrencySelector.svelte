@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Currency } from '../types/currency'
-	import { DEFAULT_CURRENCY, getCurrencyByCode, searchCurrencies } from '../data/currencies'
+	import { DEFAULT_CURRENCY, getCurrencyByCode, searchCurrencies, getCurrencyDisplayName } from '../data/currencies'
+	import { locale, t } from 'svelte-i18n'
 
 	let {
 		value = $bindable(DEFAULT_CURRENCY),
@@ -136,7 +137,7 @@
 		aria-haspopup="listbox"
 		aria-expanded={isOpen}
 	>
-		<span class="keyboard-icon">⌨️</span>
+		<span class="keyboard-icon">{$t('currencySelector.icon')}</span>
 		{selectedCurrency?.code || DEFAULT_CURRENCY}
 		<span class="arrow" class:open={isOpen}>▼</span>
 	</button>
@@ -146,7 +147,7 @@
 			<input
 				type="text"
 				class="search-input"
-				placeholder={searchQuery ? 'Searching...' : 'Type to search all currencies'}
+				placeholder={searchQuery ? $t('currencySelector.searching') : $t('currencySelector.placeholder')}
 				bind:value={searchQuery}
 				bind:this={inputElement}
 				oninput={handleInput}
@@ -155,7 +156,7 @@
 			/>
 
 			{#if !searchQuery}
-				<div class="section-header">Recommended</div>
+				<div class="section-header">{$t('currencySelector.recommended')}</div>
 			{/if}
 
 			<ul class="currency-list" role="listbox">
@@ -172,13 +173,13 @@
 						tabindex="0"
 					>
 						<span class="currency-code">{currency.code}</span>
-						<span class="currency-name">{currency.name}</span>
+						<span class="currency-name">{getCurrencyDisplayName(currency, $locale || 'en')}</span>
 						{#if currency.code === value}
-							<span class="check">●</span>
+							<span class="check">{$t('currencySelector.checkMark')}</span>
 						{/if}
 					</li>
 				{:else}
-					<li class="no-results">No currencies found</li>
+					<li class="no-results">{$t('currencySelector.noResults')}</li>
 				{/each}
 			</ul>
 		</div>

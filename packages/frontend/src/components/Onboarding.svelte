@@ -5,6 +5,8 @@
 	import CurrencySelector from './CurrencySelector.svelte'
 	import { DEFAULT_CURRENCY } from '../data/currencies'
 	import { onMount } from 'svelte'
+	import { locale, t } from 'svelte-i18n'
+	import { setLocale } from '../i18n'
 
 	let currencyMode = $state<CurrencyMode>('multi')
 	let defaultCurrency = $state(DEFAULT_CURRENCY)
@@ -82,13 +84,34 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <div class="onboarding-container">
+	<!-- Language Selector -->
+	<div class="language-selector">
+		<button
+			class="language-option"
+			class:active={$locale === 'en'}
+			onclick={() => setLocale('en')}
+			aria-label="Switch to English"
+		>
+			English
+		</button>
+		<span class="language-divider">|</span>
+		<button
+			class="language-option"
+			class:active={$locale === 'ko'}
+			onclick={() => setLocale('ko')}
+			aria-label="한국어로 전환"
+		>
+			한국어
+		</button>
+	</div>
+
 	{#if !showCurrencySelector}
 		<!-- Step 1: Currency Mode Selection -->
-		<h1>Welcome to Trip Settle</h1>
-		<p class="tagline">Expense settlement made easy</p>
+		<h1>{$t('onboarding.welcome')}</h1>
+		<p class="tagline">{$t('onboarding.tagline')}</p>
 
 		<div class="currency-mode-section">
-			<h2 class="section-title">How do you want to track expenses?</h2>
+			<h2 class="section-title">{$t('onboarding.currencyModeTitle')}</h2>
 
 			<div class="mode-options">
 				<button
@@ -104,9 +127,9 @@
 						}
 					}}
 				>
-					<div class="mode-icon">💵</div>
-					<div class="mode-title">Single Currency</div>
-					<p class="mode-description">All expenses in one currency (simpler)</p>
+					<div class="mode-icon">{$t('onboarding.singleCurrency.icon')}</div>
+					<div class="mode-title">{$t('onboarding.singleCurrency.title')}</div>
+					<p class="mode-description">{$t('onboarding.singleCurrency.description')}</p>
 				</button>
 
 				<button
@@ -121,47 +144,73 @@
 						}
 					}}
 				>
-					<div class="mode-icon">🌍</div>
-					<div class="mode-title">Multiple Currencies</div>
-					<p class="mode-description">Track expenses in different currencies</p>
+					<div class="mode-icon">{$t('onboarding.multiCurrency.icon')}</div>
+					<div class="mode-title">{$t('onboarding.multiCurrency.title')}</div>
+					<p class="mode-description">{$t('onboarding.multiCurrency.description')}</p>
 				</button>
 			</div>
 
 			<p class="keyboard-hint">
-				<span class="hint-icon">⌨️</span>
-				Use <kbd>Tab</kbd> to navigate and <kbd>Enter</kbd> to select
+				<span class="hint-icon">{$t('onboarding.keyboardHint.icon')}</span>
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html $t('onboarding.keyboardHint.navigate', {
+					values: {
+						tab: `<kbd>${$t('keyboard.tab')}</kbd>`,
+						enter: `<kbd>${$t('keyboard.enter')}</kbd>`,
+					},
+				})}
 			</p>
 
-			<button class="skip-link" tabindex="0" onclick={skipOnboarding}>Skip and use multi-currency mode</button>
+			<button class="skip-link" tabindex="0" onclick={skipOnboarding}>{$t('onboarding.skipButton')}</button>
 		</div>
 
-		<p class="keyboard-hint">Press <kbd>Esc</kbd> to skip</p>
+		<p class="keyboard-hint">
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+			{@html $t('onboarding.keyboardHint.skip', {
+				values: { esc: `<kbd>${$t('keyboard.esc')}</kbd>` },
+			})}
+		</p>
 	{:else}
 		<!-- Step 2: Currency Selection (Single-Currency Mode Only) -->
-		<h1>Choose Your Currency</h1>
-		<p class="tagline">Select the default currency for all expenses</p>
+		<h1>{$t('onboarding.currencySelection.title')}</h1>
+		<p class="tagline">{$t('onboarding.currencySelection.tagline')}</p>
 
 		<div class="currency-selection">
 			<p class="currency-keyboard-hint">
-				<span class="hint-icon">⌨️</span>
-				Type to search • <kbd>↑</kbd><kbd>↓</kbd> to navigate • <kbd>Enter</kbd> to select •
-				<kbd>Esc</kbd> to close
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html $t('onboarding.currencySelection.keyboardHint', {
+					values: {
+						up: `<kbd>${$t('keyboard.up')}</kbd>`,
+						down: `<kbd>${$t('keyboard.down')}</kbd>`,
+						enter: `<kbd>${$t('keyboard.enter')}</kbd>`,
+						esc: `<kbd>${$t('keyboard.esc')}</kbd>`,
+					},
+				})}
 			</p>
 
 			<div class="currency-selector-wrapper">
-				<label for="default-currency">Default Currency:</label>
+				<label for="default-currency">{$t('onboarding.currencySelection.label')}</label>
 				<CurrencySelector bind:value={defaultCurrency} autofocus={true} initialOpen={true} />
 			</div>
 
 			<div class="actions">
-				<button class="primary" onclick={completeOnboarding}>Continue</button>
-				<button class="secondary" onclick={goBack}>Go Back</button>
+				<button class="primary" onclick={completeOnboarding}
+					>{$t('onboarding.currencySelection.continueButton')}</button
+				>
+				<button class="secondary" onclick={goBack}>{$t('onboarding.currencySelection.backButton')}</button>
 			</div>
 		</div>
 
 		<p class="keyboard-hint">
-			<span class="hint-icon">⌨️</span>
-			<kbd>Ctrl</kbd>+<kbd>Enter</kbd> to continue • <kbd>Tab</kbd> to Continue button • <kbd>Esc</kbd> to go back
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+			{@html $t('onboarding.currencySelection.bottomHint', {
+				values: {
+					ctrl: `<kbd>${$t('keyboard.ctrl')}</kbd>`,
+					enter: `<kbd>${$t('keyboard.enter')}</kbd>`,
+					tab: `<kbd>${$t('keyboard.tab')}</kbd>`,
+					esc: `<kbd>${$t('keyboard.esc')}</kbd>`,
+				},
+			})}
 		</p>
 	{/if}
 </div>
@@ -172,6 +221,47 @@
 		margin: 0 auto;
 		padding: 2rem;
 		text-align: center;
+	}
+
+	.language-selector {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 2rem;
+		padding: 0.5rem 0;
+	}
+
+	.language-option {
+		background: none;
+		border: none;
+		color: #999;
+		font-size: 0.95rem;
+		padding: 0.4rem 0.8rem;
+		cursor: pointer;
+		transition: all 0.2s;
+		border-radius: 4px;
+		font-weight: 500;
+	}
+
+	.language-option:hover {
+		color: #666;
+		background-color: #f5f5f5;
+	}
+
+	.language-option.active {
+		color: #ff3e00;
+		font-weight: 600;
+	}
+
+	.language-option:focus {
+		outline: 2px solid #ff3e00;
+		outline-offset: 2px;
+	}
+
+	.language-divider {
+		color: #ddd;
+		user-select: none;
 	}
 
 	h1 {
@@ -369,7 +459,9 @@
 		font-size: 1.2rem;
 	}
 
-	kbd {
+	/* Keyboard key styles are now injected via {@html} in translations */
+	:global(.keyboard-hint kbd),
+	:global(.currency-keyboard-hint kbd) {
 		background-color: #f5f5f5;
 		border: 1px solid #ccc;
 		border-radius: 3px;

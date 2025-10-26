@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Expense } from '../types/expense'
 	import { settings } from '../stores/settings.svelte'
+	import { t } from 'svelte-i18n'
 
 	let {
 		expenses,
@@ -26,9 +27,9 @@
 </script>
 
 <div class="list-container">
-	<h3>Expenses</h3>
+	<h3>{$t('expenseList.title')}</h3>
 	{#if expenses.length === 0}
-		<p class="empty-state">No expenses yet</p>
+		<p class="empty-state">{$t('expenseList.empty')}</p>
 	{:else}
 		<ul class="expense-list">
 			{#each expenses as expense (expense.id)}
@@ -40,12 +41,14 @@
 							<span class="currency-code">{expense.currency}</span>
 						{/if}
 					</span>
-					<button class="remove-btn" onclick={() => onRemove(expense.id)}>×</button>
+					<button class="remove-btn" onclick={() => onRemove(expense.id)}
+						>{$t('expenseList.removeButton')}</button
+					>
 				</li>
 			{/each}
 		</ul>
 		<div class="total">
-			<span class="total-label">Total:</span>
+			<span class="total-label">{$t('expenseList.total')}</span>
 			<div class="total-amounts">
 				{#each Array.from(totalsByCurrency.entries()) as [currency, amount]}
 					<span class="total-amount">

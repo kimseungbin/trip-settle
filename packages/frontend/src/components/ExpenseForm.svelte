@@ -3,6 +3,7 @@
 	import { DEFAULT_CURRENCY } from '../data/currencies'
 	import { settings } from '../stores/settings.svelte'
 	import { onMount } from 'svelte'
+	import { t } from 'svelte-i18n'
 
 	let {
 		onAdd,
@@ -71,7 +72,7 @@
 </script>
 
 <div class="form-container">
-	<h3>Add Expense</h3>
+	<h3>{$t('expenseForm.title')}</h3>
 	<form
 		onsubmit={e => {
 			e.preventDefault()
@@ -79,12 +80,27 @@
 		}}
 		onkeydown={handleKeydown}
 	>
-		<input type="text" placeholder="Expense name" bind:value={expenseName} bind:this={nameInput} required />
-		<input type="number" placeholder="Amount" bind:value={expenseAmount} step="0.01" min="0.01" required />
+		<input
+			type="text"
+			placeholder={$t('expenseForm.namePlaceholder')}
+			bind:value={expenseName}
+			bind:this={nameInput}
+			required
+		/>
+		<input
+			type="number"
+			placeholder={$t('expenseForm.amountPlaceholder')}
+			bind:value={expenseAmount}
+			step="0.01"
+			min="0.01"
+			required
+		/>
 		{#if showCurrencySelector}
 			<CurrencySelector bind:value={selectedCurrency} {sessionCurrencies} onselect={handleCurrencySelect} />
 		{/if}
-		<button type="submit" bind:this={submitButton} onclick={handleButtonClick} tabindex="0">Add</button>
+		<button type="submit" bind:this={submitButton} onclick={handleButtonClick} tabindex="0"
+			>{$t('expenseForm.addButton')}</button
+		>
 	</form>
 </div>
 

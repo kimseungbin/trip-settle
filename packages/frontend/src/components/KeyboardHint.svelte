@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { t } from 'svelte-i18n'
 
 	let {
 		visible = false,
@@ -57,11 +58,19 @@
 
 {#if visible && show}
 	<div class="toast" class:show>
-		<span class="icon">💡</span>
+		<span class="icon">{$t('keyboardHint.icon')}</span>
 		<div class="content">
-			<strong>Keyboard tip:</strong> Press <kbd>Enter</kbd> to add, <kbd>Tab</kbd> to move between fields
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+			{@html $t('keyboardHint.content', {
+				values: {
+					enter: `<kbd>${$t('keyboard.enter')}</kbd>`,
+					tab: `<kbd>${$t('keyboard.tab')}</kbd>`,
+				},
+			})}
 		</div>
-		<button class="dismiss" onclick={handleDismiss} aria-label="Dismiss tip">×</button>
+		<button class="dismiss" onclick={handleDismiss} aria-label={$t('keyboardHint.dismissAriaLabel')}
+			>{$t('keyboardHint.dismissButton')}</button
+		>
 	</div>
 {/if}
 
@@ -101,11 +110,12 @@
 		line-height: 1.4;
 	}
 
-	.content strong {
+	/* Styles for HTML elements injected via {@html} */
+	.content :global(strong) {
 		color: #ff3e00;
 	}
 
-	kbd {
+	.content :global(kbd) {
 		display: inline-block;
 		padding: 0.2em 0.4em;
 		background: #f5f5f5;

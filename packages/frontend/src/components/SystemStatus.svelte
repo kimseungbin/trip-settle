@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { config } from '../config'
+	import { t } from 'svelte-i18n'
 
 	let healthStatus = $state('loading')
 	let databaseStatus = $state('loading')
@@ -26,31 +27,31 @@
 </script>
 
 <div class="status" data-testid="system-status">
-	<h3>System Status</h3>
+	<h3>{$t('systemStatus.title')}</h3>
 	<p class="api-url">{apiUrl}</p>
 
 	<div class="status-row">
-		<span class="label">Backend:</span>
+		<span class="label">{$t('systemStatus.backend')}</span>
 		<div class="health {healthStatus}">
 			{#if healthStatus === 'loading'}
-				<span>⏳ Checking...</span>
+				<span>{$t('systemStatus.checking')}</span>
 			{:else if healthStatus === 'ok'}
-				<span>✅ Healthy</span>
+				<span>{$t('systemStatus.healthy')}</span>
 			{:else}
-				<span>❌ Error</span>
+				<span>{$t('systemStatus.error')}</span>
 			{/if}
 		</div>
 	</div>
 
 	<div class="status-row">
-		<span class="label">Database:</span>
+		<span class="label">{$t('systemStatus.database')}</span>
 		<div class="health {databaseStatus}">
 			{#if databaseStatus === 'loading'}
-				<span>⏳ Checking...</span>
+				<span>{$t('systemStatus.checking')}</span>
 			{:else if databaseStatus === 'ok'}
-				<span>✅ Connected</span>
+				<span>{$t('systemStatus.connected')}</span>
 			{:else}
-				<span>❌ Disconnected</span>
+				<span>{$t('systemStatus.disconnected')}</span>
 			{/if}
 		</div>
 	</div>

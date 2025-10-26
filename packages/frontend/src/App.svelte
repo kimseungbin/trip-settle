@@ -6,6 +6,7 @@
 	import { config } from './config'
 	import { initRouter, destroyRouter, getRoute, navigate } from './lib/router.svelte'
 	import { settings } from './stores/settings.svelte'
+	import { t } from 'svelte-i18n'
 
 	const isLocalMode = config.environment === 'local'
 
@@ -43,8 +44,8 @@
 	{#if currentRoute === '/onboarding'}
 		<Onboarding />
 	{:else}
-		<h1>Trip Settle</h1>
-		<p>Expense settlement made easy</p>
+		<h1>{$t('app.title')}</h1>
+		<p>{$t('app.tagline')}</p>
 
 		<ExpenseTracker />
 	{/if}

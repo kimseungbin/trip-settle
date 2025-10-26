@@ -1,4 +1,4 @@
-import { addMessages, init, getLocaleFromNavigator } from 'svelte-i18n'
+import { addMessages, init, getLocaleFromNavigator, locale as localeStore } from 'svelte-i18n'
 
 import en from './locales/en.json'
 import ko from './locales/ko.json'
@@ -35,8 +35,11 @@ init({
 	initialLocale: getInitialLocale(),
 })
 
-// Save locale to localStorage when it changes
-export function setLocale(locale: SupportedLocale): void {
-	localStorage.setItem('locale', locale)
-	// Locale change will be handled by svelte-i18n's locale store
+/**
+ * Set the current locale and save to localStorage
+ * @param newLocale - The locale to switch to
+ */
+export function setLocale(newLocale: SupportedLocale): void {
+	localeStore.set(newLocale)
+	localStorage.setItem('locale', newLocale)
 }

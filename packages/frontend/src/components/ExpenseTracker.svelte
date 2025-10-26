@@ -4,6 +4,7 @@
 	import ExpenseList from './ExpenseList.svelte'
 	import KeyboardHint from './KeyboardHint.svelte'
 	import { shouldShowKeyboardHint, dismissKeyboardHint } from '../lib/keyboardHint'
+	import { t } from 'svelte-i18n'
 
 	let expenses = $state<Expense[]>([])
 	let nextId = $state(1)
@@ -38,7 +39,7 @@
 </script>
 
 <div class="expense-tracker">
-	<h2>Track Your Expenses</h2>
+	<h2>{$t('expenseTracker.title')}</h2>
 	<KeyboardHint visible={showHint} onDismiss={handleDismissHint} />
 	<ExpenseForm onAdd={addExpense} onMouseSubmit={handleMouseSubmit} {sessionCurrencies} />
 	<ExpenseList {expenses} onRemove={removeExpense} />
