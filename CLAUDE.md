@@ -465,10 +465,11 @@ Git notes are used to store CI/CD metadata (cache metrics, test failures) alongs
 **Namespaces**:
 - `refs/notes/ci/cache-metrics` - Docker build cache efficiency metrics
 - `refs/notes/ci/e2e-failures` - Playwright E2E test failure metadata
+- `refs/notes/ci/snapshot-updates` - Visual snapshot update workflow execution metadata
 
 **Helper Skill**: `.claude/skills/git-notes-helper/helper.yaml`
 - **Purpose**: Provides reusable git notes operations (fetch, parse, compare, historical analysis)
-- **Used by**: `docker-cache-analysis`, `e2e-failure-analysis` skills
+- **Used by**: `docker-cache-analysis`, `e2e-failure-analysis`, `snapshot-update-analysis` skills
 - **Operations**: Fetch notes, show note content, parse INI fields, compare commits, historical walking
 
 **Usage**:
@@ -492,6 +493,7 @@ git notes --ref=ci/<namespace> list
 **See also**:
 - Docker cache analysis: `.claude/skills/docker-cache-analysis/`
 - E2E failure analysis: `.claude/skills/e2e-failure-analysis/`
+- Snapshot update analysis: `.claude/skills/snapshot-update-analysis/`
 - Git notes helper: `.claude/skills/git-notes-helper/`
 
 ## TypeScript Configuration
