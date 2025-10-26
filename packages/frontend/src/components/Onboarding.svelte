@@ -9,7 +9,7 @@
 	let currencyMode = $state<CurrencyMode>('multi')
 	let defaultCurrency = $state(DEFAULT_CURRENCY)
 	let showCurrencySelector = $state(false)
-	let firstButton: HTMLButtonElement
+	let firstButton = $state<HTMLButtonElement | undefined>(undefined)
 
 	/**
 	 * Focus the first interactive element on mount for keyboard accessibility
