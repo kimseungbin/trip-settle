@@ -1,10 +1,42 @@
 name: CI
 
+# CI runs on code changes but skips documentation-only commits for efficiency.
+#
+# ✅ CI RUNS when changes include:
+#   - packages/** (frontend, backend, infra code)
+#   - package.json, tsconfig*.json (root configs)
+#   - .prettierrc*, .eslintrc* (code quality tools)
+#   - .github/workflows/ci.yml (this workflow)
+#   - .github/actions/** (custom actions)
+#   - docker-compose.e2e.yml, Dockerfile* (E2E test configs)
+#
+# ⏭️  CI SKIPS when ONLY these files change:
+#   - **.md (README, CLAUDE.md, documentation)
+#   - .claude/** (Claude Code skills, settings)
+#   - .github/workflows/*.yml (other workflows)
+#   - LICENSE, .gitignore, .gitattributes
+#
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'                    # Documentation files
+      - '.claude/**'               # Claude Code skills and settings
+      - '.github/workflows/*.yml'  # Other workflows
+      - '!.github/workflows/ci.yml' # Except this workflow itself
+      - 'LICENSE'
+      - '.gitignore'
+      - '.gitattributes'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**.md'                    # Documentation files
+      - '.claude/**'               # Claude Code skills and settings
+      - '.github/workflows/*.yml'  # Other workflows
+      - '!.github/workflows/ci.yml' # Except this workflow itself
+      - 'LICENSE'
+      - '.gitignore'
+      - '.gitattributes'
 
 # Prevent simultaneous workflow runs on the same branch
 # Queue new runs to ensure all commits are validated
