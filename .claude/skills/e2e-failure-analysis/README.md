@@ -127,8 +127,48 @@ Test C: ✅ ❌ ✅ ❌ ✅  → FLAKY (55% flip rate, critical)
 - Add explicit waits for button visibility
 ```
 
+**Feature 2: Failure Trend Analysis (ACTIVE)**
+
+Track when tests started failing and monitor degradation over time.
+
+**What it tracks:**
+- First failure occurrence (when did it start failing?)
+- Failure duration (days and commits since first failure)
+- Failure rate (recent vs historical)
+- Trend direction (DEGRADING, STABLE, IMPROVING)
+
+**How it works:**
+```bash
+# Walk backwards through commits to find first failure
+for commit in $(git log -30 --format="%H"); do
+  if test_failed_in_commit "$commit"; then
+    echo "Failed"
+  else
+    echo "First failure after this commit"
+    break
+  fi
+done
+
+# Calculate failure rates
+Recent (last 5):   80% (4/5) - DEGRADING
+Historical (last 20): 60% (12/20)
+```
+
+**Example output:**
+```markdown
+## Failure Trend Analysis 📈
+
+### ExpenseTracker › should add expense [chromium]
+**First Failed**: 3 days ago (commit stu901 - "Add edit button")
+**Trend**: 🔴 DEGRADING (80% recent vs 60% historical)
+**Fix Priority**: HIGH - Blocking for 3 days
+
+**Recommendations**:
+- Review commit stu901 for button changes
+- Likely introduced by "Add edit button" feature
+```
+
 **Remaining Features:**
-- Failure trend analysis (degradation over time)
 - Blame integration (find commit that introduced failure)
 - Comparison reports (show failures different from last run)
 - Automatic regression detection (newly failing tests)

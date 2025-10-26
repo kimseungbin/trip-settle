@@ -442,6 +442,198 @@ instructions: |
   - **High flip rate = urgent**: Tests with >50% flip rate destroy CI trust
   - **Track over time**: New flakiness might indicate environmental changes
 
+  ### Feature 2: Failure Trend Analysis
+
+  Identify when tests started failing and track degradation/improvement over time.
+
+  **What it tracks:**
+  - First failure occurrence (when did it start failing?)
+  - Failure duration (how long has it been failing?)
+  - Failure frequency (fails in X% of recent runs)
+  - Trend direction (getting worse, stable, improving)
+  - Recent vs historical comparison
+
+  **Workflow:**
+
+  ```bash
+  # Step 1: Fetch git notes for historical analysis
+  git fetch origin refs/notes/ci/e2e-failures:refs/notes/ci/e2e-failures
+
+  # Step 2: For each currently failing test, find first failure
+  # Walk backwards through commits until test passes or history exhausted
+
+  # Step 3: Calculate time-based metrics
+  # - Days since first failure
+  # - Failure rate in last 7 days vs last 30 days
+  # - Pass rate trend (improving, degrading, stable)
+
+  # Step 4: Determine trend direction
+  # Recent 5 runs: ❌ ❌ ❌ ❌ ❌ → Consistently failing (stable bug)
+  # Recent 5 runs: ✅ ✅ ✅ ❌ ❌ → Recently broke (regression)
+  # Recent 5 runs: ❌ ❌ ❌ ✅ ✅ → Recently fixed (recovering)
+  # Recent 5 runs: ❌ ✅ ❌ ✅ ❌ → Flaky (see Feature 1)
+  ```
+
+  **Detection Logic:**
+
+  ```
+  For currently failing test:
+
+  1. Find first failure commit:
+     - Walk backwards: HEAD, HEAD~1, HEAD~2, ...
+     - Check each commit's git note
+     - Stop when test passes or 30 days reached
+
+  2. Calculate metrics:
+     - Duration: commits_since_first_failure
+     - Time: timestamp_now - timestamp_first_failure
+     - Recent rate: failures_last_5 / 5
+     - Historical rate: failures_last_20 / 20
+
+  3. Classify trend:
+     if recent_rate > historical_rate:
+       "DEGRADING" (getting worse)
+     elif recent_rate < historical_rate:
+       "IMPROVING" (getting better)
+     else:
+       "STABLE" (consistent failure)
+  ```
+
+  **Simplified Commands:**
+
+  ```bash
+  # Find when test first failed (walk backwards)
+  for commit in $(git log --oneline -30 --format="%H"); do
+    if git notes --ref=ci/e2e-failures show "$commit" 2>/dev/null | \
+       grep -q "test_name = ExpenseTracker › should add expense"; then
+      echo "Failed at: $commit"
+    else
+      echo "Passed at: $commit (first failure after this)"
+      break
+    fi
+  done
+
+  # Get commit metadata for first failure
+  git show --no-patch --format="%h: %s (%ar, %cd)" <first-failure-commit>
+
+  # Calculate failure rate in last N commits
+  total=0
+  failed=0
+  for commit in $(git log --oneline -10 --format="%H"); do
+    total=$((total + 1))
+    if git notes --ref=ci/e2e-failures show "$commit" 2>/dev/null | \
+       grep -q "test_name = ExpenseTracker › should add expense"; then
+      failed=$((failed + 1))
+    fi
+  done
+  echo "Failure rate: $failed / $total"
+  ```
+
+  **Report Format:**
+
+  ```markdown
+  ## Failure Trend Analysis 📈
+
+  ### 1. ExpenseTracker › should add expense with Enter key [chromium]
+
+  **Current Status**: ❌ FAILING
+
+  **Trend Metrics:**
+  - **First Failed**: 3 days ago (commit abc123 - "Add edit button")
+  - **Failure Duration**: 3 days (15 commits)
+  - **Recent Failure Rate**: 80% (4/5 in last 5 runs)
+  - **Historical Failure Rate**: 60% (12/20 in last 20 runs)
+  - **Trend**: 🔴 DEGRADING (getting worse)
+
+  **Failure History:**
+  ```
+  Recent (last 10 commits, newest first):
+  abc123  ❌  1h ago   "Refactor expense form"
+  def456  ❌  3h ago   "Update button styles"
+  ghi789  ✅  5h ago   "Fix typo"
+  jkl012  ❌  8h ago   "Add validation"
+  mno345  ❌  12h ago  "Update deps"
+  pqr678  ✅  1d ago   "Lint fixes"
+  stu901  ❌  1d ago   "Add edit button" ← FIRST FAILURE
+  vwx234  ✅  2d ago   "Working state"
+  yza567  ✅  2d ago   "Feature complete"
+  bcd890  ✅  3d ago   "Initial impl"
+  ```
+
+  **Analysis:**
+  - Test was stable before commit stu901 (worked for 20+ commits)
+  - Started failing after "Add edit button" feature
+  - Failure rate increased from 60% → 80% (degrading)
+  - Likely introduced by code in stu901 or related changes
+
+  **Root Cause Hypothesis:**
+  ```bash
+  # Review changes in first failing commit
+  git show stu901 -- packages/frontend/src/components/ExpenseForm.svelte
+
+  # Check for button-related changes
+  git diff vwx234 stu901 -- packages/frontend/src/
+  ```
+
+  **Recommendations:**
+  1. **Immediate**: Review commit stu901 for button rendering changes
+  2. **Investigate**: Check if "Add edit button" feature conflicts with test
+  3. **Consider**: Revert stu901 temporarily to verify it's the culprit
+  4. **Fix**: Address root cause identified in first failing commit
+
+  **Fix Priority**: 🔴 HIGH - Degrading trend, blocking merges for 3 days
+
+  ---
+
+  ### 2. CurrencySelector › Visual snapshot [webkit]
+
+  **Current Status**: ❌ FAILING
+
+  **Trend Metrics:**
+  - **First Failed**: 1 day ago (commit xyz789 - "Update font sizes")
+  - **Failure Duration**: 1 day (5 commits)
+  - **Recent Failure Rate**: 40% (2/5 in last 5 runs)
+  - **Historical Failure Rate**: 20% (2/10 in last 10 runs)
+  - **Trend**: 🟡 STABLE (consistent failure rate)
+
+  **Failure History:**
+  ```
+  Recent (last 10 commits):
+  abc123  ✅  1h ago
+  def456  ❌  3h ago  ← Current failure
+  ghi789  ✅  5h ago
+  jkl012  ❌  8h ago
+  mno345  ✅  12h ago
+  pqr678  ✅  1d ago
+  stu901  ✅  1d ago
+  vwx234  ✅  1d ago
+  yza567  ❌  1d ago  ← FIRST FAILURE (commit xyz789)
+  bcd890  ✅  2d ago
+  ```
+
+  **Analysis:**
+  - New failure (only 1 day old)
+  - Failure rate relatively low (40%)
+  - May be flaky rather than deterministic bug
+  - Visual test - could be font rendering issue
+
+  **Recommendations:**
+  1. Check if failure is flaky (see Flaky Test Detection)
+  2. Review font size changes in xyz789
+  3. Verify visual snapshots are Linux-based (CI only)
+  4. Consider updating snapshots if change is intentional
+
+  **Fix Priority**: 🟡 MEDIUM - Recent issue, monitor for 1-2 more days
+  ```
+
+  **Key Insights:**
+
+  - **Stable failures = bugs**: High consistent failure rate indicates real bug
+  - **Recent failures = regressions**: New failures point to recent code changes
+  - **Degrading trends = urgent**: Increasing failure rate needs immediate attention
+  - **Duration matters**: Long-failing tests block team velocity
+  - **First failure commit = root cause**: Start investigation here
+
 examples:
   timeout_failure:
     scenario: "Test times out waiting for button"
