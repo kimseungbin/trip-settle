@@ -77,14 +77,6 @@
 				</span>
 				<button class="toggle-button" onclick={toggleOnboarding} tabindex="-1">Toggle</button>
 			</div>
-			<div class="setting-item">
-				<span class="setting-label">Currency Mode:</span>
-				<span class="setting-value">{settings.currencyMode}</span>
-			</div>
-			<div class="setting-item">
-				<span class="setting-label">Default Currency:</span>
-				<span class="setting-value">{settings.defaultCurrency}</span>
-			</div>
 		</div>
 	</div>
 
