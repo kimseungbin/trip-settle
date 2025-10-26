@@ -1,0 +1,442 @@
+name: workflow-metrics-analysis
+description: |
+  Analyze GitHub Actions workflow timing metrics from git notes.
+
+  Use this skill to:
+  - Review CI/CD performance over time
+  - Identify slow jobs and steps
+  - Find commits that caused timing regressions
+  - Get recommendations for workflow optimization
+  - Compare timing across different job types
+
+instructions: |
+  When the user requests workflow performance analysis or timing review:
+
+  ## Prerequisites: Git Notes Helper Skill
+
+  This skill uses git notes to store and retrieve workflow metrics. Before starting analysis:
+
+  1. **Reference git-notes-helper skill** for common operations:
+     - Read `.claude/skills/git-notes-helper/helper.yaml` for git notes operations
+     - Use namespace: `ci/workflow-metrics`
+     - Follow patterns from git-notes-helper for fetching, parsing, and historical analysis
+
+  2. **Key operations from git-notes-helper**:
+     - Fetch notes: Operation 1
+     - Check existence: Operation 2
+     - Show note: Operation 3
+     - Parse INI fields: Operation 5
+     - Historical analysis: Operation 7
+     - Compare commits: Operation 8
+
+  ## Background: How Metrics Are Captured
+
+  Before analyzing metrics, understand how they're generated in the CI pipeline:
+
+  ### CI Workflow Integration
+
+  The `.github/workflows/ci.yml` workflow should include a step at the END (runs after all other jobs):
+
+  ```yaml
+  # Final job: Capture workflow metrics
+  capture-metrics:
+    name: Capture Workflow Metrics
+    runs-on: ubuntu-latest
+    needs: [code-format, lint, type-check, build, unit-tests, docker-images, e2e-tests]
+    if: always()  # Run even if previous jobs fail
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Capture workflow timing metrics
+        run: |
+          # Fetch job timing data from GitHub API
+          gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs \
+            --jq '.jobs[] | {name: .name, started_at: .started_at, completed_at: .completed_at, conclusion: .conclusion, steps: [.steps[] | {name: .name, started_at: .started_at, completed_at: .completed_at, conclusion: .conclusion}]}' \
+            > jobs-raw.json
+
+          # Process and format metrics
+          .github/scripts/extract-workflow-metrics.sh jobs-raw.json workflow-note.txt
+
+          # Store in git notes
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git notes --ref=ci/workflow-metrics add -F workflow-note.txt ${{ github.sha }}
+
+          # Push to remote
+          git push origin refs/notes/ci/workflow-metrics
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ```
+
+  **Key points:**
+  - Runs after ALL other jobs complete (uses `needs` with all job names)
+  - Uses `if: always()` to run even if tests fail
+  - Fetches job data from GitHub Actions API via `gh` CLI
+  - Processes timing data with extraction script
+  - Stores notes in `refs/notes/ci/workflow-metrics` namespace
+
+  ### Extraction Script Logic
+
+  The `.github/scripts/extract-workflow-metrics.sh` script processes GitHub API JSON:
+
+  **What it extracts:**
+  - Job names and durations (started_at → completed_at)
+  - Step names and durations within each job
+  - Job conclusions (success, failure, cancelled, skipped)
+  - Total workflow duration (first job start → last job end)
+  - Critical path analysis (longest serial dependency chain)
+
+  **Output format:** INI-style structure with sections per job
+
+  ### Example Metrics Note Structure
+
+  ```ini
+  timestamp = 2025-10-26T17:30:00Z
+  commit = c750f59
+  workflow_run_id = 12345678
+  total_workflow_time_sec = 420
+
+  [summary]
+  jobs_total = 7
+  jobs_passed = 7
+  jobs_failed = 0
+  slowest_job = e2e-tests
+  slowest_job_duration_sec = 300
+  critical_path_sec = 420
+
+  [job.code-format]
+  started_at = 2025-10-26T17:30:00Z
+  completed_at = 2025-10-26T17:30:45Z
+  duration_sec = 45
+  conclusion = success
+  step_count = 3
+  step.1.name = Checkout code
+  step.1.duration_sec = 5
+  step.2.name = Setup project
+  step.2.duration_sec = 25
+  step.3.name = Check formatting
+  step.3.duration_sec = 15
+
+  [job.lint]
+  started_at = 2025-10-26T17:30:00Z
+  completed_at = 2025-10-26T17:30:50Z
+  duration_sec = 50
+  conclusion = success
+  step_count = 3
+  step.1.name = Checkout code
+  step.1.duration_sec = 5
+  step.2.name = Setup project
+  step.2.duration_sec = 25
+  step.3.name = Run linters
+  step.3.duration_sec = 20
+
+  [job.e2e-tests]
+  started_at = 2025-10-26T17:32:00Z
+  completed_at = 2025-10-26T17:37:00Z
+  duration_sec = 300
+  conclusion = success
+  step_count = 5
+  step.1.name = Checkout code
+  step.1.duration_sec = 5
+  step.2.name = Setup Docker Compose
+  step.2.duration_sec = 15
+  step.3.name = Build images
+  step.3.duration_sec = 60
+  step.4.name = Run Playwright tests
+  step.4.duration_sec = 210
+  step.5.name = Upload artifacts
+  step.5.duration_sec = 10
+  ```
+
+  ## Step 1: Fetch and Validate Workflow Metrics Notes
+
+  Use **git-notes-helper** Operations 1-2:
+
+  ```bash
+  # Operation 1: Fetch notes from remote
+  git fetch origin refs/notes/ci/workflow-metrics:refs/notes/ci/workflow-metrics 2>/dev/null || \
+    echo "No remote workflow metrics found (notes may not be set up yet)"
+
+  # Operation 2: Check if any notes exist locally
+  git notes --ref=ci/workflow-metrics list | head -5
+  ```
+
+  If no notes exist, inform the user that the CI workflow needs to be updated to capture metrics first.
+
+  ## Step 2: Extract Recent Metrics
+
+  Use **git-notes-helper** Operations 3-7 to retrieve workflow metrics:
+
+  **Reference**: See `.claude/skills/git-notes-helper/helper.yaml` → Operation 7 (Historical Analysis) for detailed patterns.
+
+  **Simplified workflow** (follows git-notes-helper best practices):
+
+  ```bash
+  # List recent commits with workflow notes (Operation 4)
+  git notes --ref=ci/workflow-metrics list | head -20
+
+  # For each commit hash, extract key metrics (Operations 3, 5):
+
+  # Show note content (Operation 3)
+  git notes --ref=ci/workflow-metrics show <commit-hash>
+
+  # Parse summary fields (Operation 5)
+  git notes --ref=ci/workflow-metrics show <commit> | grep "^total_workflow_time_sec" | cut -d'=' -f2 | xargs
+  git notes --ref=ci/workflow-metrics show <commit> | grep "^slowest_job" | cut -d'=' -f2 | xargs
+
+  # Parse job durations (Operation 5 with section parsing)
+  git notes --ref=ci/workflow-metrics show <commit> | awk '/\[job\.code-format\]/,/^$/ {if ($1 == "duration_sec") print $3}'
+
+  # Get commit context (Operation 6)
+  git show --no-patch --format="%h: %s (%ar)" <commit-hash>
+  ```
+
+  ## Step 3: Analyze Trends
+
+  Parse the extracted data and identify patterns:
+
+  ### Key Metrics to Analyze:
+
+  1. **Total Workflow Duration**
+     - Track end-to-end CI time across commits
+     - Identify when workflow became significantly slower
+     - Calculate average duration over time period
+
+  2. **Job-Level Performance**
+     - Average duration per job (code-format, lint, build, e2e-tests, etc.)
+     - Identify consistently slow jobs
+     - Track job duration trends over time
+
+  3. **Step-Level Bottlenecks**
+     - Within each job, find the slowest steps
+     - Calculate step percentage of total job time
+     - Identify optimization targets
+
+  4. **Failure Impact**
+     - Compare duration of successful vs failed runs
+     - Check if failures cause early termination (saves time)
+     - Track failure rates by job
+
+  5. **Parallelization Efficiency**
+     - Compare total job time vs wall-clock time
+     - Identify serial bottlenecks (jobs that block others)
+     - Calculate parallel efficiency ratio
+
+  ### Analysis Template:
+
+  ```
+  === GITHUB ACTIONS WORKFLOW PERFORMANCE ANALYSIS ===
+
+  Period: [oldest_timestamp] to [newest_timestamp]
+  Workflow runs analyzed: [count]
+
+  ## Overall Workflow Performance
+
+  Average total time: [X]min [Y]sec
+  Fastest run: [X]min [Y]sec (commit: [hash])
+  Slowest run: [X]min [Y]sec (commit: [hash])
+  Trend: [improving/stable/degrading]
+
+  ## Job Performance Breakdown
+
+  | Job Name      | Avg Duration | % of Total | Trend      |
+  |---------------|--------------|------------|------------|
+  | e2e-tests     | 5.2min       | 74%        | Stable     |
+  | docker-images | 1.5min       | 21%        | Improving  |
+  | build         | 1.2min       | 17%        | Stable     |
+  | lint          | 0.8min       | 11%        | Stable     |
+  | type-check    | 0.7min       | 10%        | Stable     |
+  | unit-tests    | 0.5min       | 7%         | Stable     |
+  | code-format   | 0.5min       | 7%         | Stable     |
+
+  Note: Percentages don't sum to 100% due to parallel execution
+
+  ## Critical Path Analysis
+
+  The critical path (longest serial dependency chain):
+  1. code-format/lint/type-check (parallel) → [X]min
+  2. build → [X]min
+  3. docker-images → [X]min
+  4. e2e-tests → [X]min
+
+  Total critical path: [X]min [Y]sec
+
+  ## Bottleneck Identification
+
+  Top 5 slowest steps across all jobs:
+  1. e2e-tests → Run Playwright tests: 4.1min (79% of e2e-tests job)
+  2. docker-images → Build frontend-dev: 1.2min (80% of docker job)
+  3. build → Build all packages: 1.0min (83% of build job)
+  4. lint → Run linters: 0.7min (88% of lint job)
+  5. type-check → Type check frontend: 0.6min (86% of type-check job)
+
+  ## Trends & Patterns
+
+  [Identify any concerning patterns, e.g.:]
+  - ⚠️ E2E test duration increased by 30% after commit abc123
+  - ✓ Docker build time improved after cache optimization (commit def456)
+  - 📊 Workflow time varies by ±15% depending on GitHub runner allocation
+  - 🔍 Build job shows 10% slowdown trend over last 10 commits
+
+  ## Recommendations
+
+  [Provide actionable insights, e.g.:]
+  1. **High Priority**: E2E tests are the main bottleneck (74% of workflow time)
+     - Consider parallelizing Playwright tests across multiple jobs
+     - Use test sharding: `--shard=1/4`, `--shard=2/4`, etc.
+     - Expected impact: Reduce e2e-tests from 5min to 2min
+
+  2. **Medium Priority**: Docker image builds
+     - Frontend-dev build takes 1.2min - review Dockerfile layer caching
+     - Consider using pre-built base images
+     - Expected impact: Reduce docker-images from 1.5min to 1min
+
+  3. **Low Priority**: Setup overhead
+     - Each job spends ~25sec on "Setup project" step
+     - Consider using GitHub Actions cache for node_modules
+     - Expected impact: Save 25sec × 7 jobs = 3min (across all jobs)
+
+  4. **Monitoring**: Track trends
+     - Build job showing slow degradation - investigate dependency size growth
+     - Set up alerts if workflow time exceeds 10min threshold
+  ```
+
+  ## Step 4: Deep Dive (Optional)
+
+  If user requests details about a specific job, run, or time period:
+
+  ```bash
+  # Show full note for a commit
+  git notes --ref=ci/workflow-metrics show <commit>
+
+  # Find commits between two dates
+  git log --since="2025-10-01" --until="2025-10-24" --format="%h" | \
+    xargs -I {} git notes --ref=ci/workflow-metrics show {} 2>/dev/null
+
+  # Compare two specific commits
+  git notes --ref=ci/workflow-metrics show <commit-old> > /tmp/old.txt
+  git notes --ref=ci/workflow-metrics show <commit-new> > /tmp/new.txt
+  diff /tmp/old.txt /tmp/new.txt
+  ```
+
+  ## Step 5: Identify Regressions
+
+  To find commits that caused timing regressions:
+
+  ```bash
+  # Extract total_workflow_time_sec for recent commits
+  git notes --ref=ci/workflow-metrics list | head -20 | awk '{print $2}' | while read commit; do
+    time=$(git notes --ref=ci/workflow-metrics show $commit | grep "^total_workflow_time_sec" | cut -d'=' -f2 | xargs)
+    echo "$commit $time"
+  done | sort -k2 -n
+
+  # Find the commit where time increased significantly
+  # Then investigate what changed:
+  git show <regression-commit>
+  ```
+
+examples:
+  basic_analysis:
+    user_request: "Analyze workflow performance"
+    steps:
+      - "Fetch git notes: `git fetch origin refs/notes/ci/workflow-metrics:refs/notes/ci/workflow-metrics`"
+      - "Extract metrics from last 20 workflow runs"
+      - "Calculate average duration per job"
+      - "Identify slowest jobs and steps"
+      - "Present findings with recommendations"
+
+  specific_job:
+    user_request: "Show e2e-tests job performance"
+    steps:
+      - "Fetch notes if not available"
+      - "Extract e2e-tests job data from notes"
+      - "Parse step-level durations"
+      - "Calculate step percentages"
+      - "Compare to historical baseline"
+      - "Present step breakdown"
+
+  time_range:
+    user_request: "Show workflow performance for the last week"
+    steps:
+      - "Get commits from last 7 days"
+      - "Extract workflow metrics for those commits"
+      - "Calculate aggregate statistics"
+      - "Track daily trends"
+      - "Identify any anomalies"
+
+  identify_regression:
+    user_request: "Why did CI get slower?"
+    steps:
+      - "Extract recent workflow durations"
+      - "Find commit where duration increased significantly"
+      - "Compare job durations before/after"
+      - "Show git diff for the regression commit"
+      - "Identify likely cause (deps, dockerfile, code size)"
+      - "Provide remediation recommendations"
+
+  compare_jobs:
+    user_request: "Compare build vs e2e-tests performance"
+    steps:
+      - "Extract build job metrics from notes"
+      - "Extract e2e-tests job metrics from notes"
+      - "Calculate average durations"
+      - "Break down by step"
+      - "Compare parallelization efficiency"
+      - "Recommend optimization priorities"
+
+common_issues:
+  no_notes_found:
+    symptom: "No git notes found"
+    solution: |
+      The CI workflow hasn't captured metrics yet.
+      Steps to enable:
+      1. Add "capture-metrics" job to .github/workflows/ci.yml (see above)
+      2. Create .github/scripts/extract-workflow-metrics.sh script
+      3. Push a commit to trigger CI
+      4. After CI completes, fetch notes: `git fetch origin refs/notes/ci/workflow-metrics`
+
+  inconsistent_timings:
+    symptom: "Job durations vary wildly between runs"
+    causes:
+      - "GitHub Actions runner allocation (different machine specs)"
+      - "Network latency (downloading dependencies)"
+      - "Shared runner contention (peak hours)"
+    solution: "Compare trends over multiple runs, not single data points"
+
+  missing_job_data:
+    symptom: "Some jobs missing from metrics"
+    causes:
+      - "Job was skipped (conditional execution)"
+      - "Job failed before metrics capture"
+      - "Extraction script doesn't handle job name format"
+    solution: "Check job.conclusion field - may show 'skipped' or extraction script may need update"
+
+tips:
+  - "Reference git-notes-helper skill for all git notes operations"
+  - "Use namespace: `ci/workflow-metrics` for all workflow metrics notes"
+  - "Follow git-notes-helper best practices for parsing and historical analysis"
+  - "Focus on trends over time, not single data points (runner variance is high)"
+  - "Calculate percentages to understand relative impact (e.g., step % of job duration)"
+  - "Identify critical path: longest serial dependency chain determines minimum workflow time"
+  - "Compare job durations to commit types (code-only vs deps vs dockerfile changes)"
+  - "Use step-level data to find specific bottlenecks within jobs"
+  - "Consider parallel efficiency: total job time / wall-clock time"
+
+output_format: |
+  Present analysis in clear sections:
+  1. Overall workflow performance summary
+  2. Job-by-job breakdown with durations
+  3. Critical path analysis
+  4. Bottleneck identification (top slowest steps)
+  5. Trends and patterns
+  6. Prioritized recommendations
+
+  Use visual indicators:
+  - ✓ for good performance
+  - ⚠️ for concerning trends
+  - 📊 for statistical insights
+  - 💡 for recommendations
+  - 🔍 for areas needing investigation
+  - 🎯 for optimization targets
