@@ -87,7 +87,7 @@ git notes --ref=ci/e2e-failures show HEAD
 - `.github/scripts/extract-e2e-failures.js` - Parses JSON results
 - Git notes pushed to `refs/notes/ci/e2e-failures` namespace
 
-### Phase 3: Advanced Features (In Progress)
+### Phase 3: Advanced Features (Complete ✅)
 
 **Feature 1: Flaky Test Detection (ACTIVE)**
 
@@ -248,8 +248,69 @@ comm -12 current.txt previous.txt  # Still failing
 - ExpenseTracker › should add [chromium] (❌→❌, 3 days)
 ```
 
-**Remaining Features:**
-- Automatic regression detection (newly failing tests)
+**Feature 5: Automatic Regression Detection (ACTIVE)**
+
+Automatically detect and highlight newly failing tests (regressions) at the start of every E2E failure analysis.
+
+**What it does:**
+- Automatically compares current run with previous run (if git notes exist)
+- Highlights regressions (✅→❌) prominently at the TOP of the report
+- Shows "REGRESSION ALERT" banner if new failures detected
+- Provides immediate "what just broke" feedback
+- Links regressions to likely culprit commits
+
+**How it works:**
+```bash
+# Automatic workflow (runs every E2E failure analysis)
+# 1. Check if previous commit has E2E notes
+PREV_COMMIT=$(git rev-parse HEAD~1)
+if git notes --ref=ci/e2e-failures show $PREV_COMMIT &>/dev/null; then
+  # 2. Extract current and previous test names
+  CURRENT=$(git notes --ref=ci/e2e-failures show HEAD | grep "^test_name" | cut -d'=' -f2 | sort)
+  PREVIOUS=$(git notes --ref=ci/e2e-failures show $PREV_COMMIT | grep "^test_name" | cut -d'=' -f2 | sort)
+
+  # 3. Find new failures (regressions)
+  NEW_FAILURES=$(comm -23 <(echo "$CURRENT") <(echo "$PREVIOUS"))
+
+  # 4. Show REGRESSION ALERT if regressions found
+  if [ $(echo "$NEW_FAILURES" | grep -c .) -gt 0 ]; then
+    echo "⚠️  REGRESSION ALERT: New failures detected!"
+  fi
+fi
+```
+
+**Example output:**
+```markdown
+=== E2E TEST FAILURE ANALYSIS ===
+
+## ⚠️  REGRESSION ALERT
+
+**Status**: 🔴 NEW FAILURES DETECTED
+**Regressions**: 2 tests that were passing now fail
+**Likely Culprit**: Commit abc123de (1h ago)
+
+### New Failures (✅→❌)
+
+1. **ExpenseTracker › should delete expense [chromium]**
+   - **Previously**: ✅ PASSING (last 10 runs)
+   - **Now**: ❌ FAILING (timeout)
+   - **Action**: REVERT or FIX immediately
+```
+
+**Benefits:**
+- Immediate visibility into what just broke
+- No manual comparison needed
+- Actionable alerts with fix suggestions
+- Prevents regression blindness
+
+---
+
+**Phase 3 Complete**: All 5 advanced features implemented ✅
+- ✅ Flaky test detection
+- ✅ Failure trend analysis
+- ✅ Blame integration
+- ✅ Comparison reports
+- ✅ Automatic regression detection
 
 ## Example Output
 
