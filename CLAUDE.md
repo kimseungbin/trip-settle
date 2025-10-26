@@ -960,6 +960,33 @@ git push
 
 **Note**: When pushing multiple commits, the workflow checks ALL commits in the push. If ANY commit contains `Snapshots: update`, the workflow will run, even if it's not the HEAD commit.
 
+**Advanced: Selective Scope (Optional Optimization)**
+
+To speed up snapshot updates when you KNOW only specific tests need updating:
+
+```bash
+# Update all snapshots (default, safest)
+Snapshots: update
+
+# Update only visual snapshots (tests/visual/)
+Snapshots: update:visual
+
+# Update only e2e snapshots (tests/e2e/)
+Snapshots: update:e2e
+```
+
+**When to use selective scope:**
+- `update:visual` - Only changed CSS/styling, no interaction changes
+- `update:e2e` - Only changed keyboard focus behavior
+- `update` (no scope) - Default, safest option (updates all)
+
+**Performance:**
+- `update:visual` - ~30-40 seconds (52 snapshots)
+- `update:e2e` - ~20-30 seconds (12 snapshots)
+- `update` (all) - ~2-5 minutes (64 snapshots)
+
+**Warning:** Selective scope is an optimization. Use with caution—if unsure, use default `Snapshots: update` to ensure all affected tests are updated.
+
 **Verifying Changes**:
 1. CI workflow commits snapshot updates with detailed message
 2. Review the git diff in the snapshot files

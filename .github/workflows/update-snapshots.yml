@@ -92,9 +92,30 @@ jobs:
 
       - name: Run visual tests with snapshot update
         id: record_playwright
+        timeout-minutes: 15  # Prevent indefinite hangs (Playwright tests should complete < 10 min)
         run: |
+          TEST_SCOPE="${{ needs.check-trigger.outputs.test_scope }}"
           echo "📸 Updating visual snapshots in remote CI environment..."
-          echo "ℹ️  Updating all visual snapshots (tests/visual/ and tests/e2e/)"
+          echo "ℹ️  Test scope: $TEST_SCOPE"
+
+          # Build Playwright test pattern based on scope
+          case "$TEST_SCOPE" in
+            visual)
+              TEST_PATTERN="tests/visual/"
+              echo "   Running only visual tests (tests/visual/)"
+              ;;
+            e2e)
+              TEST_PATTERN="tests/e2e/"
+              echo "   Running only e2e tests (tests/e2e/)"
+              ;;
+            all|*)
+              TEST_PATTERN=""  # Empty = all tests
+              echo "   Running all visual tests (tests/visual/ and tests/e2e/)"
+              ;;
+          esac
+
+          # Pass test pattern to Playwright via environment variable
+          export PLAYWRIGHT_TEST_PATTERN="$TEST_PATTERN"
           PLAYWRIGHT_ARGS="--update-snapshots" docker compose -f docker-compose.e2e.yml up --build --abort-on-container-exit
           echo "success=true" >> $GITHUB_OUTPUT
         env:

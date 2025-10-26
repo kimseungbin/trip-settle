@@ -94,6 +94,7 @@ services:
       - PLAYWRIGHT_WORKERS=4  # Run tests in parallel with 4 workers
       - HOME=/root  # Required when running as root
       - PLAYWRIGHT_ARGS=${PLAYWRIGHT_ARGS:-}  # Pass through playwright args (e.g., --update-snapshots)
+      - PLAYWRIGHT_TEST_PATTERN=${PLAYWRIGHT_TEST_PATTERN:-}  # Optional: filter tests by directory (e.g., tests/visual/)
     depends_on:
       backend:
         condition: service_healthy
@@ -103,7 +104,7 @@ services:
       sh -c "
         echo 'Waiting for services to be ready...' &&
         sleep 5 &&
-        npm run test:e2e --workspace=frontend -- $PLAYWRIGHT_ARGS
+        npm run test:e2e --workspace=frontend -- $PLAYWRIGHT_ARGS $PLAYWRIGHT_TEST_PATTERN
       "
 
   # Playwright UI mode (interactive watch mode)

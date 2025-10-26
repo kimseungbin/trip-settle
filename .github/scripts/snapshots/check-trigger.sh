@@ -14,6 +14,7 @@
 # Outputs (to GITHUB_OUTPUT):
 #   should_run: "true" or "false"
 #   branch: Branch name to update snapshots on
+#   test_scope: Test scope to run ("all", "visual", "e2e", or "auto")
 #
 # Environment variables required:
 #   GITHUB_EVENT_NAME: Type of event that triggered workflow
@@ -25,6 +26,7 @@ set -euo pipefail
 # Initialize outputs
 SHOULD_RUN="false"
 BRANCH="${GITHUB_REF_NAME:-main}"
+TEST_SCOPE="all"  # Default: run all tests (safe)
 
 echo "🔍 Checking snapshot update trigger condition..."
 echo "Event: ${GITHUB_EVENT_NAME:-unknown}"
@@ -78,6 +80,36 @@ case "${GITHUB_EVENT_NAME:-}" in
         echo "   Matching commits:"
         echo "$MATCHING_COMMITS" | sed 's/^/     /'
         SHOULD_RUN="true"
+
+        # Extract test scope from commit footer (optional optimization)
+        # Supported formats:
+        #   Snapshots: update        → all (default, safest)
+        #   Snapshots: update:all    → all
+        #   Snapshots: update:visual → visual tests only (tests/visual/)
+        #   Snapshots: update:e2e    → e2e tests only (tests/e2e/)
+        #
+        # Note: Selective scope is an optimization for faster updates when
+        # developer KNOWS only specific tests need updating. Use with caution.
+        # Default "all" is safest.
+        SCOPE_LINE=$(jq -r '.commits[] | select(.message | contains("Snapshots: update")) | .message' "$GITHUB_EVENT_PATH" 2>/dev/null | grep "Snapshots: update" | head -1 || echo "")
+
+        if [[ "$SCOPE_LINE" =~ Snapshots:\ update:([a-z]+) ]]; then
+          EXTRACTED_SCOPE="${BASH_REMATCH[1]}"
+          case "$EXTRACTED_SCOPE" in
+            all|visual|e2e)
+              TEST_SCOPE="$EXTRACTED_SCOPE"
+              echo "   Test scope: $TEST_SCOPE"
+              ;;
+            *)
+              echo "   ⚠️  Unknown scope '$EXTRACTED_SCOPE', defaulting to 'all'"
+              TEST_SCOPE="all"
+              ;;
+          esac
+        else
+          # No scope specified, default to all
+          TEST_SCOPE="all"
+          echo "   Test scope: all (default)"
+        fi
       else
         echo "ℹ️  No commits in push contain snapshot update trigger"
       fi
@@ -94,11 +126,13 @@ echo ""
 echo "Results:"
 echo "  should_run = $SHOULD_RUN"
 echo "  branch = $BRANCH"
+echo "  test_scope = $TEST_SCOPE"
 
 # Write to GITHUB_OUTPUT if available
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
   echo "should_run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
   echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+  echo "test_scope=$TEST_SCOPE" >> "$GITHUB_OUTPUT"
   echo "✅ Results written to GITHUB_OUTPUT"
 else
   echo "⚠️  GITHUB_OUTPUT not set (not running in GitHub Actions)"
