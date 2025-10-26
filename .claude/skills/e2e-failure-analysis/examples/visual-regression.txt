@@ -1,0 +1,77 @@
+Example E2E Test Failure: Visual Regression
+
+=== TEST FAILURE ===
+
+Test: CurrencySelector › Visual: Currency dropdown
+File: tests/visual/currency-selector.spec.ts:10
+Browser: webkit
+Status: FAILED
+Duration: 1250ms
+
+ERROR:
+Screenshot comparison failed:
+
+127 pixels (0.05% of all pixels) differ
+
+Expected: tests/visual/currency-selector.spec.ts-snapshots/currency-selector-webkit-linux.png
+Received: test-results/visual-currency-selector-webkit/currency-selector-actual.png
+Diff: test-results/visual-currency-selector-webkit/currency-selector-diff.png
+
+STACK TRACE:
+    at expect.toHaveScreenshot (tests/visual/currency-selector.spec.ts:10:20)
+
+ARTIFACTS:
+  Expected Snapshot: tests/visual/currency-selector-webkit-linux.png
+  Actual Screenshot: test-results/visual-currency-selector-webkit/currency-selector-actual.png
+  Diff Image: test-results/visual-currency-selector-webkit/currency-selector-diff.png
+
+=== ANALYSIS ===
+
+Error Type: Visual Regression
+Root Cause: UI appearance changed - 127 pixels differ from baseline
+
+Common Causes:
+1. CSS styling changes (colors, spacing, fonts, shadows)
+2. Layout changes (flexbox, grid, positioning)
+3. Font rendering differences (OS-specific)
+4. Browser engine differences (webkit vs chromium)
+5. Component structural changes (new elements, removed elements)
+6. Animation/transition mid-flight capture
+7. Outdated snapshots (code changed, snapshots not updated)
+
+Debugging Steps:
+1. View diff image to see exact changes:
+   open test-results/visual-currency-selector-webkit/currency-selector-diff.png
+   (Red pixels = expected but missing, Green pixels = present but unexpected)
+
+2. Check recent CSS changes:
+   git diff HEAD~1 -- packages/frontend/src/components/CurrencySelector.svelte
+   git diff HEAD~1 -- '*.css' '*.svelte'
+
+3. Compare expected vs actual:
+   open test-results/visual-currency-selector-webkit/currency-selector-actual.png
+   open tests/visual/currency-selector-webkit-linux.png
+
+4. Determine if change is intentional:
+   - Intentional (new design): Update snapshots
+   - Unintentional (bug): Investigate and fix CSS regression
+
+5. If change is intentional, update snapshots:
+   git commit -m "feat(frontend): Update currency selector style [update-snapshots]"
+   (CI will automatically regenerate snapshots)
+
+6. If change is unintentional:
+   - Identify which commit introduced the visual bug
+   - Review diff to find unintended CSS changes
+   - Fix the CSS regression
+
+Quick Fix Suggestions:
+- Intentional design change: Add [update-snapshots] to commit message
+- Unintentional change: Revert CSS changes or fix the regression
+- Font rendering difference: Ensure snapshots are Linux-based (CI environment)
+
+Important Notes:
+- Visual snapshots are ONLY maintained in CI (Linux environment)
+- Do NOT run visual tests locally (macOS/Windows rendering differs)
+- Always update snapshots via CI workflow, not local runs
+- See CLAUDE.md "Visual Snapshot Management" section for details

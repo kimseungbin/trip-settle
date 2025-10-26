@@ -1,0 +1,62 @@
+Example E2E Test Failure: Timeout Error
+
+=== TEST FAILURE ===
+
+Test: ExpenseTracker › should add expense with Enter key
+File: tests/e2e/expense-workflow.spec.ts:15
+Browser: chromium
+Status: FAILED
+Duration: 5000ms
+
+ERROR:
+Timeout 5000ms exceeded.
+waiting for getByRole('button', { name: 'Add' })
+
+Call log:
+  - locator.click()
+  - waiting for getByRole('button', { name: 'Add' })
+
+STACK TRACE:
+    at /path/to/tests/e2e/expense-workflow.spec.ts:15:45
+    at Test.test (/path/to/node_modules/@playwright/test/index.js:123:45)
+
+ARTIFACTS:
+  Screenshot: test-results/expense-workflow-chromium/test-failed-1.png
+  Video: test-results/expense-workflow-chromium/video.webm
+  Trace: test-results/expense-workflow-chromium/trace.zip
+
+=== ANALYSIS ===
+
+Error Type: Timeout
+Root Cause: Element with role 'button' and name 'Add' not found within 5 seconds
+
+Common Causes:
+1. Button text changed (e.g., "Add" → "Submit")
+2. Button is hidden by CSS (display: none, visibility: hidden)
+3. Button is disabled and test expects it to be enabled
+4. Button hasn't rendered yet (async component loading)
+5. Selector is incorrect or too specific
+
+Debugging Steps:
+1. Check button selector:
+   git diff HEAD~1 -- packages/frontend/src/components/ExpenseForm.svelte
+
+2. Verify button visibility:
+   - Open screenshot: test-results/expense-workflow-chromium/test-failed-1.png
+   - Look for button in UI
+
+3. Review component logic:
+   - Check conditional rendering (v-if, *ngIf, etc.)
+   - Verify button isn't disabled by state
+
+4. Run test locally with debug:
+   npx playwright test expense-workflow --project=chromium --debug
+
+5. Check for race conditions:
+   - Is there async state update before button renders?
+   - Does button appear after API response?
+
+Quick Fix Suggestions:
+- If button text changed: Update test selector
+- If button is conditionally rendered: Add wait for visible state
+- If timing issue: Increase timeout or wait for specific condition

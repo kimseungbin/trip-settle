@@ -1,0 +1,512 @@
+name: e2e-failure-analysis
+description: |
+  Analyze Playwright E2E test failures to quickly diagnose issues and provide fix recommendations.
+
+  Use this skill to:
+  - Identify which tests failed and why
+  - Categorize failures by error type
+  - Surface relevant debugging artifacts
+  - Provide actionable fix recommendations
+  - Help developers resolve test failures fast
+
+instructions: |
+  When the user requests E2E failure analysis or mentions failed E2E tests:
+
+  ## Step 1: Locate Test Results
+
+  Playwright generates multiple output formats. Check for them in this order:
+
+  ### Local Test Results (packages/frontend/test-results/)
+
+  ```bash
+  # Check if test results exist
+  ls -la packages/frontend/test-results/
+
+  # Look for JSON reporter output (most structured, preferred)
+  find packages/frontend/test-results -name "*.json" -type f
+
+  # Check for JUnit XML (alternative structured format)
+  find packages/frontend/test-results -name "junit.xml" -type f
+  ```
+
+  ### Playwright HTML Report (packages/frontend/playwright-report/)
+
+  ```bash
+  # Check if HTML report exists
+  ls -la packages/frontend/playwright-report/
+
+  # HTML report is human-readable but harder to parse programmatically
+  # Use as fallback if JSON unavailable
+  ```
+
+  ### GitHub Actions Artifacts (CI failures)
+
+  If analyzing CI failures, artifacts are available via GitHub Actions:
+  - Artifact name: `playwright-test-results` (test results JSON)
+  - Artifact name: `playwright-report` (HTML report)
+  - Retention: 30 days
+
+  **Important**: Do NOT attempt to download artifacts directly. Instead:
+  1. Inform user where to download artifacts (GitHub Actions → Run → Artifacts)
+  2. Or parse failure info from git notes (Phase 2 feature, coming later)
+
+  ## Step 2: Parse Test Results
+
+  ### Method A: Parse JSON Reporter Output (Preferred)
+
+  Playwright's JSON reporter generates structured failure data. Parse it to extract:
+
+  ```bash
+  # Example: Read results.json
+  cat packages/frontend/test-results/results.json
+
+  # Or read JUnit XML
+  cat packages/frontend/test-results/junit.xml
+  ```
+
+  **Key data to extract**:
+  - `test.title` - Test name
+  - `test.file` - Test file path
+  - `test.status` - passed/failed/skipped/flaky
+  - `test.errors` - Error messages and stack traces
+  - `test.attachments` - Screenshots, videos, traces
+  - `test.projectName` - Browser (chromium, webkit, etc.)
+  - `test.duration` - How long test ran
+
+  ### Method B: Parse Console Output (Fallback)
+
+  If structured output unavailable, parse console logs:
+
+  ```bash
+  # Example: Last test run output (if available)
+  # Look for patterns like:
+  # ✓ ExpenseTracker › should add expense [chromium] (1.2s)
+  # ✗ ExpenseTracker › should delete expense [webkit] (5.0s)
+  #
+  #   Error: Timeout 5000ms exceeded.
+  #   waiting for getByRole('button', { name: 'Delete' })
+  ```
+
+  ## Step 3: Categorize Failures
+
+  Classify each failure by error type to provide targeted recommendations:
+
+  ### Error Type Detection
+
+  **Timeout Errors**:
+  - Pattern: `Timeout.*exceeded`, `waiting for`, `locator.click: Timeout`
+  - Cause: Element not found/visible/enabled within timeout
+  - Common in: Element selection, animations, async operations
+
+  **Assertion Failures**:
+  - Pattern: `expect.*to.*`, `Expected.*Received`, `toBe`, `toHaveText`
+  - Cause: Expected value doesn't match actual
+  - Common in: State validation, content checks
+
+  **Visual Regression Failures**:
+  - Pattern: `toHaveScreenshot`, `Screenshot comparison failed`, `pixels differ`
+  - Cause: UI appearance changed
+  - Common in: CSS changes, layout shifts, font rendering
+
+  **Navigation/Routing Errors**:
+  - Pattern: `page.goto`, `Navigation failed`, `net::ERR_`
+  - Cause: Page failed to load, network issues
+  - Common in: Server down, incorrect URL, CORS
+
+  **Setup/Teardown Errors**:
+  - Pattern: `beforeEach`, `afterEach`, `beforeAll`, `afterAll`
+  - Cause: Test fixture setup failed
+  - Common in: Database setup, authentication, cleanup
+
+  ## Step 4: Extract Artifact References
+
+  For each failed test, identify available debugging artifacts:
+
+  ### Artifact Types
+
+  **Screenshots** (`.png` files):
+  - Captured automatically on failure
+  - Path pattern: `test-results/{test-name}-{browser}/test-failed-{n}.png`
+  - Use: See exact UI state at failure moment
+
+  **Videos** (`.webm` files):
+  - Full test execution recording
+  - Path pattern: `test-results/{test-name}-{browser}/video.webm`
+  - Use: Watch test execution to understand failure context
+
+  **Traces** (`.zip` files):
+  - Playwright trace with full timeline, network, console
+  - Path pattern: `test-results/{test-name}-{browser}/trace.zip`
+  - Use: Deep debugging with Playwright Trace Viewer
+
+  **Expected vs Actual Screenshots** (visual tests):
+  - Expected: `*-expected.png`
+  - Actual: `*-actual.png`
+  - Diff: `*-diff.png`
+  - Use: Compare visual changes pixel-by-pixel
+
+  ## Step 5: Generate Failure Report
+
+  Present findings in clear, actionable format:
+
+  ### Report Template
+
+  ```markdown
+  === E2E TEST FAILURE ANALYSIS ===
+
+  ## Summary
+  - **Total Tests**: {total}
+  - **Passed**: {passed} ✅
+  - **Failed**: {failed} ❌
+  - **Pass Rate**: {pass_rate}%
+
+  ## Failed Tests
+
+  ### {n}. {test_name} [{browser}]
+  **File**: `{test_file}:{line_number}`
+  **Error Type**: {error_type}
+  **Duration**: {duration}ms
+
+  **Error Message**:
+  ```
+  {error_message}
+  {stack_trace_excerpt}
+  ```
+
+  **Artifacts**:
+  - 📸 Screenshot: `{screenshot_path}`
+  - 🎥 Video: `{video_path}`
+  - 🔍 Trace: `{trace_path}`
+
+  **Fix Recommendations**:
+  {debugging_steps_based_on_error_type}
+
+  ---
+
+  ## Quick Fixes
+
+  {summary_of_recommended_actions}
+
+  ## Debugging Commands
+
+  {commands_to_reproduce_locally}
+  ```
+
+  ### Debugging Recommendations by Error Type
+
+  **Timeout Errors** → Provide these steps:
+  1. Check if element selector changed in recent commits
+  2. Verify element is visible/enabled (not hidden by CSS)
+  3. Check for race conditions (async state updates)
+  4. Review component rendering logic
+  5. Run test locally with `--debug` flag to step through
+  6. Consider increasing timeout if legitimately slow operation
+
+  **Assertion Failures** → Provide these steps:
+  1. Review expected vs actual values
+  2. Check if business logic changed
+  3. Verify test expectations are still valid
+  4. Look for state management bugs
+  5. Check for timing issues (async assertions)
+
+  **Visual Regression Failures** → Provide these steps:
+  1. View diff image to see exact pixel changes
+  2. Review CSS changes in recent commits (git diff *.css *.svelte)
+  3. If change is intentional: Add `[update-snapshots]` to commit message
+  4. If change is unintentional: Investigate CSS regression
+  5. Check for font rendering differences (OS-specific)
+  6. Verify snapshots are Linux-based (CI environment)
+
+  **Navigation Errors** → Provide these steps:
+  1. Check if backend is running (docker-compose status)
+  2. Verify URL configuration (baseURL in playwright.config.ts)
+  3. Check for CORS issues (browser console)
+  4. Review network tab in trace viewer
+  5. Ensure test environment is properly set up
+
+  ## Step 6: Provide Local Reproduction Steps
+
+  Help user reproduce failures locally:
+
+  ```bash
+  # Run specific failed test
+  npx playwright test {test_file} --project={browser}
+
+  # Run with UI mode for interactive debugging
+  npm run test:e2e:ui --workspace=frontend
+
+  # Run with debug mode (Playwright Inspector)
+  npm run test:e2e:debug --workspace=frontend
+
+  # Run with headed mode (see browser)
+  npx playwright test {test_file} --headed
+
+  # Update visual snapshots (if visual regression)
+  npm run test:e2e:docker:update-snapshots
+  ```
+
+  ## Step 7: Browser-Specific Analysis
+
+  If failures occur in only one browser, highlight this:
+
+  ```markdown
+  ## Browser-Specific Failures ⚠️
+
+  The following tests fail only in **{browser}**:
+  - {test_1}
+  - {test_2}
+
+  **Possible Causes**:
+  - Browser-specific CSS rendering
+  - Browser-specific JavaScript API differences
+  - WebKit vs Chromium engine differences
+  - Timing differences between browsers
+
+  **Action**: Test specifically in {browser} locally to debug.
+  ```
+
+examples:
+  timeout_failure:
+    scenario: "Test times out waiting for button"
+    test_file: "tests/e2e/expense-workflow.spec.ts"
+    test_name: "ExpenseTracker › should add expense with Enter key"
+    browser: "chromium"
+    error: "Timeout 5000ms exceeded waiting for getByRole('button', { name: 'Add' })"
+
+    analysis_output: |
+      === E2E TEST FAILURE ANALYSIS ===
+
+      ## Summary
+      - **Total Tests**: 42
+      - **Passed**: 41 ✅
+      - **Failed**: 1 ❌
+      - **Pass Rate**: 97.6%
+
+      ## Failed Tests
+
+      ### 1. ExpenseTracker › should add expense with Enter key [chromium]
+      **File**: `tests/e2e/expense-workflow.spec.ts:15`
+      **Error Type**: Timeout
+      **Duration**: 5000ms
+
+      **Error Message**:
+      ```
+      Timeout 5000ms exceeded.
+      waiting for getByRole('button', { name: 'Add' })
+
+      Call log:
+        - locator.click()
+        - waiting for getByRole('button', { name: 'Add' })
+      ```
+
+      **Artifacts**:
+      - 📸 Screenshot: `test-results/expense-workflow-chromium/test-failed-1.png`
+      - 🎥 Video: `test-results/expense-workflow-chromium/video.webm`
+      - 🔍 Trace: `test-results/expense-workflow-chromium/trace.zip`
+
+      **Fix Recommendations**:
+      1. **Check button selector**: Verify button with text "Add" exists in ExpenseForm
+         ```bash
+         git diff HEAD~1 -- packages/frontend/src/components/ExpenseForm.svelte
+         ```
+      2. **Check button visibility**: Ensure button isn't hidden by CSS or disabled
+      3. **Review component logic**: Check if conditional rendering affects button
+      4. **Run test locally**:
+         ```bash
+         npx playwright test expense-workflow --project=chromium --debug
+         ```
+
+      ## Quick Fixes
+      - Check if button text changed from "Add" to something else
+      - Verify ExpenseForm renders the submit button correctly
+      - Review recent changes to ExpenseForm.svelte
+
+  visual_regression:
+    scenario: "Visual snapshot comparison fails"
+    test_file: "tests/visual/currency-selector.spec.ts"
+    test_name: "CurrencySelector › Visual: Currency dropdown"
+    browser: "webkit"
+    error: "Screenshot comparison failed: 127 pixels (0.05%) differ"
+
+    analysis_output: |
+      === E2E TEST FAILURE ANALYSIS ===
+
+      ## Summary
+      - **Total Tests**: 8
+      - **Passed**: 7 ✅
+      - **Failed**: 1 ❌
+      - **Pass Rate**: 87.5%
+
+      ## Failed Tests
+
+      ### 1. CurrencySelector › Visual: Currency dropdown [webkit]
+      **File**: `tests/visual/currency-selector.spec.ts:10`
+      **Error Type**: Visual Regression
+      **Duration**: 1250ms
+
+      **Error Message**:
+      ```
+      Screenshot comparison failed:
+
+      127 pixels (0.05% of all pixels) differ
+
+      Expected: tests/visual/currency-selector.spec.ts-snapshots/currency-selector-webkit-linux.png
+      Received: test-results/visual-currency-selector-webkit/currency-selector-actual.png
+      Diff: test-results/visual-currency-selector-webkit/currency-selector-diff.png
+      ```
+
+      **Artifacts**:
+      - 📸 Expected: `tests/visual/currency-selector.spec.ts-snapshots/currency-selector-webkit-linux.png`
+      - 📸 Actual: `test-results/visual-currency-selector-webkit/currency-selector-actual.png`
+      - 📸 Diff: `test-results/visual-currency-selector-webkit/currency-selector-diff.png`
+
+      **Fix Recommendations**:
+      1. **View diff image**: Open diff.png to see exactly what changed
+      2. **Check CSS changes**:
+         ```bash
+         git diff HEAD~1 -- packages/frontend/src/components/CurrencySelector.svelte
+         git diff HEAD~1 -- '*.css' '*.svelte'
+         ```
+      3. **If change is intentional**: Update snapshots
+         ```bash
+         # Add to commit message:
+         git commit -m "feat(frontend): Update currency selector style [update-snapshots]"
+         ```
+      4. **If change is unintentional**: Investigate CSS regression
+
+      ## Quick Fixes
+      - Review diff image to understand the visual change
+      - If styling change was intentional, update snapshots with [update-snapshots]
+      - If not intentional, revert CSS changes causing the difference
+
+  multiple_failures:
+    scenario: "Multiple tests fail across different error types"
+
+    analysis_output: |
+      === E2E TEST FAILURE ANALYSIS ===
+
+      ## Summary
+      - **Total Tests**: 42
+      - **Passed**: 38 ✅
+      - **Failed**: 4 ❌
+      - **Pass Rate**: 90.5%
+
+      ## Failed Tests
+
+      ### 1. ExpenseTracker › should add expense [chromium]
+      **Error Type**: Timeout
+      **File**: `tests/e2e/expense-workflow.spec.ts:15`
+
+      **Error**: Timeout waiting for getByRole('button', { name: 'Add' })
+
+      **Artifacts**: 📸 Screenshot | 🎥 Video | 🔍 Trace
+
+      **Fix**: Check button selector, verify button visibility
+
+      ---
+
+      ### 2. CurrencySelector › Visual snapshot [webkit]
+      **Error Type**: Visual Regression
+      **File**: `tests/visual/currency-selector.spec.ts:10`
+
+      **Error**: 127 pixels differ from expected screenshot
+
+      **Artifacts**: 📸 Diff Image | 📸 Expected | 📸 Actual
+
+      **Fix**: Review CSS changes, update snapshots if intentional
+
+      ---
+
+      ### 3. Onboarding › should complete onboarding flow [chromium]
+      **Error Type**: Assertion
+      **File**: `tests/e2e/onboarding.spec.ts:25`
+
+      **Error**: Expected URL to be '/expense-tracker', received '/onboarding'
+
+      **Artifacts**: 📸 Screenshot | 🎥 Video
+
+      **Fix**: Check navigation logic, verify routing conditions
+
+      ---
+
+      ### 4. LocalStorageViewer › should display expenses [webkit]
+      **Error Type**: Assertion
+      **File**: `tests/e2e/local-storage-viewer.spec.ts:18`
+
+      **Error**: Expected 3 expense items, found 0
+
+      **Artifacts**: 📸 Screenshot
+
+      **Fix**: Verify localStorage state, check data persistence
+
+      ## Quick Fixes
+
+      **Immediate Actions**:
+      1. Fix button selector issue in ExpenseTracker (timeout)
+      2. Review onboarding navigation logic (assertion)
+      3. Investigate localStorage persistence (assertion)
+      4. Update visual snapshots if CSS change was intentional
+
+      **Debugging Commands**:
+      ```bash
+      # Run failed tests in UI mode
+      npm run test:e2e:ui --workspace=frontend
+
+      # Run specific test
+      npx playwright test expense-workflow --project=chromium --debug
+
+      # Update snapshots (if visual change is intentional)
+      npm run test:e2e:docker:update-snapshots
+      ```
+
+tips:
+  - "Always check test-results/ directory first for JSON output (most reliable)"
+  - "Look for patterns in error messages to categorize failures quickly"
+  - "Visual regressions often indicate unintentional CSS changes"
+  - "Timeout errors usually mean selector changed or element is hidden"
+  - "Browser-specific failures suggest rendering or API differences"
+  - "Screenshot artifacts are essential for visual debugging"
+  - "Trace files provide the most comprehensive debugging information"
+
+output_format: |
+  Present analysis in clear sections:
+  1. Summary statistics (total, passed, failed, pass rate)
+  2. Failed test details (name, error, artifacts, recommendations)
+  3. Quick fixes section (immediate actions)
+  4. Debugging commands (local reproduction steps)
+
+  Use visual indicators:
+  - ✅ for passed tests
+  - ❌ for failed tests
+  - 📸 for screenshots
+  - 🎥 for videos
+  - 🔍 for traces
+  - ⚠️ for warnings/browser-specific issues
+
+common_issues:
+  no_test_results_found:
+    symptom: "test-results/ directory is empty or doesn't exist"
+    solution: |
+      Test results not available. Possible causes:
+      1. Tests haven't been run yet → Run: npm run test:e2e:docker
+      2. Tests passed (no failures to analyze) → Check git status
+      3. Results were cleaned up → Re-run tests to regenerate
+
+  artifacts_not_found:
+    symptom: "Screenshots/videos referenced but files don't exist"
+    solution: |
+      Artifacts may have been cleaned up or test was skipped.
+      To regenerate:
+      - Run failed test again: npx playwright test {test-name}
+      - Ensure screenshot/video settings enabled in playwright.config.ts
+
+  ci_vs_local_differences:
+    symptom: "Tests pass locally but fail in CI"
+    causes:
+      - "Environment differences (Linux CI vs macOS/Windows local)"
+      - "Visual snapshots are Linux-based (must update in CI)"
+      - "Timing differences (CI may be slower)"
+      - "Different browser versions"
+    solution: |
+      For visual tests: Always update snapshots via CI workflow
+      For other failures: Check environment-specific issues (TEST_ENV variable)
