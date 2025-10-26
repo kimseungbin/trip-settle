@@ -1,6 +1,6 @@
 <script lang="ts">
 	import CurrencySelector from './CurrencySelector.svelte'
-	import { DEFAULT_CURRENCY, getCurrencyByCode } from '../data/currencies'
+	import { DEFAULT_CURRENCY } from '../data/currencies'
 	import { settings } from '../stores/settings.svelte'
 	import { onMount } from 'svelte'
 	import { t } from 'svelte-i18n'
@@ -26,15 +26,6 @@
 
 	// Derived state: show currency selector only in multi-currency mode
 	const showCurrencySelector = $derived(settings.currencyMode === 'multi')
-
-	// Derived state: get input step and min based on selected currency's decimal places
-	const currency = $derived(getCurrencyByCode(selectedCurrency))
-	const inputStep = $derived(
-		currency ? (currency.decimalPlaces === 0 ? '1' : `0.${'0'.repeat(currency.decimalPlaces - 1)}1`) : '0.01'
-	)
-	const inputMin = $derived(
-		currency ? (currency.decimalPlaces === 0 ? '1' : `0.${'0'.repeat(currency.decimalPlaces - 1)}1`) : '0.01'
-	)
 
 	function handleSubmit() {
 		if (!expenseName.trim() || !expenseAmount) return
@@ -101,8 +92,6 @@
 			inputmode="decimal"
 			placeholder={$t('expenseForm.amountPlaceholder')}
 			bind:value={expenseAmount}
-			step={inputStep}
-			min={inputMin}
 			required
 		/>
 		{#if showCurrencySelector}
