@@ -50,6 +50,9 @@ export function navigate(path: string): void {
 
 	// Update reactive state to trigger re-renders
 	currentRoute = path
+
+	// Scroll to top of page (mimic browser behavior for new page loads)
+	window.scrollTo(0, 0)
 }
 
 /**
