@@ -13,6 +13,18 @@ export interface Toast {
 	duration: number
 }
 
+/**
+ * Generate a unique ID
+ * Uses crypto.randomUUID() if available, otherwise falls back to timestamp + random
+ */
+function generateId(): string {
+	if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+		return crypto.randomUUID()
+	}
+	// Fallback for older browsers or non-secure contexts
+	return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
+}
+
 class ToastStore {
 	toasts = $state<Toast[]>([])
 
@@ -23,7 +35,7 @@ class ToastStore {
 	 * @param duration - How long to show the toast in milliseconds (default: 3000)
 	 */
 	show(message: string, type: ToastType = 'info', duration: number = 3000) {
-		const id = crypto.randomUUID()
+		const id = generateId()
 		const toast: Toast = { id, message, type, duration }
 
 		this.toasts = [...this.toasts, toast]
