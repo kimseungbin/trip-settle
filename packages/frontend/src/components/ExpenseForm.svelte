@@ -82,6 +82,7 @@
 	>
 		<input
 			type="text"
+			autocomplete="off"
 			placeholder={$t('expenseForm.namePlaceholder')}
 			bind:value={expenseName}
 			bind:this={nameInput}
