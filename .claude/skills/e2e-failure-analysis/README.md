@@ -211,8 +211,44 @@ git show $FIRST_FAIL -- packages/frontend/src/
 New Edit button affects button selector. Please review.
 ```
 
+**Feature 4: Comparison Reports (ACTIVE)**
+
+Compare current test results with previous run to identify changes.
+
+**What it shows:**
+- New failures (regressions) - ✅→❌
+- Fixed tests (improvements) - ❌→✅
+- Still failing (chronic issues) - ❌→❌
+- Summary of changes since last run
+
+**How it works:**
+```bash
+# Extract test names from current and previous runs
+git notes --ref=ci/e2e-failures show HEAD | grep "^test_name" > current.txt
+git notes --ref=ci/e2e-failures show HEAD~1 | grep "^test_name" > previous.txt
+
+# Compare: new failures, fixes, still failing
+comm -23 current.txt previous.txt  # New failures
+comm -13 current.txt previous.txt  # Fixed tests
+comm -12 current.txt previous.txt  # Still failing
+```
+
+**Example output:**
+```markdown
+## Comparison Report 📊
+
+### 🆕 New Failures (2 tests) - REGRESSIONS
+- ExpenseTracker › should delete [chromium] (✅→❌)
+- CurrencySelector › should switch [webkit] (✅→❌)
+
+### ✅ Fixed Tests (1 test) - IMPROVEMENTS
+- Onboarding › should complete flow [chromium] (❌→✅) 🎉
+
+### ❌ Still Failing (1 test) - CHRONIC
+- ExpenseTracker › should add [chromium] (❌→❌, 3 days)
+```
+
 **Remaining Features:**
-- Comparison reports (show failures different from last run)
 - Automatic regression detection (newly failing tests)
 
 ## Example Output

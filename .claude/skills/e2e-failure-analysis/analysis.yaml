@@ -867,6 +867,233 @@ instructions: |
   - **Code ownership**: Identify maintainers for specific components
   - **Historical context**: Understand why changes were made (commit message)
 
+  ### Feature 4: Comparison Reports
+
+  Compare current test results with previous run to identify changes (new failures, fixes).
+
+  **What it shows:**
+  - New failures (were passing, now failing) - REGRESSIONS
+  - Fixed tests (were failing, now passing) - IMPROVEMENTS
+  - Still failing (continue to fail) - CHRONIC ISSUES
+  - Still passing (continue to pass) - STABLE
+  - Summary of changes since last run
+
+  **Workflow:**
+
+  ```bash
+  # Step 1: Get current commit's test results
+  CURRENT=$(git rev-parse HEAD)
+  git notes --ref=ci/e2e-failures show $CURRENT
+
+  # Step 2: Get previous commit's test results
+  PREVIOUS=$(git rev-parse HEAD~1)
+  git notes --ref=ci/e2e-failures show $PREVIOUS
+
+  # Step 3: Extract test names from both
+  # Current failures
+  git notes --ref=ci/e2e-failures show $CURRENT | grep "^test_name" | cut -d'=' -f2
+
+  # Previous failures
+  git notes --ref=ci/e2e-failures show $PREVIOUS | grep "^test_name" | cut -d'=' -f2
+
+  # Step 4: Compare and categorize
+  # New failures: In current but NOT in previous
+  # Fixed tests: In previous but NOT in current
+  # Still failing: In both current AND previous
+  ```
+
+  **Detection Logic:**
+
+  ```
+  Compare current vs previous test runs:
+
+  1. Extract test lists:
+     current_failures = [test1, test2, test3]
+     previous_failures = [test2, test4]
+
+  2. Categorize changes:
+     new_failures = current - previous = [test1, test3]
+     fixed_tests = previous - current = [test4]
+     still_failing = current ∩ previous = [test2]
+
+  3. Calculate metrics:
+     total_current = current_failures.length
+     total_previous = previous_failures.length
+     change_delta = total_current - total_previous
+     improvement_rate = fixed_tests.length / (total_previous || 1)
+  ```
+
+  **Simplified Commands:**
+
+  ```bash
+  # Get current failures
+  git notes --ref=ci/e2e-failures show HEAD | \
+    grep "^test_name" | cut -d'=' -f2 | sort > current_failures.txt
+
+  # Get previous failures
+  git notes --ref=ci/e2e-failures show HEAD~1 | \
+    grep "^test_name" | cut -d'=' -f2 | sort > previous_failures.txt
+
+  # Find new failures (in current, not in previous)
+  comm -23 current_failures.txt previous_failures.txt
+
+  # Find fixed tests (in previous, not in current)
+  comm -13 current_failures.txt previous_failures.txt
+
+  # Find still failing (in both)
+  comm -12 current_failures.txt previous_failures.txt
+
+  # Cleanup
+  rm current_failures.txt previous_failures.txt
+  ```
+
+  **Report Format:**
+
+  ```markdown
+  ## Comparison Report: Current vs Previous Run 📊
+
+  **Current Commit**: abc123de (1h ago)
+  **Previous Commit**: xyz789fg (3h ago)
+  **Time Between Runs**: 2 hours
+
+  ---
+
+  ### Summary
+
+  | Category | Count | Change |
+  |----------|-------|--------|
+  | **Total Tests** | 42 | No change |
+  | **Total Failures** | 4 | +2 (worse) 🔴 |
+  | **Total Passing** | 38 | -2 (worse) |
+  | **Pass Rate** | 90.5% | -4.8% 📉 |
+
+  **Status**: 🔴 DEGRADED (more failures than last run)
+
+  ---
+
+  ### 🆕 New Failures (2 tests)
+
+  Tests that were **passing** in previous run, now **failing**:
+
+  #### 1. ExpenseTracker › should delete expense [chromium]
+  - **Status**: ✅ → ❌ (REGRESSION)
+  - **Error**: Timeout waiting for delete button
+  - **First Failed**: This commit (abc123de)
+  - **Likely Cause**: Recent code change in this commit
+
+  **Investigation**:
+  ```bash
+  # What changed between runs?
+  git diff xyz789fg abc123de -- packages/frontend/src/components/ExpenseList.svelte
+  ```
+
+  #### 2. CurrencySelector › should switch currencies [webkit]
+  - **Status**: ✅ → ❌ (REGRESSION)
+  - **Error**: Expected USD, got EUR
+  - **First Failed**: This commit (abc123de)
+  - **Likely Cause**: State management change
+
+  **Investigation**:
+  ```bash
+  # Check for currency-related changes
+  git diff xyz789fg abc123de -- packages/frontend/src/components/CurrencySelector.svelte
+  ```
+
+  ---
+
+  ### ✅ Fixed Tests (1 test)
+
+  Tests that were **failing** in previous run, now **passing**:
+
+  #### 1. Onboarding › should complete flow [chromium]
+  - **Status**: ❌ → ✅ (FIXED!)
+  - **Was Failing For**: 2 commits (fixed in this run)
+  - **Fix Commit**: abc123de
+  - **Congratulations!** 🎉
+
+  **What Fixed It?**:
+  ```bash
+  # Review changes that fixed the issue
+  git show abc123de -- packages/frontend/src/components/Onboarding.svelte
+  ```
+
+  ---
+
+  ### ❌ Still Failing (2 tests)
+
+  Tests that **continue to fail** (failing in both runs):
+
+  #### 1. ExpenseTracker › should add expense with Enter key [chromium]
+  - **Status**: ❌ → ❌ (CHRONIC)
+  - **Failing For**: 3 days (15 commits)
+  - **Failure Rate**: 80% (recent)
+  - **Priority**: 🔴 HIGH (long-standing issue)
+
+  #### 2. Visual: Currency dropdown [webkit]
+  - **Status**: ❌ → ❌ (CHRONIC)
+  - **Failing For**: 1 day (5 commits)
+  - **Failure Rate**: 40% (may be flaky)
+  - **Priority**: 🟡 MEDIUM
+
+  ---
+
+  ### 📈 Trend Analysis
+
+  **Recent History** (last 5 runs):
+  ```
+  5 runs ago:  2 failures
+  4 runs ago:  2 failures
+  3 runs ago:  2 failures
+  2 runs ago:  2 failures
+  1 run ago:   2 failures ← Previous
+  Current:     4 failures ← Current (WORSE)
+  ```
+
+  **Observation**: Failure count doubled in this run (2 → 4).
+  This indicates **recent regressions** introduced in commit abc123de.
+
+  ---
+
+  ### 🎯 Action Items
+
+  **Immediate (Fix Today)**:
+  1. 🔴 Investigate new failures (ExpenseTracker delete, CurrencySelector switch)
+  2. 🔴 Review commit abc123de for breaking changes
+  3. 🟡 Consider reverting abc123de if regressions are severe
+
+  **Short-term (This Week)**:
+  1. 🔴 Fix chronic ExpenseTracker failure (failing 3 days)
+  2. 🟡 Monitor CurrencySelector visual test (may be flaky)
+
+  **Celebrate**:
+  1. ✅ Onboarding flow fixed! (was failing for 2 commits)
+
+  ---
+
+  ### 📋 Comparison Commands
+
+  ```bash
+  # Compare full test output
+  git notes --ref=ci/e2e-failures show HEAD > current.txt
+  git notes --ref=ci/e2e-failures show HEAD~1 > previous.txt
+  diff previous.txt current.txt
+
+  # Find what code changed
+  git diff HEAD~1 HEAD -- packages/frontend/src/
+
+  # View commit message
+  git show --no-patch HEAD
+  ```
+  ```
+
+  **Key Insights:**
+
+  - **New failures = regressions**: Immediate attention needed (broke recently)
+  - **Fixed tests = wins**: Celebrate and learn what worked
+  - **Still failing = chronic**: Need systematic fix, not just quick patches
+  - **Trend direction matters**: One bad run vs consistent degradation
+  - **Delta analysis**: +2 failures in one commit → investigate that commit
+
 examples:
   timeout_failure:
     scenario: "Test times out waiting for button"
