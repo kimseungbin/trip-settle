@@ -188,6 +188,46 @@ npm run dev --workspace=backend
 npm run dev --workspace=frontend
 ```
 
+### Backend Run Modes
+
+The backend supports two distinct run modes optimized for different contexts:
+
+#### Development Mode (Watch)
+
+**Command**: `npm run dev --workspace=backend`
+
+**What it does**: TypeScript compilation in watch mode with hot reload. Code changes automatically trigger recompilation and restart.
+
+**When to use**:
+- Local native development
+- Docker Compose local development (`docker-compose up`)
+- Interactive debugging sessions
+
+**Why**: Fast iteration during active development. No need to manually rebuild after each change.
+
+#### Production Mode (Build Once)
+
+**Commands**:
+```bash
+npm run build --workspace=backend
+npm run start --workspace=backend
+```
+
+**What it does**: Builds TypeScript once to JavaScript, then runs the compiled code. No file watching.
+
+**When to use**:
+- CI/CD E2E tests (GitHub Actions)
+- Production deployments (ECS, Lambda, Fargate)
+- Docker E2E test environments
+
+**Why**: Faster startup time, more stable for automated tests, no unnecessary file watching overhead in production.
+
+#### Choosing the Right Mode
+
+**For E2E Docker configurations** (`docker-compose.e2e.yml`, `Dockerfile`):
+- **Local Docker E2E**: Use development mode for faster iteration when code changes need to be reflected immediately
+- **CI E2E**: Use production mode for faster startup and stability in automated testing
+
 ### Database Setup
 
 **Development**: No setup required! Uses `pg-mem` for in-memory PostgreSQL.
