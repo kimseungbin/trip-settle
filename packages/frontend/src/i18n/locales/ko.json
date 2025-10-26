@@ -27,6 +27,8 @@
 			"title": "다중 통화",
 			"description": "이런 경우 추천:\n• 항공/숙박을 다른 통화로 예약\n• 여러 나라 여행\n• 예시: 한국→일본 여행 (항공권 KRW + 호텔/현지경비 JPY)"
 		},
+		"showMore": "더보기",
+		"showLess": "접기",
 		"keyboardHint": {
 			"icon": "⌨️",
 			"navigate": "{tab}으로 이동하고 {enter}로 선택하세요",

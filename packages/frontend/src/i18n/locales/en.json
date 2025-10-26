@@ -27,6 +27,8 @@
 			"title": "Multiple Currencies",
 			"description": "Best for:\n• Booking flights/hotels in different currencies\n• Multi-country trips\n• Example: Korea → Japan trip (Flights in KRW + Hotels/expenses in JPY)"
 		},
+		"showMore": "Show more",
+		"showLess": "Show less",
 		"keyboardHint": {
 			"icon": "⌨️",
 			"navigate": "Use {tab} to navigate and {enter} to select",
