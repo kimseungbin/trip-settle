@@ -3,6 +3,7 @@
 	import PayerSelector from './PayerSelector.svelte'
 	import { DEFAULT_CURRENCY } from '../data/currencies'
 	import { settings } from '../stores/settings.svelte'
+	import { loadLastPayer, saveLastPayer } from '../lib/lastPayer'
 	import { onMount } from 'svelte'
 	import { t } from 'svelte-i18n'
 
@@ -40,6 +41,11 @@
 
 		onAdd(expenseName.trim(), amount, selectedCurrency, showPayerSelector ? selectedPayer : undefined)
 
+		// Save the last selected payer to local storage for next time
+		if (showPayerSelector && selectedPayer) {
+			saveLastPayer(selectedPayer)
+		}
+
 		// Trigger mouse submit callback if this was a mouse click
 		if (isMouseClick && onMouseSubmit) {
 			onMouseSubmit()
@@ -47,7 +53,7 @@
 
 		expenseName = ''
 		expenseAmount = ''
-		selectedPayer = ''
+		// Keep the payer selection for the next expense (don't reset it)
 		nameInput?.focus()
 		isMouseClick = false
 	}
@@ -71,9 +77,19 @@
 
 	/**
 	 * Focus the name input on mount for keyboard accessibility
+	 * Load the last selected payer from local storage
 	 */
 	onMount(() => {
 		nameInput?.focus()
+
+		// Load last selected payer if in multi-payer mode
+		if (showPayerSelector) {
+			const lastPayer = loadLastPayer()
+			// Only set if the payer still exists in the current payer list
+			if (lastPayer && settings.payers.includes(lastPayer)) {
+				selectedPayer = lastPayer
+			}
+		}
 	})
 </script>
 
