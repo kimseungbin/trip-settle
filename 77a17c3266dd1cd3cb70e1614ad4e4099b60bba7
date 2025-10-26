@@ -1,0 +1,689 @@
+=== E2E TEST FAILURE REPORT ===
+
+[metadata]
+timestamp = 2025-10-26T03:45:01.227Z
+commit = 77a17c3
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18812442487
+total_tests = 0
+passed = 0
+failed = 0
+skipped = 0
+pass_rate = 0.0%
+duration_sec = 0
+
+[summary]
+status = PASSED
+new_failures = 60
+timeout_failures = 10
+visual_failures = 0
+assertion_failures = 0
+navigation_failures = 0
+setup_failures = 0
+
+[failure.1]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › homepage should not have accessibility violations
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.2]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › expense form should not have accessibility violations
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.3]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › expense list should not have accessibility violations
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.4]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › form inputs have accessible labels
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.5]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › buttons have accessible names
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.6]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › color contrast meets WCAG AA standards
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.7]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › page has proper heading structure
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.8]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › interactive elements are keyboard accessible
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.9]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › focus order is logical
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.10]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › no ARIA violations
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.11]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › images have alt text (if any)
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.12]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › page is usable at 200% zoom
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.13]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › homepage should not have accessibility violations
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.14]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › expense form should not have accessibility violations
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.15]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › expense list should not have accessibility violations
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.16]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › form inputs have accessible labels
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.17]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › buttons have accessible names
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.18]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › color contrast meets WCAG AA standards
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.19]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › page has proper heading structure
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.20]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › interactive elements are keyboard accessible
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.21]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › focus order is logical
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.22]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › no ARIA violations
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.23]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › images have alt text (if any)
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.24]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility › page is usable at 200% zoom
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.25]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility - Screen Reader › form has appropriate semantics
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.26]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility - Screen Reader › expense list uses semantic HTML
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.27]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility - Screen Reader › dynamic content announces to screen readers
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.28]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility - Screen Reader › form has appropriate semantics
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.29]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility - Screen Reader › expense list uses semantic HTML
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.30]
+test_file = accessibility/a11y.spec.ts
+test_name = accessibility/a11y.spec.ts › Accessibility - Screen Reader › dynamic content announces to screen readers
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.31]
+test_file = e2e/keyboard-navigation.spec.ts
+test_name = e2e/keyboard-navigation.spec.ts › Keyboard Navigation › can fill form entirely with keyboard
+browser = chromium
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeFocused[2m([22m[2m)[22m failed
+duration_ms = 6631
+screenshots = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-82516-form-entirely-with-keyboard-chromium/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-82516-form-entirely-with-keyboard-chromium/video.webm
+traces = none
+
+[failure.32]
+test_file = e2e/keyboard-navigation.spec.ts
+test_name = e2e/keyboard-navigation.spec.ts › Keyboard Navigation › can fill form entirely with keyboard
+browser = webkit
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeFocused[2m([22m[2m)[22m failed
+duration_ms = 7884
+screenshots = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-82516-form-entirely-with-keyboard-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-82516-form-entirely-with-keyboard-webkit/video.webm
+traces = none
+
+[failure.33]
+test_file = e2e/onboarding.spec.ts
+test_name = e2e/onboarding.spec.ts › Onboarding Flow › should complete onboarding with single-currency mode
+browser = chromium
+error_type = timeout
+error_message = [31mTest timeout of 30000ms exceeded.[39m
+duration_ms = 30180
+screenshots = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--3ec85-g-with-single-currency-mode-chromium/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--3ec85-g-with-single-currency-mode-chromium/video.webm
+traces = none
+
+[failure.34]
+test_file = e2e/onboarding.spec.ts
+test_name = e2e/onboarding.spec.ts › Onboarding Flow › should support keyboard navigation - Enter on single-currency button
+browser = chromium
+error_type = timeout
+error_message = [31mTest timeout of 30000ms exceeded.[39m
+duration_ms = 30165
+screenshots = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--8df9e-r-on-single-currency-button-chromium/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--8df9e-r-on-single-currency-button-chromium/video.webm
+traces = none
+
+[failure.35]
+test_file = e2e/onboarding.spec.ts
+test_name = e2e/onboarding.spec.ts › Onboarding Flow › should complete onboarding with single-currency mode
+browser = webkit
+error_type = timeout
+error_message = [31mTest timeout of 30000ms exceeded.[39m
+duration_ms = 30264
+screenshots = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--3ec85-g-with-single-currency-mode-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--3ec85-g-with-single-currency-mode-webkit/video.webm
+traces = none
+
+[failure.36]
+test_file = e2e/onboarding.spec.ts
+test_name = e2e/onboarding.spec.ts › Onboarding Flow › should support keyboard navigation - Enter on single-currency button
+browser = webkit
+error_type = timeout
+error_message = [31mTest timeout of 30000ms exceeded.[39m
+duration_ms = 30253
+screenshots = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--8df9e-r-on-single-currency-button-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-onboarding-Onboarding--8df9e-r-on-single-currency-button-webkit/video.webm
+traces = none
+
+[failure.37]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › initial empty state
+browser = chromium
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveScreenshot[2m([22m[32mexpected[39m[2m)[22m failed
+duration_ms = 4581
+screenshots = /app/packages/frontend/tests/visual/ui-snapshots.spec.ts-snapshots/empty-state-chromium-linux.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-chromium/empty-state-actual.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-chromium/empty-state-diff.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-chromium/test-failed-1.png
+videos = /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-chromium/video.webm
+traces = none
+
+[failure.38]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › expense form UI
+browser = chromium
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveScreenshot[2m([22m[32mexpected[39m[2m)[22m failed
+duration_ms = 2263
+screenshots = /app/packages/frontend/tests/visual/ui-snapshots.spec.ts-snapshots/expense-form-chromium-linux.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-expense-form-UI-chromium/expense-form-actual.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-expense-form-UI-chromium/expense-form-diff.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-expense-form-UI-chromium/test-failed-1.png
+videos = /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-expense-form-UI-chromium/video.webm
+traces = none
+
+[failure.39]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › expense list with multiple items
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.40]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › total calculation display
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.41]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › expense list item hover state
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.42]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › remove button visibility
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.43]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › initial empty state
+browser = webkit
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveScreenshot[2m([22m[32mexpected[39m[2m)[22m failed
+duration_ms = 5785
+screenshots = /app/packages/frontend/tests/visual/ui-snapshots.spec.ts-snapshots/empty-state-webkit-linux.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/empty-state-actual.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/empty-state-diff.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/video.webm
+traces = none
+
+[failure.44]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › expense form UI
+browser = webkit
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveScreenshot[2m([22m[32mexpected[39m[2m)[22m failed
+duration_ms = 2700
+screenshots = /app/packages/frontend/tests/visual/ui-snapshots.spec.ts-snapshots/expense-form-webkit-linux.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-expense-form-UI-webkit/expense-form-actual.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-expense-form-UI-webkit/expense-form-diff.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-expense-form-UI-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-expense-form-UI-webkit/video.webm
+traces = none
+
+[failure.45]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › expense list with multiple items
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.46]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › total calculation display
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.47]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › expense list item hover state
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.48]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › remove button visibility
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.49]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Mobile › mobile empty state
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.50]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Mobile › mobile expense form
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.51]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Mobile › mobile expense list
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.52]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Mobile › mobile empty state
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.53]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Mobile › mobile expense form
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.54]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Mobile › mobile expense list
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.55]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Responsive Breakpoints › responsive layout - mobile
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.56]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Responsive Breakpoints › responsive layout - tablet
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.57]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Responsive Breakpoints › responsive layout - desktop
+browser = chromium
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.58]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Responsive Breakpoints › responsive layout - mobile
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.59]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Responsive Breakpoints › responsive layout - tablet
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[failure.60]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression - Responsive Breakpoints › responsive layout - desktop
+browser = webkit
+error_type = unknown
+error_message = No error message
+duration_ms = 0
+screenshots = none
+videos = none
+traces = none
+
+[diagnostics]
+playwright_version = 1.56.1
+test_env = unknown
+workers = 4
+reporter_output = packages/frontend/test-results/results.json
+artifacts_uploaded = yes (GitHub Actions)
