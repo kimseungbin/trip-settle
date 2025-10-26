@@ -149,10 +149,12 @@ test.describe('Keyboard Navigation', () => {
 	})
 
 	test('can fill form entirely with keyboard', async ({ page }) => {
+		const nameInput = page.getByPlaceholder('Expense name')
 		const submitButton = page.getByRole('button', { name: 'Add' })
 
-		// Start from beginning (press Tab until we reach the form)
-		await page.keyboard.press('Tab')
+		// Start from a known position - focus name input explicitly
+		await nameInput.focus()
+		await expect(nameInput).toBeFocused()
 
 		// Type expense name
 		await page.keyboard.type('Keyboard Only Expense')

@@ -150,7 +150,7 @@
 
 			<div class="currency-selector-wrapper">
 				<label for="default-currency">Default Currency:</label>
-				<CurrencySelector bind:value={defaultCurrency} autofocus={true} initialOpen={true} />
+				<CurrencySelector bind:value={defaultCurrency} autofocus={true} />
 			</div>
 
 			<div class="actions">
