@@ -123,5 +123,33 @@
 		"resetPreferencesButton": "Reset System Preferences",
 		"confirmResetAll": "Reset onboarding? This will clear all settings and redirect to onboarding screen.",
 		"confirmResetPreferences": "Reset system preferences only? Feature settings will be preserved."
+	},
+	"settings": {
+		"title": "Settings",
+		"tagline": "Manage your app preferences",
+		"backButton": "Back",
+		"currentSettings": "Current Settings",
+		"editSettings": "Edit Settings",
+		"currencyMode": {
+			"label": "Currency Mode",
+			"single": "Single Currency",
+			"multi": "Multiple Currencies",
+			"singleDesc": "All expenses in one currency (simpler)",
+			"multiDesc": "Track expenses in different currencies"
+		},
+		"defaultCurrency": {
+			"label": "Default Currency"
+		},
+		"language": {
+			"label": "Language",
+			"english": "English",
+			"korean": "Korean"
+		},
+		"languageSection": "Language",
+		"editButton": "Change Settings",
+		"saveButton": "Save Changes",
+		"cancelButton": "Cancel",
+		"info": "Changing currency mode or default currency will reset your app. Make sure to save your expense data first.",
+		"warning": "⚠️ Warning: Saving will reset the app with new settings. Any unsaved expenses will be lost."
 	}
 }
