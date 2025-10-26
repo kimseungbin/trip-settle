@@ -23,6 +23,7 @@
 	let expenseAmount = $state('')
 	let selectedCurrency = $state(settings.currencyMode === 'single' ? settings.defaultCurrency : DEFAULT_CURRENCY)
 	let selectedPayer = $state('')
+	let payerSelect = $state<HTMLSelectElement | undefined>(undefined)
 	let nameInput = $state<HTMLInputElement | undefined>(undefined)
 	let submitButton = $state<HTMLButtonElement | undefined>(undefined)
 	let isMouseClick = $state(false)
@@ -76,12 +77,10 @@
 	}
 
 	/**
-	 * Focus the name input on mount for keyboard accessibility
+	 * Focus the appropriate input on mount for keyboard accessibility
 	 * Load the last selected payer from local storage
 	 */
 	onMount(() => {
-		nameInput?.focus()
-
 		// Load last selected payer if in multi-payer mode
 		if (showPayerSelector) {
 			const lastPayer = loadLastPayer()
@@ -89,6 +88,16 @@
 			if (lastPayer && settings.payers.includes(lastPayer)) {
 				selectedPayer = lastPayer
 			}
+
+			// Focus payer selector if no payer is selected, otherwise focus name input
+			if (!selectedPayer) {
+				payerSelect?.focus()
+			} else {
+				nameInput?.focus()
+			}
+		} else {
+			// In single-payer mode, focus name input directly
+			nameInput?.focus()
 		}
 	})
 </script>
@@ -103,7 +112,7 @@
 		onkeydown={handleKeydown}
 	>
 		{#if showPayerSelector}
-			<PayerSelector bind:value={selectedPayer} payers={settings.payers} />
+			<PayerSelector bind:value={selectedPayer} bind:selectRef={payerSelect} payers={settings.payers} />
 		{/if}
 		<input
 			type="text"

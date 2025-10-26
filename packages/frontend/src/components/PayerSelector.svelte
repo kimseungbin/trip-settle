@@ -1,8 +1,12 @@
 <script lang="ts">
-	let { value = $bindable(''), payers }: { value: string; payers: string[] } = $props()
+	let {
+		value = $bindable(''),
+		payers,
+		selectRef = $bindable(undefined),
+	}: { value: string; payers: string[]; selectRef?: HTMLSelectElement } = $props()
 </script>
 
-<select bind:value>
+<select bind:value bind:this={selectRef}>
 	<option value="" disabled>Select payer</option>
 	{#each payers as payer}
 		<option value={payer}>{payer}</option>
