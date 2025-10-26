@@ -80,6 +80,8 @@ This file includes:
 - **Artifact Links**: Direct paths to screenshots, videos, traces
 - **Fix Recommendations**: Actionable debugging steps based on error type
 - **Browser-Specific Detection**: Identify if failures are browser-specific
+- **Flaky Test Detection** (Phase 3): Identify unreliable tests with intermittent failures
+- **Historical Analysis** (Phase 3): Track test reliability across commits
 
 ## Notes
 

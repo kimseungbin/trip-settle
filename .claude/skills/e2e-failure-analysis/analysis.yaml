@@ -314,6 +314,134 @@ instructions: |
   **Action**: Test specifically in {browser} locally to debug.
   ```
 
+  ## Step 9: Advanced Analysis (Phase 3 Features)
+
+  **NEW in Phase 3**: Analyze historical patterns across commits using git notes.
+
+  ### Feature 1: Flaky Test Detection
+
+  Identify tests that intermittently fail without code changes (unreliable tests).
+
+  **Workflow:**
+
+  ```bash
+  # Step 1: Fetch git notes for last 20 commits
+  git fetch origin refs/notes/ci/e2e-failures:refs/notes/ci/e2e-failures
+
+  # Step 2: Get list of recent commits with E2E notes
+  git log --oneline -20 --format="%H" | while read commit; do
+    if git notes --ref=ci/e2e-failures show "$commit" >/dev/null 2>&1; then
+      echo "$commit"
+    fi
+  done
+
+  # Step 3: For each commit, extract test pass/fail status
+  # Parse [metadata] section for total_tests, passed, failed
+  # Parse [failure.N] sections to get failed test names
+
+  # Step 4: Build pass/fail history for each unique test
+  # Example: "ExpenseTracker › should add expense with Enter key"
+  #   Commit 1: ✅ (not in failures)
+  #   Commit 2: ❌ (in [failure.1])
+  #   Commit 3: ✅ (not in failures)
+  #   Commit 4: ❌ (in [failure.2])
+  #   ...
+
+  # Step 5: Calculate flakiness metrics
+  # Flip rate = (number of status changes) / (total runs - 1)
+  # Example: ✅ ❌ ✅ ❌ ✅ = 4 flips / 4 transitions = 100% flip rate
+
+  # Step 6: Identify flaky tests (flip rate > 30%)
+  ```
+
+  **Simplified Commands for Claude:**
+
+  ```bash
+  # Get last 10 commits with E2E notes
+  git log --oneline -20 | while read hash rest; do
+    git notes --ref=ci/e2e-failures show "$hash" 2>/dev/null && echo "---COMMIT: $hash---"
+  done
+
+  # Extract all test names from a note
+  git notes --ref=ci/e2e-failures show <commit> | grep "^test_name" | cut -d'=' -f2 | xargs
+
+  # Check if specific test failed in a commit
+  git notes --ref=ci/e2e-failures show <commit> | grep -q "test_name = ExpenseTracker › should add expense"
+  echo $?  # 0 = failed, 1 = passed
+  ```
+
+  **Flakiness Thresholds:**
+  - **> 50% flip rate** → Highly flaky (critical issue)
+  - **30-50% flip rate** → Moderately flaky (needs attention)
+  - **10-30% flip rate** → Slightly flaky (monitor)
+  - **< 10% flip rate** → Stable (acceptable variance)
+
+  **Detection Algorithm:**
+
+  ```
+  For each unique test found in git notes:
+
+  1. Build history across last N commits:
+     Test: "ExpenseTracker › should add expense"
+     History: ✅ ❌ ✅ ✅ ❌ ✅ ❌ ✅ ✅ ❌
+
+  2. Count transitions (pass→fail or fail→pass):
+     ✅→❌ (1), ❌→✅ (2), ✅→❌ (3), ❌→✅ (4), ✅→❌ (5)
+     Flips: 5
+
+  3. Calculate flip rate:
+     Flip rate = 5 flips / 9 transitions = 55.6%
+
+  4. Classify:
+     55.6% > 50% → HIGHLY FLAKY
+  ```
+
+  **Report Format:**
+
+  ```markdown
+  ## Flaky Tests Detected ⚠️
+
+  ### 1. ExpenseTracker › should add expense with Enter key [chromium]
+  **Flakiness**: 55.6% (5 flips in 10 runs)
+  **Pattern**: ✅ ❌ ✅ ✅ ❌ ✅ ❌ ✅ ✅ ❌
+  **First flaky**: 3 days ago (commit abc123)
+  **Severity**: 🔴 CRITICAL (>50%)
+
+  **Common Error When Failing**: Timeout waiting for button
+
+  **Recommendations**:
+  - Review timeout handling in test
+  - Check for race conditions in button rendering
+  - Add explicit waits for button visibility
+  - Consider increasing timeout or adding retry logic
+
+  **Fix Priority**: HIGH - Blocks CI reliability
+
+  ---
+
+  ### 2. CurrencySelector › Visual snapshot [webkit]
+  **Flakiness**: 33.3% (3 flips in 10 runs)
+  **Pattern**: ✅ ✅ ❌ ✅ ❌ ✅ ❌ ✅ ✅ ✅
+  **First flaky**: 5 days ago (commit def456)
+  **Severity**: 🟡 MODERATE (30-50%)
+
+  **Common Error When Failing**: Visual snapshot pixels differ
+
+  **Recommendations**:
+  - May be environmental (font rendering, OS differences)
+  - Visual tests should only run in consistent CI environment
+  - Check if snapshots are Linux-based (CI snapshots only)
+
+  **Fix Priority**: MEDIUM - Monitor for degradation
+  ```
+
+  **Key Insights:**
+
+  - **Flaky tests are different from bugs**: Bugs fail consistently, flaky tests fail intermittently
+  - **Flakiness indicates test quality issues**: Timing, race conditions, dependencies
+  - **High flip rate = urgent**: Tests with >50% flip rate destroy CI trust
+  - **Track over time**: New flakiness might indicate environmental changes
+
 examples:
   timeout_failure:
     scenario: "Test times out waiting for button"

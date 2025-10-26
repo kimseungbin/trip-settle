@@ -1,0 +1,166 @@
+Example: Flaky Test Detection
+
+=== FLAKY TEST ANALYSIS ===
+
+Analysis Period: Last 10 commits (2025-10-20 to 2025-10-26)
+Total Commits Analyzed: 10
+Total Unique Tests: 42
+
+## Flaky Tests Detected: 2
+
+---
+
+### 1. ExpenseTracker › should add expense with Enter key [chromium]
+
+**Flakiness Metrics:**
+- Flip Rate: 55.6% (5 status changes in 9 transitions)
+- Runs: 10 total (5 passed, 5 failed)
+- Severity: 🔴 CRITICAL (>50% flip rate)
+
+**Pass/Fail History:**
+```
+Commit   Status  Age     Error (when failed)
+abc123   ✅      1h ago  -
+def456   ❌      3h ago  Timeout 5000ms exceeded waiting for button
+ghi789   ✅      5h ago  -
+jkl012   ✅      8h ago  -
+mno345   ❌      12h ago Timeout 5000ms exceeded waiting for button
+pqr678   ✅      1d ago  -
+stu901   ❌      1d ago  Timeout 5000ms exceeded waiting for button
+vwx234   ✅      2d ago  -
+yza567   ✅      2d ago  -
+bcd890   ❌      3d ago  Timeout 5000ms exceeded waiting for button
+```
+
+**Pattern**: ✅ ❌ ✅ ✅ ❌ ✅ ❌ ✅ ✅ ❌
+
+**First Flaky Occurrence**: 3 days ago (commit bcd890)
+
+**Common Error Pattern**:
+- Error Type: Timeout
+- Error Message: "Timeout 5000ms exceeded waiting for getByRole('button', { name: 'Add' })"
+- Browser: chromium
+- Test File: tests/e2e/expense-workflow.spec.ts
+
+**Root Cause Analysis**:
+This test exhibits classic race condition symptoms:
+- Fails intermittently without code changes
+- Always same error (timeout waiting for button)
+- Suggests button rendering is timing-dependent
+
+**Recommendations**:
+1. **Immediate**: Add explicit wait for button visibility before interaction
+   ```typescript
+   // Current (flaky):
+   await page.getByRole('button', { name: 'Add' }).click()
+
+   // Fixed (stable):
+   await page.waitForSelector('button:has-text("Add")', { state: 'visible' })
+   await page.getByRole('button', { name: 'Add' }).click()
+   ```
+
+2. **Review**: Check ExpenseForm component for conditional button rendering
+   ```bash
+   git diff bcd890~1 bcd890 -- packages/frontend/src/components/ExpenseForm.svelte
+   ```
+
+3. **Monitor**: If flip rate increases (>70%), disable test until fixed
+
+4. **Long-term**: Add retry logic with exponential backoff for this test
+
+**Fix Priority**: 🔴 HIGH - Destroys CI reliability, blocks merges
+
+---
+
+### 2. CurrencySelector › Visual: Currency dropdown [webkit]
+
+**Flakiness Metrics:**
+- Flip Rate: 33.3% (3 status changes in 9 transitions)
+- Runs: 10 total (7 passed, 3 failed)
+- Severity: 🟡 MODERATE (30-50% flip rate)
+
+**Pass/Fail History:**
+```
+Commit   Status  Age     Error (when failed)
+abc123   ✅      1h ago  -
+def456   ✅      3h ago  -
+ghi789   ❌      5h ago  127 pixels differ from expected
+jkl012   ✅      8h ago  -
+mno345   ❌      12h ago 143 pixels differ from expected
+pqr678   ✅      1d ago  -
+stu901   ❌      1d ago  156 pixels differ from expected
+vwx234   ✅      2d ago  -
+yza567   ✅      2d ago  -
+bcd890   ✅      3d ago  -
+```
+
+**Pattern**: ✅ ✅ ❌ ✅ ❌ ✅ ❌ ✅ ✅ ✅
+
+**First Flaky Occurrence**: 1 day ago (commit stu901)
+
+**Common Error Pattern**:
+- Error Type: Visual regression
+- Error Message: "Screenshot comparison failed: 127-156 pixels differ"
+- Browser: webkit (Safari)
+- Test File: tests/visual/currency-selector.spec.ts
+
+**Root Cause Analysis**:
+Visual snapshots are inherently flaky due to:
+- Font rendering differences (subpixel antialiasing)
+- Timing of snapshot capture (animations mid-flight)
+- OS/environment differences (macOS vs Linux)
+
+**Recommendations**:
+1. **Verify**: Ensure visual tests ONLY run in CI (Linux environment)
+   ```typescript
+   // In playwright.config.ts
+   const shouldRunVisualTests = testEnv === 'ci-docker'
+   ```
+
+2. **Check**: Confirm snapshots are Linux-based (*-linux.png)
+   ```bash
+   find tests/visual -name "*-darwin.png"  # Should be empty
+   find tests/visual -name "*-linux.png"   # Should exist
+   ```
+
+3. **Review**: Check if animations are disabled during snapshot
+   ```typescript
+   await page.emulateMedia({ reducedMotion: 'reduce' })
+   ```
+
+4. **Consider**: Increase visual diff threshold if minor rendering differences acceptable
+   ```typescript
+   await expect(page).toHaveScreenshot({ maxDiffPixels: 200 })
+   ```
+
+**Fix Priority**: 🟡 MEDIUM - Monitor for increasing flip rate
+
+---
+
+## Summary
+
+**Critical Issues**: 1 test (requires immediate attention)
+**Moderate Issues**: 1 test (monitor closely)
+**Stable Tests**: 40 tests (no flakiness detected)
+
+**Overall Test Suite Health**: 🟡 FAIR
+- 95.2% of tests are stable (40/42)
+- 1 critical flaky test blocking CI reliability
+- Recommend fixing critical issue within 24 hours
+
+**Historical Trend**:
+- New flaky tests this week: 2
+- Resolved flaky tests: 0
+- Trend: ⚠️ DEGRADING (flakiness increasing)
+
+**Next Steps**:
+1. Fix critical flaky test (ExpenseTracker › should add expense)
+2. Monitor moderate flaky test (CurrencySelector visual)
+3. Re-run flaky detection in 2-3 days to verify fixes
+4. Consider adding flakiness budget (max 5% flip rate allowed)
+
+**Detection Metadata**:
+- Analysis run: 2025-10-26 14:30:00 UTC
+- Commits analyzed: 10 (abc123 to bcd890)
+- Time range: 3 days
+- Detection algorithm: Flip rate calculation with 30% threshold

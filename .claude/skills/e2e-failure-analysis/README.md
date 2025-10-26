@@ -87,13 +87,51 @@ git notes --ref=ci/e2e-failures show HEAD
 - `.github/scripts/extract-e2e-failures.js` - Parses JSON results
 - Git notes pushed to `refs/notes/ci/e2e-failures` namespace
 
-### Phase 3: Advanced Features (Future)
+### Phase 3: Advanced Features (In Progress)
 
-**Potential Additions:**
-- Flaky test detection (pass/fail patterns)
+**Feature 1: Flaky Test Detection (ACTIVE)**
+
+Identify tests that intermittently fail without code changes.
+
+**What it detects:**
+- Tests with inconsistent pass/fail patterns
+- Flip rate calculation (percentage of status changes)
+- Severity classification (critical >50%, moderate 30-50%, slight 10-30%)
+- First flaky occurrence (commit and timestamp)
+
+**How it works:**
+```bash
+# Analyze last 10-20 commits with E2E notes
+git notes --ref=ci/e2e-failures show <each-commit>
+
+# Build pass/fail history for each test
+Test A: ✅ ✅ ✅ ✅ ✅  → STABLE (always passes)
+Test B: ❌ ❌ ❌ ❌ ❌  → STABLE (always fails, real bug)
+Test C: ✅ ❌ ✅ ❌ ✅  → FLAKY (55% flip rate, critical)
+
+# Report flaky tests with recommendations
+```
+
+**Example output:**
+```markdown
+## Flaky Tests Detected ⚠️
+
+### 1. ExpenseTracker › should add expense [chromium]
+**Flakiness**: 55.6% (5 flips in 10 runs)
+**Pattern**: ✅ ❌ ✅ ✅ ❌ ✅ ❌ ✅ ✅ ❌
+**Severity**: 🔴 CRITICAL
+
+**Recommendations**:
+- Review timeout handling
+- Check for race conditions
+- Add explicit waits for button visibility
+```
+
+**Remaining Features:**
 - Failure trend analysis (degradation over time)
-- Automated pattern recognition
-- Integration with existing CI failure reports
+- Blame integration (find commit that introduced failure)
+- Comparison reports (show failures different from last run)
+- Automatic regression detection (newly failing tests)
 
 ## Example Output
 
