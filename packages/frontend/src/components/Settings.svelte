@@ -209,26 +209,26 @@
 	.back-button {
 		background: none;
 		border: none;
-		color: #666;
+		color: var(--color-text-secondary);
 		font-size: 1rem;
 		cursor: pointer;
 		padding: 0.5rem 1rem;
 		margin-bottom: 1rem;
-		transition: color 0.2s;
+		transition: color var(--transition-fast);
 	}
 
 	.back-button:hover {
-		color: #ff3e00;
+		color: var(--color-primary);
 	}
 
 	.back-button:focus {
-		outline: 2px solid #ff3e00;
+		outline: 2px solid var(--color-focus-ring);
 		outline-offset: 2px;
 		border-radius: 4px;
 	}
 
 	h1 {
-		color: #ff3e00;
+		color: var(--color-primary);
 		font-size: 2.5rem;
 		margin-bottom: 0.5rem;
 		font-weight: 700;
@@ -236,27 +236,27 @@
 
 	.tagline {
 		font-size: 1.2rem;
-		color: #666;
+		color: var(--color-text-secondary);
 		margin: 0;
 	}
 
 	.settings-section {
-		background: white;
+		background: var(--color-surface);
 		border-radius: 12px;
 		padding: 2rem;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		box-shadow: var(--shadow-md);
 		margin-bottom: 2rem;
 	}
 
 	h2 {
-		color: #333;
+		color: var(--color-text);
 		font-size: 1.5rem;
 		margin: 0 0 1.5rem;
 		font-weight: 600;
 	}
 
 	h3 {
-		color: #555;
+		color: var(--color-text-secondary);
 		font-size: 1.2rem;
 		margin: 1.5rem 0 1rem;
 		font-weight: 600;
@@ -267,24 +267,24 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 1rem;
-		background: #f9f9f9;
+		background: var(--color-surface-1);
 		border-radius: 8px;
 		margin-bottom: 1rem;
-		border-left: 4px solid #ff3e00;
+		border-left: 4px solid var(--color-primary);
 	}
 
 	.setting-label {
 		font-weight: 600;
-		color: #555;
+		color: var(--color-text-secondary);
 	}
 
 	.setting-value {
 		font-family: 'Courier New', monospace;
-		color: #333;
-		background: white;
+		color: var(--color-text);
+		background: var(--color-surface);
 		padding: 0.5rem 1rem;
 		border-radius: 6px;
-		border: 1px solid #e0e0e0;
+		border: 1px solid var(--color-border);
 	}
 
 	.mode-selection {
@@ -298,31 +298,33 @@
 	}
 
 	.mode-option {
-		background: white;
-		border: 2px solid #e0e0e0;
+		background: var(--color-surface);
+		border: 2px solid var(--color-border);
 		border-radius: 12px;
 		padding: 1.5rem;
 		cursor: pointer;
-		transition: all 0.3s;
+		transition:
+			all var(--transition-normal),
+			transform var(--transition-fast);
 		text-align: center;
 	}
 
 	.mode-option:hover {
-		border-color: #ff3e00;
+		border-color: var(--color-primary);
 		transform: translateY(-4px);
-		box-shadow: 0 8px 16px rgba(255, 62, 0, 0.2);
+		box-shadow: var(--shadow-lg);
 	}
 
 	.mode-option.selected {
-		border-color: #ff3e00;
-		background: #fff5f2;
-		box-shadow: 0 4px 12px rgba(255, 62, 0, 0.3);
+		border-color: var(--color-primary);
+		background: var(--color-primary-light);
+		box-shadow: var(--shadow-lg);
 	}
 
 	.mode-option:focus {
 		outline: none;
-		border-color: #ff3e00;
-		box-shadow: 0 0 0 3px rgba(255, 62, 0, 0.2);
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 3px var(--color-primary-alpha-20);
 	}
 
 	.mode-icon {
@@ -333,13 +335,13 @@
 	.mode-title {
 		font-size: 1.2rem;
 		font-weight: 600;
-		color: #333;
+		color: var(--color-text);
 		margin-bottom: 0.5rem;
 	}
 
 	.mode-description {
 		font-size: 0.95rem;
-		color: #666;
+		color: var(--color-text-secondary);
 		margin: 0;
 		line-height: 1.4;
 	}
@@ -357,27 +359,30 @@
 	.language-button {
 		padding: 0.75rem 2rem;
 		font-size: 1.1rem;
-		border: 2px solid #e0e0e0;
-		background: white;
+		border: 2px solid var(--color-border);
+		background: var(--color-surface);
+		color: var(--color-text);
 		border-radius: 8px;
 		cursor: pointer;
-		transition: all 0.2s;
+		transition:
+			all var(--transition-fast),
+			background-color var(--transition-fast);
 		font-weight: 500;
 	}
 
 	.language-button:hover {
-		border-color: #ff3e00;
-		background: #fff5f2;
+		border-color: var(--color-primary);
+		background: var(--color-primary-light);
 	}
 
 	.language-button.active {
-		border-color: #ff3e00;
-		background: #ff3e00;
-		color: white;
+		border-color: var(--color-primary);
+		background: var(--color-primary);
+		color: var(--color-surface);
 	}
 
 	.language-button:focus {
-		outline: 2px solid #ff3e00;
+		outline: 2px solid var(--color-focus-ring);
 		outline-offset: 2px;
 	}
 
@@ -394,39 +399,41 @@
 		border: none;
 		border-radius: 8px;
 		cursor: pointer;
-		transition: all 0.2s;
+		transition:
+			all var(--transition-fast),
+			transform var(--transition-fast);
 		font-weight: 500;
 	}
 
 	button.primary {
-		background-color: #ff3e00;
-		color: white;
+		background-color: var(--color-primary);
+		color: var(--color-surface);
 	}
 
 	button.primary:hover {
-		background-color: #e63600;
+		background-color: var(--color-primary-hover);
 		transform: translateY(-2px);
-		box-shadow: 0 4px 8px rgba(255, 62, 0, 0.3);
+		box-shadow: var(--shadow-md);
 	}
 
 	button.primary:focus {
-		outline: 2px solid #ff3e00;
+		outline: 2px solid var(--color-focus-ring);
 		outline-offset: 2px;
 	}
 
 	button.secondary {
 		background-color: transparent;
-		color: #666;
-		border: 2px solid #ccc;
+		color: var(--color-text-secondary);
+		border: 2px solid var(--color-border-dark);
 	}
 
 	button.secondary:hover {
-		background-color: #f5f5f5;
-		border-color: #999;
+		background-color: var(--color-surface-1);
+		border-color: var(--color-text-tertiary);
 	}
 
 	button.secondary:focus {
-		outline: 2px solid #666;
+		outline: 2px solid var(--color-text-secondary);
 		outline-offset: 2px;
 	}
 
@@ -441,13 +448,13 @@
 	}
 
 	.info-box {
-		background: #e3f2fd;
-		border-left: 4px solid #2196f3;
+		background: var(--color-success-light);
+		border-left: 4px solid var(--color-success);
 	}
 
 	.warning-box {
-		background: #fff3cd;
-		border-left: 4px solid #ffc107;
+		background: var(--color-warning-light);
+		border-left: 4px solid var(--color-warning);
 	}
 
 	.info-icon,
@@ -459,7 +466,7 @@
 	.info-text,
 	.warning-text {
 		margin: 0;
-		color: #555;
+		color: var(--color-text-secondary);
 		line-height: 1.6;
 		flex: 1;
 	}

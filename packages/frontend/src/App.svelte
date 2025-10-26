@@ -4,16 +4,20 @@
 	import Onboarding from './components/Onboarding.svelte'
 	import Settings from './components/Settings.svelte'
 	import DevTools from './components/DevTools.svelte'
+	import ThemeToggle from './components/ThemeToggle.svelte'
 	import { config } from './config'
 	import { initRouter, destroyRouter, getRoute, navigate } from './lib/router.svelte'
 	import { settings } from './stores/settings.svelte'
+	import { initTheme } from './stores/theme.svelte'
 	import { t } from 'svelte-i18n'
+	import './styles/theme.css'
 
 	const isLocalMode = config.environment === 'local'
 
-	// Initialize router on mount
+	// Initialize router and theme on mount
 	onMount(() => {
 		initRouter()
+		initTheme()
 
 		// Check if user has completed onboarding
 		const currentRoute = getRoute()
@@ -53,9 +57,12 @@
 					<h1>{$t('app.title')}</h1>
 					<p>{$t('app.tagline')}</p>
 				</div>
-				<button class="settings-link" onclick={() => navigate('/settings')} aria-label="Settings">
-					⚙️ {$t('settings.title')}
-				</button>
+				<div class="header-actions">
+					<ThemeToggle />
+					<button class="settings-link" onclick={() => navigate('/settings')} aria-label="Settings">
+						⚙️ {$t('settings.title')}
+					</button>
+				</div>
 			</div>
 		</div>
 
@@ -74,6 +81,8 @@
 		font-family:
 			-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
 			'Helvetica Neue', sans-serif;
+		background-color: var(--color-surface);
+		color: var(--color-text);
 	}
 
 	main {
@@ -98,8 +107,14 @@
 		flex: 1;
 	}
 
+	.header-actions {
+		display: flex;
+		gap: 1em;
+		align-items: center;
+	}
+
 	h1 {
-		color: #ff3e00;
+		color: var(--color-primary);
 		text-transform: uppercase;
 		font-size: 4em;
 		font-weight: 100;
@@ -107,27 +122,31 @@
 	}
 
 	.settings-link {
-		background: white;
-		border: 2px solid #ff3e00;
-		color: #ff3e00;
+		background: var(--color-surface);
+		border: 2px solid var(--color-primary);
+		color: var(--color-primary);
 		padding: 0.75em 1.5em;
 		border-radius: 8px;
 		font-size: 1rem;
 		font-weight: 600;
 		cursor: pointer;
-		transition: all 0.2s;
+		transition:
+			background-color var(--transition-fast),
+			color var(--transition-fast),
+			transform var(--transition-fast),
+			box-shadow var(--transition-fast);
 		white-space: nowrap;
 	}
 
 	.settings-link:hover {
-		background: #ff3e00;
-		color: white;
+		background: var(--color-primary);
+		color: var(--color-surface);
 		transform: translateY(-2px);
-		box-shadow: 0 4px 8px rgba(255, 62, 0, 0.3);
+		box-shadow: var(--shadow-md);
 	}
 
 	.settings-link:focus {
-		outline: 2px solid #ff3e00;
+		outline: 2px solid var(--color-focus-ring);
 		outline-offset: 2px;
 	}
 
@@ -146,6 +165,11 @@
 			flex-direction: column;
 			align-items: stretch;
 			gap: 1em;
+		}
+
+		.header-actions {
+			flex-direction: column;
+			width: 100%;
 		}
 
 		.settings-link {

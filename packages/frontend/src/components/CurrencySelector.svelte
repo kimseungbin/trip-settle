@@ -196,28 +196,32 @@
 		align-items: center;
 		gap: 0.25em;
 		padding: 0.6em 0.8em;
-		border: 1px solid #ddd;
+		border: 1px solid var(--color-border);
 		border-radius: 4px;
-		background: white;
+		background: var(--color-surface);
+		color: var(--color-text);
 		font-size: 1em;
 		font-weight: 600;
 		cursor: pointer;
-		transition: all 0.2s;
+		transition:
+			background-color var(--transition-fast),
+			border-color var(--transition-fast),
+			box-shadow var(--transition-fast);
 		min-width: 85px;
 	}
 
 	.currency-button:hover {
-		border-color: #ff3e00;
-		background: #fff5f3;
+		border-color: var(--color-primary);
+		background: var(--color-primary-light);
 	}
 
 	.currency-button:focus {
 		outline: none;
-		border-color: #ff3e00;
-		background: #fff5f3;
+		border-color: var(--color-primary);
+		background: var(--color-primary-light);
 		box-shadow:
-			0 0 0 3px rgba(255, 62, 0, 0.2),
-			0 4px 8px rgba(255, 62, 0, 0.3);
+			0 0 0 3px var(--color-primary-alpha-20),
+			var(--shadow-md);
 		animation: buttonFocusPulse 2s ease-in-out infinite;
 	}
 
@@ -225,13 +229,13 @@
 		0%,
 		100% {
 			box-shadow:
-				0 0 0 3px rgba(255, 62, 0, 0.2),
-				0 4px 8px rgba(255, 62, 0, 0.3);
+				0 0 0 3px var(--color-primary-alpha-20),
+				var(--shadow-md);
 		}
 		50% {
 			box-shadow:
-				0 0 0 5px rgba(255, 62, 0, 0.3),
-				0 4px 12px rgba(255, 62, 0, 0.4);
+				0 0 0 5px var(--color-primary-alpha-30),
+				var(--shadow-lg);
 		}
 	}
 
@@ -242,8 +246,8 @@
 
 	.arrow {
 		font-size: 0.7em;
-		transition: transform 0.2s;
-		color: #666;
+		transition: transform var(--transition-fast);
+		color: var(--color-text-secondary);
 	}
 
 	.arrow.open {
@@ -255,10 +259,10 @@
 		top: calc(100% + 4px);
 		left: 0;
 		right: 0;
-		background: white;
-		border: 2px solid #ff3e00;
+		background: var(--color-surface);
+		border: 2px solid var(--color-primary);
 		border-radius: 6px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		box-shadow: var(--shadow-lg);
 		z-index: 100;
 		min-width: 280px;
 		max-height: 320px;
@@ -270,25 +274,27 @@
 		width: 100%;
 		padding: 0.75em;
 		border: none;
-		border-bottom: 1px solid #e0e0e0;
+		border-bottom: 1px solid var(--color-border-light);
+		background: var(--color-surface);
+		color: var(--color-text);
 		font-size: 0.9em;
 		outline: none;
 	}
 
 	.search-input::placeholder {
-		color: #999;
+		color: var(--color-text-tertiary);
 		font-style: italic;
 	}
 
 	.section-header {
 		padding: 0.5em 0.75em;
-		background: #fff5f3;
+		background: var(--color-primary-light);
 		font-size: 0.75em;
 		font-weight: 700;
-		color: #ff3e00;
+		color: var(--color-primary);
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		border-bottom: 1px solid #ffe0d9;
+		border-bottom: 1px solid var(--color-border-light);
 	}
 
 	.currency-list {
@@ -305,40 +311,40 @@
 		gap: 0.75em;
 		padding: 0.6em 0.75em;
 		cursor: pointer;
-		transition: background 0.15s;
+		transition: background var(--transition-fast);
 	}
 
 	.currency-item:hover,
 	.currency-item.selected {
-		background: #f5f5f5;
+		background: var(--color-surface-1);
 	}
 
 	.currency-item.active {
-		background: #fff5f3;
+		background: var(--color-primary-light);
 	}
 
 	.currency-code {
 		font-weight: 700;
 		font-size: 0.9em;
-		color: #333;
+		color: var(--color-text);
 		min-width: 40px;
 	}
 
 	.currency-name {
 		flex: 1;
 		font-size: 0.85em;
-		color: #666;
+		color: var(--color-text-secondary);
 	}
 
 	.check {
-		color: #ff3e00;
+		color: var(--color-primary);
 		font-size: 0.8em;
 	}
 
 	.no-results {
 		padding: 1em;
 		text-align: center;
-		color: #999;
+		color: var(--color-text-tertiary);
 		font-style: italic;
 	}
 </style>
