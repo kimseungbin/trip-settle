@@ -474,19 +474,75 @@ For setup, verification, and troubleshooting, see `.claude/skills/git-hooks-setu
 
 ## Git Notes for CI Metadata
 
-Git notes are used to store CI/CD metadata (cache metrics, test failures) alongside commits without modifying commit history.
+Git notes are used to store CI/CD metadata (cache metrics, test failures, workflow execution data) alongside commits without modifying commit history.
 
 **Namespaces**:
 - `refs/notes/ci/cache-metrics` - Docker build cache efficiency metrics
 - `refs/notes/ci/e2e-failures` - Playwright E2E test failure metadata
 - `refs/notes/ci/snapshot-updates` - Visual snapshot update workflow execution metadata
+- `refs/notes/ci/workflow-metrics` - GitHub Actions job/step timing metrics
 
-**Helper Skill**: `.claude/skills/git-notes-helper/helper.yaml`
+**Why git notes?**
+- No external database needed (metadata stored in git)
+- Version-controlled and auditable
+- Team-wide visibility (pushed to remote)
+- Perfect for CI metadata that doesn't belong in commits
+
+### How Metadata is Captured
+
+CI workflows use a **post-job architecture** to accurately capture workflow execution status:
+
+**Problem**: Within a job, `${{ job.status }}` always evaluates to "running" during execution, making it impossible to capture the final result.
+
+**Solution**: Use a separate post-job that runs after the main job completes:
+
+```yaml
+jobs:
+  main-job:
+    outputs:
+      # Export step success flags as job outputs
+      step1_success: ${{ steps.step1.outputs.success }}
+      step2_success: ${{ steps.step2.outputs.success }}
+    steps:
+      - name: Some step
+        id: step1
+        run: |
+          # ... work
+          echo "success=true" >> $GITHUB_OUTPUT  # Only set if successful
+
+  # Post-job captures accurate final status
+  capture-metadata:
+    needs: [main-job]
+    if: always()  # Run even if main-job fails
+    steps:
+      - run: |
+          # Accurate final status from needs context
+          STATUS="${{ needs.main-job.result }}"  # success, failure, cancelled, skipped
+          STEP1="${{ needs.main-job.outputs.step1_success || 'false' }}"
+
+          # Generate metadata and push to git notes
+          # ...
+```
+
+**Key benefits**:
+- ✅ Captures accurate final status (not "running")
+- ✅ Runs even when main job fails (`if: always()`)
+- ✅ Identifies which specific step failed
+- ✅ Enables reliable workflow analytics
+
+**Examples**:
+- `.github/workflows/update-snapshots.yml` - Snapshot update workflow with metadata capture
+- `.github/workflows/ci.yml` - E2E tests with cache metrics capture
+
+### Helper Skill
+
+**Skill**: `.claude/skills/git-notes-helper/helper.yaml`
 - **Purpose**: Provides reusable git notes operations (fetch, parse, compare, historical analysis)
-- **Used by**: `docker-cache-analysis`, `e2e-failure-analysis`, `snapshot-update-analysis` skills
+- **Used by**: `docker-cache-analysis`, `e2e-failure-analysis`, `snapshot-update-analysis`, `workflow-metrics-analysis` skills
 - **Operations**: Fetch notes, show note content, parse INI fields, compare commits, historical walking
 
-**Usage**:
+### Usage
+
 ```bash
 # Fetch notes from remote (not fetched by default)
 git fetch origin refs/notes/ci/<namespace>:refs/notes/ci/<namespace>
@@ -497,12 +553,6 @@ git notes --ref=ci/<namespace> show <commit-hash>
 # List all commits with notes
 git notes --ref=ci/<namespace> list
 ```
-
-**Why git notes?**
-- No external database needed (metadata stored in git)
-- Version-controlled and auditable
-- Team-wide visibility (pushed to remote)
-- Perfect for CI metadata that doesn't belong in commits
 
 **See also**:
 - Docker cache analysis: `.claude/skills/docker-cache-analysis/`
