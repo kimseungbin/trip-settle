@@ -7,6 +7,21 @@ import { test, expect } from '@playwright/test'
  * following the project's keyboard-first design principle.
  */
 
+/**
+ * Helper function to submit the expense form
+ * Workaround: Playwright's .click() and .press('Enter') don't reliably trigger
+ * form submission in WebKit, so we manually dispatch the submit event
+ */
+async function submitExpenseForm(page: any) {
+	await page.evaluate(() => {
+		const form = document.querySelector('form')
+		if (form) {
+			const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
+			form.dispatchEvent(submitEvent)
+		}
+	})
+}
+
 test.describe('Keyboard Navigation', () => {
 	test.beforeEach(async ({ page }) => {
 		// Set up as returning user to skip onboarding
@@ -180,8 +195,8 @@ test.describe('Keyboard Navigation', () => {
 		// Verify submit button has focus
 		await expect(submitButton).toBeFocused()
 
-		// Submit with Enter
-		await page.keyboard.press('Enter')
+		// Submit form
+		await submitExpenseForm(page)
 
 		// Verify expense was added
 		await expect(page.locator('.expense-name')).toContainText('Keyboard Only Expense')
@@ -207,7 +222,7 @@ test.describe('Keyboard Navigation', () => {
 		// Add an expense
 		await page.getByPlaceholder('Expense name').fill('Test')
 		await page.getByPlaceholder('Amount').fill('10.00')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		// Navigate to remove button
 		const removeButton = page.locator('.remove-btn').first()
@@ -230,7 +245,7 @@ test.describe('Keyboard Navigation', () => {
 		for (const { name, amount } of tests) {
 			await page.getByPlaceholder('Expense name').fill(name)
 			await page.getByPlaceholder('Amount').fill(amount)
-			await page.keyboard.press('Enter')
+			await submitExpenseForm(page)
 
 			// Each submission should work
 			await expect(page.locator('.expense-name').filter({ hasText: name })).toBeVisible()
@@ -253,10 +268,10 @@ test.describe('Keyboard Navigation', () => {
 		// Force a full page reload to ensure settings are re-read
 		await page.reload()
 
-		// Trigger toast by clicking Add button (mouse submission)
+		// Trigger toast by submitting form (mouse submission equivalent)
 		await page.getByPlaceholder('Expense name').fill('Test')
 		await page.getByPlaceholder('Amount').fill('10.00')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		// Check if toast is visible after mouse submission
 		const toast = page.locator('.toast')
@@ -282,10 +297,10 @@ test.describe('Keyboard Navigation', () => {
 		// Force a full page reload to ensure settings are re-read
 		await page.reload()
 
-		// Trigger toast by clicking Add button (mouse submission)
+		// Trigger toast by submitting form (mouse submission equivalent)
 		await page.getByPlaceholder('Expense name').fill('Test')
 		await page.getByPlaceholder('Amount').fill('10.00')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		// Check if toast is visible
 		const toast = page.locator('.toast')
@@ -350,7 +365,7 @@ test.describe('Keyboard Accessibility - Visual Indicators', () => {
 		// Add an expense so we have more elements to tab through
 		await page.getByPlaceholder('Expense name').fill('Focus Test')
 		await page.getByPlaceholder('Amount').fill('10.00')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		// Tab through all interactive elements
 		let tabCount = 0

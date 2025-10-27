@@ -34,16 +34,19 @@
 	const showPayerSelector = $derived(settings.paymentMode === 'multi')
 
 	function handleSubmit() {
+		// Always read fresh from settings to avoid stale derived values
+		const needsPayer = settings.paymentMode === 'multi'
+
 		if (!expenseName.trim() || !expenseAmount) return
-		if (showPayerSelector && !selectedPayer) return
+		if (needsPayer && !selectedPayer) return
 
 		const amount = parseFloat(expenseAmount)
 		if (isNaN(amount) || amount <= 0) return
 
-		onAdd(expenseName.trim(), amount, selectedCurrency, showPayerSelector ? selectedPayer : undefined)
+		onAdd(expenseName.trim(), amount, selectedCurrency, needsPayer ? selectedPayer : undefined)
 
 		// Save the last selected payer to local storage for next time
-		if (showPayerSelector && selectedPayer) {
+		if (needsPayer && selectedPayer) {
 			saveLastPayer(selectedPayer)
 		}
 
