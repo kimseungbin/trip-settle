@@ -474,7 +474,7 @@ For setup, verification, and troubleshooting, see `.claude/skills/git-hooks-setu
 
 ## Git Notes for CI Metadata
 
-Git notes are used to store CI/CD metadata (cache metrics, test failures, workflow execution data) alongside commits without modifying commit history.
+Git notes store CI/CD metadata alongside commits without modifying commit history.
 
 **Namespaces**:
 - `refs/notes/ci/cache-metrics` - Docker build cache efficiency metrics
@@ -482,11 +482,7 @@ Git notes are used to store CI/CD metadata (cache metrics, test failures, workfl
 - `refs/notes/ci/snapshot-updates` - Visual snapshot update workflow execution metadata
 - `refs/notes/ci/workflow-metrics` - GitHub Actions job/step timing metrics
 
-**Why git notes?**
-- No external database needed (metadata stored in git)
-- Version-controlled and auditable
-- Team-wide visibility (pushed to remote)
-- Perfect for CI metadata that doesn't belong in commits
+See README.md "Why Git Notes for CI Metadata?" for rationale and benefits.
 
 ### How Metadata is Captured
 

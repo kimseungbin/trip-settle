@@ -100,6 +100,24 @@ By default, git hooks live in `.git/hooks/` which is **not tracked by version co
 3. **No external dependencies**: Works without tools like husky
 4. **Explicit opt-in**: Developers consciously enable hooks after understanding what they do
 
+**Why Git Notes for CI Metadata?**
+
+The project uses git notes to store CI/CD metadata (cache metrics, test failures, workflow execution data) alongside commits. This approach provides several advantages:
+
+1. **No external database needed**: Metadata lives in git itself, no additional infrastructure
+2. **Version-controlled and auditable**: Track CI metrics over time with full git history
+3. **Team-wide visibility**: Metadata pushed to remote is accessible to all team members
+4. **Perfect for CI metadata**: Keeps diagnostic information attached to commits without polluting commit messages
+5. **Enables trend analysis**: Historical data helps identify patterns (flaky tests, cache degradation, workflow timeouts)
+
+Git notes are stored in separate namespaces:
+- `refs/notes/ci/cache-metrics` - Docker build cache efficiency metrics
+- `refs/notes/ci/e2e-failures` - Playwright E2E test failure metadata
+- `refs/notes/ci/snapshot-updates` - Visual snapshot update workflow execution metadata
+- `refs/notes/ci/workflow-metrics` - GitHub Actions job/step timing metrics
+
+This metadata powers analysis skills that help diagnose CI failures quickly. For technical details on using git notes, see CLAUDE.md.
+
 ### Git Hooks
 
 The project uses pre-commit hooks to validate code quality before commits. These hooks run automatically before each commit to check:
