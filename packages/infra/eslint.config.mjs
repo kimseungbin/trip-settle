@@ -1,21 +1,20 @@
-import eslint from '@eslint/js'
-import tseslint from 'typescript-eslint'
+import baseConfig from '../../eslint.config.base.mjs'
 
 export default [
+	// Extend base config
+	...baseConfig,
+	// Infra-specific ignores
 	{
-		ignores: ['cdk.out/', 'node_modules/', '**/*.js', '**/*.d.ts', 'eslint.config.mjs'],
+		ignores: ['cdk.out/', '**/*.js', '**/*.d.ts'],
 	},
-	eslint.configs.recommended,
-	...tseslint.configs.recommended,
+	// Infra-specific configuration (AWS CDK)
 	{
 		languageOptions: {
-			ecmaVersion: 2021,
-			sourceType: 'module',
-			parser: tseslint.parser,
 			parserOptions: {
 				project: true,
 			},
 			globals: {
+				// Node.js globals (manually defined for CDK)
 				console: 'readonly',
 				process: 'readonly',
 				Buffer: 'readonly',
@@ -25,9 +24,6 @@ export default [
 				require: 'readonly',
 				exports: 'readonly',
 			},
-		},
-		rules: {
-			'@typescript-eslint/no-explicit-any': 'off',
 		},
 	},
 ]

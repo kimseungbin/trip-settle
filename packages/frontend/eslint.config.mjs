@@ -1,19 +1,20 @@
-import eslint from '@eslint/js'
-import tseslint from 'typescript-eslint'
+import baseConfig from '../../eslint.config.base.mjs'
 import sveltePlugin from 'eslint-plugin-svelte'
+import tseslint from 'typescript-eslint'
 import globals from 'globals'
 
 export default [
+	// Extend base config
+	...baseConfig,
+	// Frontend-specific ignores
 	{
-		ignores: ['dist/', 'node_modules/', 'playwright-report/', 'test-results/', 'eslint.config.mjs'],
+		ignores: ['dist/', 'playwright-report/', 'test-results/'],
 	},
-	eslint.configs.recommended,
-	...tseslint.configs.recommended,
+	// Svelte plugin configs
 	...sveltePlugin.configs['flat/recommended'],
+	// Frontend-specific language options
 	{
 		languageOptions: {
-			ecmaVersion: 2020,
-			sourceType: 'module',
 			globals: {
 				...globals.browser,
 				...globals.es2017,
@@ -21,6 +22,7 @@ export default [
 			},
 		},
 	},
+	// Svelte file-specific configuration
 	{
 		files: ['**/*.svelte'],
 		languageOptions: {

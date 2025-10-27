@@ -1,18 +1,16 @@
-import eslint from '@eslint/js'
-import tseslint from 'typescript-eslint'
+import baseConfig from '../../eslint.config.base.mjs'
 import globals from 'globals'
 
 export default [
+	// Extend base config
+	...baseConfig,
+	// Backend-specific ignores
 	{
-		ignores: ['dist/', 'node_modules/', 'eslint.config.mjs', 'vitest.config.ts'],
+		ignores: ['dist/', 'vitest.config.ts'],
 	},
-	eslint.configs.recommended,
-	...tseslint.configs.recommended,
+	// Backend-specific configuration (NestJS)
 	{
 		languageOptions: {
-			ecmaVersion: 2021,
-			sourceType: 'module',
-			parser: tseslint.parser,
 			parserOptions: {
 				project: './tsconfig.eslint.json',
 				tsconfigRootDir: import.meta.dirname,
@@ -22,10 +20,10 @@ export default [
 			},
 		},
 		rules: {
+			// NestJS-specific rule overrides
 			'@typescript-eslint/interface-name-prefix': 'off',
 			'@typescript-eslint/explicit-function-return-type': 'off',
 			'@typescript-eslint/explicit-module-boundary-types': 'off',
-			'@typescript-eslint/no-explicit-any': 'off',
 		},
 	},
 ]
