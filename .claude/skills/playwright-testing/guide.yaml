@@ -153,6 +153,44 @@ when_tests_fail:
   view_report: "npm run test:e2e:report --workspace=frontend"
 
 visual_regression_workflow:
+  philosophy:
+    name: "Remote-Only Visual Testing"
+    description: "Visual regression tests are NEVER run locally"
+    rationale:
+      why: "Running visual tests locally is an anti-pattern due to high flakiness"
+      causes:
+        - "OS rendering differences (macOS vs Linux font hinting, subpixel rendering)"
+        - "Docker-on-macOS quirks (host kernel affects rendering even in containers)"
+        - "GPU/hardware variations (acceleration, color profiles)"
+        - "Timing/network conditions (loading states, animations)"
+      solution: "Visual snapshots are ONLY generated, updated, and validated in remote CI environment (GitHub Actions)"
+
+  environment_based_testing:
+    description: "Project uses TEST_ENV variable to enforce remote-only visual testing"
+    environments:
+      local:
+        value: "TEST_ENV=local (default)"
+        behavior: "Skips visual regression tests, runs functional E2E tests only"
+        who: "Local developers"
+      ci_docker:
+        value: "TEST_ENV=ci-docker"
+        behavior: "Runs ALL tests including visual snapshots"
+        who: "GitHub Actions only"
+      ecs:
+        value: "TEST_ENV=ecs (future)"
+        behavior: "Production validation tests"
+        who: "ECS environment"
+
+    what_runs_where:
+      local_developer:
+        functional_e2e: true
+        visual_regression: false
+        snapshot_updates: false
+      github_actions:
+        functional_e2e: true
+        visual_regression: true
+        snapshot_updates: true
+
   first_run:
     description: "Creates baseline screenshots"
     location: "tests/<test-name>-snapshots/"
@@ -161,9 +199,130 @@ visual_regression_workflow:
     pass: "UI matches baseline (within threshold)"
     fail: "UI differs - test shows visual diff"
 
+  updating_snapshots:
+    description: "How to update visual snapshots when UI changes cause CI visual tests to fail"
+
+    option_1_commit_footer:
+      name: "Commit Footer Trigger (Recommended)"
+      steps:
+        - "Add 'Snapshots: update' footer to commit message"
+        - "Push to trigger CI snapshot update"
+        - "Workflow automatically updates snapshots and commits"
+        - "Pull the updated snapshots"
+      example: |
+        git commit -m "feat(frontend): Redesign primary button
+
+        Changes button color and adds hover animation.
+
+        Snapshots: update"
+        git push
+        # CI automatically updates snapshots and commits
+        git pull
+      note: "When pushing multiple commits, workflow checks ALL commits. If ANY commit contains 'Snapshots: update', workflow runs."
+
+    option_2_pr_comment:
+      name: "PR Comment Trigger"
+      steps:
+        - "Create PR with your changes"
+        - "Comment on PR: /update-snapshots"
+        - "Workflow updates snapshots automatically"
+        - "Review and merge"
+
+    option_3_manual_workflow:
+      name: "Manual Workflow Trigger"
+      steps:
+        - "Push your code changes"
+        - "Go to GitHub Actions → 'Update Visual Snapshots' → Run workflow"
+        - "Workflow updates snapshots and commits to your branch"
+        - "Pull the changes"
+
+    selective_scope:
+      description: "Optional optimization to speed up snapshot updates when you know specific tests need updating"
+      default:
+        footer: "Snapshots: update"
+        behavior: "Updates all snapshots (safest)"
+        performance: "~2-5 minutes (64 snapshots)"
+      visual_only:
+        footer: "Snapshots: update:visual"
+        behavior: "Update only visual snapshots (tests/visual/)"
+        when: "Only changed CSS/styling, no interaction changes"
+        performance: "~30-40 seconds (52 snapshots)"
+      e2e_only:
+        footer: "Snapshots: update:e2e"
+        behavior: "Update only e2e snapshots (tests/e2e/)"
+        when: "Only changed keyboard focus behavior"
+        performance: "~20-30 seconds (12 snapshots)"
+      warning: "Selective scope is an optimization. Use with caution—if unsure, use default 'Snapshots: update' to ensure all affected tests are updated."
+
+  when_to_update_snapshots:
+    description: "Visual snapshots capture exact pixel-perfect appearance. Update whenever you intentionally change how something looks."
+
+    always_update_after:
+      css_styling:
+        - "Colors, backgrounds, borders"
+        - "Spacing (padding, margin, gap)"
+        - "Shadows, gradients, opacity"
+        - "Font sizes, weights, or families"
+        - "Focus/hover/active state styling"
+      visual_elements:
+        - "Icons, emojis, badges"
+        - "Decorative elements"
+        - "Loading spinners, animations"
+        - "Visual feedback indicators"
+      layout_changes:
+        - "Flexbox/grid structure"
+        - "Element positioning"
+        - "Component sizing"
+        - "Responsive breakpoints"
+      text_content:
+        - "Labels, placeholders, help text"
+        - "Error messages"
+        - "Button text"
+
+    do_not_update_for:
+      - "Logic/behavior changes (state management, event handlers)"
+      - "Test code modifications"
+      - "Backend API changes"
+      - "Documentation updates"
+      - "Configuration changes"
+
+    detection_workflow:
+      pre_commit_hook:
+        description: "When committing .svelte or .css files, pre-commit hook displays warning"
+        example: |
+          ⚠️  UI Changes Detected
+          You've modified UI files that may affect visual snapshots:
+            📄 packages/frontend/src/components/Button.svelte
+
+          If this changes visual appearance, remember to update snapshots:
+            • Add "Snapshots: update" footer to commit message, OR
+            • Comment /update-snapshots on PR after pushing
+      ci_validation: "If you push without updating snapshots, CI will fail with visual diff errors"
+      update_process: "Use any of the three methods above (commit footer recommended)"
+
+    best_practices:
+      - "Update snapshots in same PR that changes UI (keeps changes atomic)"
+      - "Review visual diff artifacts in CI to verify changes are intentional"
+      - "If CI visual tests fail unexpectedly, check for unintended style side effects"
+      - "Never commit *-darwin.png or platform-specific snapshots (CI will reject them)"
+
+  verifying_changes:
+    steps:
+      - "CI workflow commits snapshot updates with detailed message"
+      - "Review git diff in snapshot files"
+      - "Check uploaded artifacts for visual diffs"
+      - "Ensure only *-linux.png files exist (no *-darwin.png)"
+
+  why_this_works:
+    consistency: "All snapshots generated in identical CI environment"
+    reliability: "No platform-specific rendering issues"
+    audit_trail: "Automated commits show when/why snapshots changed"
+    no_local_setup: "Developers don't need Docker/Playwright installed locally"
+    golden_rule: "Visual snapshots are a CI-only concern. Developers write code, CI validates visuals."
+
   when_ui_changes:
     review: "npm run test:e2e:report --workspace=frontend"
-    update_baselines: "npm run test:e2e:update-snapshots --workspace=frontend"
+    update_baselines: "Use one of three update methods above (commit footer recommended)"
     tip: "Only update baselines after reviewing diffs and confirming changes are intentional"
 
 configuration:
