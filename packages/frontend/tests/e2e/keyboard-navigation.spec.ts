@@ -22,6 +22,27 @@ async function submitExpenseForm(page: any) {
 	})
 }
 
+/**
+ * Helper function to submit form via mouse click (triggers toast)
+ * This triggers onclick handler on the button and then submits the form
+ */
+async function submitExpenseFormWithMouse(page: any) {
+	await page.evaluate(() => {
+		const button = document.querySelector('button[type="submit"]') as HTMLButtonElement
+		const form = document.querySelector('form')
+
+		if (button && form) {
+			// First trigger the onclick event to set isMouseClick flag
+			const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true })
+			button.dispatchEvent(clickEvent)
+
+			// Then trigger form submission
+			const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
+			form.dispatchEvent(submitEvent)
+		}
+	})
+}
+
 test.describe('Keyboard Navigation', () => {
 	test.beforeEach(async ({ page }) => {
 		// Set up as returning user to skip onboarding
@@ -268,10 +289,10 @@ test.describe('Keyboard Navigation', () => {
 		// Force a full page reload to ensure settings are re-read
 		await page.reload()
 
-		// Trigger toast by submitting form (mouse submission equivalent)
+		// Trigger toast by mouse-clicking submit button
 		await page.getByPlaceholder('Expense name').fill('Test')
 		await page.getByPlaceholder('Amount').fill('10.00')
-		await submitExpenseForm(page)
+		await submitExpenseFormWithMouse(page)
 
 		// Check if toast is visible after mouse submission
 		const toast = page.locator('.toast')
@@ -297,10 +318,10 @@ test.describe('Keyboard Navigation', () => {
 		// Force a full page reload to ensure settings are re-read
 		await page.reload()
 
-		// Trigger toast by submitting form (mouse submission equivalent)
+		// Trigger toast by mouse-clicking submit button
 		await page.getByPlaceholder('Expense name').fill('Test')
 		await page.getByPlaceholder('Amount').fill('10.00')
-		await submitExpenseForm(page)
+		await submitExpenseFormWithMouse(page)
 
 		// Check if toast is visible
 		const toast = page.locator('.toast')
