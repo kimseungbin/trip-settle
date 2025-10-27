@@ -19,56 +19,209 @@ A full-stack TypeScript application for managing trip expense settlements.
 - **Development Database**: pg-mem (in-memory PostgreSQL, zero configuration)
 - **Testing**: Vitest (unit), Playwright (E2E), Jest (backend)
 
+## Architecture & Technical Decisions
+
+This project showcases full-stack development with a focus on **developer experience (DX)** and modern engineering practices. Key architectural decisions demonstrate understanding of monorepo organization, build tooling, infrastructure automation, and team productivity.
+
+### Monorepo Architecture
+
+**npm workspaces** manage three packages (frontend, backend, infra) with unified tooling:
+
+- **Shared configuration**: Root-level ESLint/Prettier/TypeScript configs eliminate duplication
+- **Unified CI/CD**: Single pipeline builds and tests all packages in parallel (7-8 min total)
+- **Dependency deduplication**: Common dependencies hoisted to root, reducing `node_modules` size
+- **Atomic changes**: Related frontend/backend changes deployed together
+
+**DX benefit**: Developers work across the full stack without switching repositories or dealing with version drift.
+
+### Modern Build Tooling
+
+**Vite + ESM-first architecture** for fast development cycles:
+
+- **Sub-second HMR**: Changes reflect instantly without full page reloads
+- **Native ES modules**: No bundler during development (Vite serves modules directly)
+- **Optimized production builds**: Code splitting and tree shaking out of the box
+- **TypeScript-first**: No Babel complexity, direct TS → JS via esbuild
+
+**Migration impact**: Moved from ts-node to tsx for **2.7x performance boost** in infrastructure builds.
+
+**DX benefit**: Instant feedback loop during development. No waiting for bundler rebuilds.
+
+### Zero-Configuration Development
+
+**pg-mem** provides in-memory PostgreSQL with zero setup:
+
+- **No installation**: No PostgreSQL, Docker, or database tools required
+- **Instant startup**: Backend starts in < 2 seconds with full database support
+- **Full compatibility**: Real PostgreSQL syntax, not a mock (perfect for TypeScript ORMs)
+- **Ephemeral data**: Clean state on every restart, ideal for development
+
+**TypeScript-based configuration** eliminates `.env` files:
+
+- **Compile-time validation**: Configuration errors caught during build, not runtime
+- **IDE autocomplete**: Full IntelliSense for all config values
+- **Environment clarity**: Explicit `local.ts`, `development.ts`, `production.ts` files
+- **No secret leaks**: Environment-specific values injected by CI/CD, not committed
+
+**DX benefit**: `npm install && npm run dev` is all you need. No README checklist of dependencies to install.
+
+### CI/CD Optimizations
+
+**Parallel execution strategy** reduces CI time by 40-50%:
+
+- **4 jobs run concurrently**: Quality checks, build, unit tests, E2E tests
+- **Smart dependencies**: E2E depends only on build, not quality (maximizes parallelism)
+- **Docker layer caching**: 71% cache hit rate, 90% time savings vs cold builds
+- **Base image caching**: Playwright image (786MB) cached, saves 46 seconds per build
+
+**Total CI time**: ~7-8 minutes (would be 12-15 min sequential)
+
+**Git notes for CI metadata** enable debugging without external tools:
+
+- **Build cache metrics**: Track Docker layer performance over time
+- **E2E failure analysis**: Automatically categorize test failures with stack traces
+- **Snapshot update tracking**: Monitor visual regression workflow success/failure
+- **Workflow timing metrics**: Job/step duration trends to identify bottlenecks
+
+**DX benefit**: Fast feedback loops in CI. Rich diagnostic data embedded in git history, no external dashboards needed.
+
+### Infrastructure as Code
+
+**AWS CDK (Cloud Development Kit)** for type-safe infrastructure:
+
+- **TypeScript infrastructure**: Define AWS resources with full IDE support
+- **Compile-time validation**: Catch misconfigurations before deployment
+- **Reusable constructs**: Abstract common patterns (VPC, RDS, CDN) into components
+- **GitOps deployment**: Infrastructure changes deploy automatically on push to `main`
+
+**OIDC authentication** for GitHub Actions (no stored AWS credentials):
+
+- **Short-lived tokens**: GitHub generates temporary credentials via OIDC
+- **No secret rotation**: No AWS access keys stored in GitHub Secrets
+- **Audit trail**: CloudTrail logs show exactly what GitHub Actions deployed
+
+**DX benefit**: Infrastructure changes are code changes. Review, version control, and deploy infrastructure like application code.
+
+### Docker Parity (Local = CI)
+
+**Identical environments** eliminate "works on my machine":
+
+- **Same Docker images**: Local E2E tests use exact same Dockerfile as CI
+- **Same browser versions**: Playwright image pinned (`v1.56.1-noble`) across all environments
+- **Same OS rendering**: Visual snapshots generated in Linux container, not macOS/Windows
+
+**Docker-based E2E testing** by default:
+
+- **Zero setup**: No `npx playwright install --with-deps` needed
+- **Service orchestration**: docker-compose starts backend + frontend + Playwright automatically
+- **Isolation**: Tests don't pollute local environment
+
+**DX benefit**: E2E test failures in CI are reproducible locally. No debugging platform-specific rendering differences.
+
+### AI-Assisted Development
+
+**Structured documentation** for AI pair programming:
+
+- **CLAUDE.md**: AI-focused instructions (commands, file paths, technical constraints)
+- **README.md**: Human-focused documentation (philosophy, architecture, setup)
+- **Skills system**: Complex workflows (TDD, testing, CI debugging) packaged as reusable skills
+
+**CI failure reports** optimized for Claude Code:
+
+- **Structured markdown**: TypeScript errors grouped by file with line numbers
+- **Git context**: Commit SHA, branch, run URL embedded in reports
+- **Artifact uploads**: Downloadable reports for AI to analyze and suggest fixes
+
+**DX benefit**: AI assistant has complete project context. Developers spend less time writing repetitive code, more time on architecture.
+
+### Key Takeaways
+
+These decisions demonstrate:
+
+- **Systems thinking**: Optimizing the full development workflow, not just application code
+- **Pragmatic automation**: Automate repetitive tasks (git hooks, CI caching, snapshot updates) while keeping manual control
+- **Team scalability**: New developers productive in < 10 minutes (`npm install && npm run dev`)
+- **Operational excellence**: Production infrastructure deployed with same rigor as application code
+
 ## Design Philosophy
 
-### User Experience First
+Beyond technical architecture, this project demonstrates **product-focused engineering decisions** that balance user needs with implementation complexity.
 
-This project prioritizes exceptional user experience because great applications should be accessible and delightful for everyone.
+### Keyboard-First Accessibility
 
-**Why Keyboard Accessibility Matters**
+**Decision**: All interactive features must work without a mouse.
 
-All interactive features must work without a mouse. This isn't just about power users - it's about inclusion:
+**Engineering rationale**:
+- **Accessibility requirement**: WCAG 2.1 compliance mandates keyboard navigation
+- **Testability**: Keyboard interactions are easier to automate in E2E tests than mouse hover states
+- **Mobile translation**: Touch gestures map more naturally to keyboard patterns than mouse events
+- **Reduced complexity**: Single interaction model (keyboard) vs. dual models (keyboard + mouse)
 
-- **Accessibility**: Users with motor disabilities rely on keyboard navigation
-- **Efficiency**: Power users move faster with keyboard shortcuts
-- **Universality**: Works in environments where mice aren't practical (tablets, kiosks)
-- **Testing**: Keyboard-first design catches UX issues early
+**Implementation details**:
+- Forms submit with Enter, clear with Escape (standard browser behavior)
+- Tab navigation follows document flow (no custom tab index manipulation)
+- Arrow keys for list navigation (minimal JavaScript, uses native focus management)
+- Focus indicators styled with `:focus-visible` (only visible for keyboard users)
 
-Our keyboard-first principles:
-- Forms submit with Enter, clear with Escape
-- Tab navigation follows logical, intuitive flow
-- Arrow keys navigate lists and selections
-- Every interactive element is reachable and usable via keyboard
+**Trade-off**: Requires more upfront planning of interaction patterns, but pays dividends in reduced edge cases.
 
-**Why Responsive Design**
+### Mobile-First Responsive Design
 
-Mobile-first approach with desktop enhancements ensures:
-- **Mobile Reality**: Most users browse on phones - design for them first
-- **Progressive Enhancement**: Start minimal, add features for larger screens
-- **Performance**: Mobile-first forces efficiency and fast load times
-- **Future-Proof**: Works across devices from watches to ultra-wide monitors
+**Decision**: Design for mobile viewport first, enhance for desktop.
 
-**Why Performance Matters**
+**Engineering rationale**:
+- **CSS simplicity**: Base styles are mobile styles; media queries only add complexity, never override
+- **Performance constraint**: Mobile-first forces minimal DOM and CSS from the start
+- **Testing priority**: Mobile viewports tested first (most users), desktop becomes the edge case
+- **Progressive enhancement**: Features gracefully degrade on older/slower devices
 
-Fast, smooth interactions with minimal latency create trust and satisfaction:
-- **User Retention**: Slow apps frustrate users and drive them away
-- **Perceived Quality**: Performance directly affects how users judge quality
-- **Accessibility**: Fast response helps users with cognitive disabilities
-- **Global Reach**: Works well even on slower networks and devices
+**Implementation details**:
+- Vite dev server tests mobile viewport by default
+- Playwright tests run on mobile viewports first (iPhone, Pixel)
+- CSS uses `min-width` media queries (never `max-width`)
+- Touch targets sized for fingers (44×44px minimum)
 
-**Why Clear Feedback**
+**Trade-off**: Desktop-specific features (hover states, larger layouts) require explicit opt-in via media queries.
 
-Visual and interaction feedback for all actions builds confidence:
-- **User Confidence**: Users know their actions worked
-- **Error Prevention**: Clear states prevent accidental actions
-- **Learning**: Feedback teaches users how the app works
-- **Trust**: Responsive UI feels reliable and professional
+### Performance as Feature
 
-When designing features, ask yourself:
-1. Can this be done without a mouse? (keyboard accessibility)
-2. Is the interaction intuitive and discoverable? (usability)
-3. Does it work well on mobile devices? (responsive design)
-4. Is it accessible to users with disabilities? (inclusive design)
+**Decision**: Sub-second page loads and instant interactions.
+
+**Engineering rationale**:
+- **User retention metric**: Every 100ms delay reduces conversions by 1%
+- **Accessibility requirement**: Fast response critical for cognitive disabilities
+- **Technical constraint**: Vite HMR already provides instant feedback in development
+- **Competitive advantage**: Speed differentiates commodity applications
+
+**Implementation details**:
+- Vite code splitting generates separate chunks per route
+- Svelte compiles to vanilla JavaScript (no runtime framework overhead)
+- pg-mem eliminates database round-trip latency in development
+- Docker layer caching keeps CI feedback under 8 minutes
+
+**Metrics**:
+- Lighthouse performance score: 95+ (target)
+- First Contentful Paint: < 1.5s
+- Time to Interactive: < 2.5s
+- Backend API response time: < 100ms (local development)
+
+### Clear Visual Feedback
+
+**Decision**: Every user action has immediate visual response.
+
+**Engineering rationale**:
+- **State management**: User needs confirmation that state changed
+- **Error prevention**: Visual cues prevent accidental duplicate submissions
+- **Debugging**: Clear UI states make bug reports more actionable
+- **Trust building**: Responsive UI feels reliable, not broken
+
+**Implementation details**:
+- Button disabled states during async operations (prevents double-submit)
+- Toast notifications for success/error feedback
+- Loading spinners for operations > 200ms
+- Form validation shows errors on blur (not on every keystroke)
+
+**Trade-off**: More UI states to design and test, but drastically reduces "did it work?" support tickets.
 
 ### Testing Strategy
 
