@@ -17,7 +17,7 @@ A full-stack TypeScript application for managing trip expense settlements.
 - **Infrastructure**: AWS CDK
 - **Monorepo**: npm workspaces
 - **Development Database**: pg-mem (in-memory PostgreSQL, zero configuration)
-- **Testing**: Vitest (unit), Playwright (E2E), Jest (backend)
+- **Testing**: Vitest (unit), Playwright (E2E)
 
 ## Architecture & Technical Decisions
 
@@ -534,7 +534,7 @@ npm test
 
 # Run unit tests for specific package
 npm run test --workspace=frontend  # Vitest (Svelte components)
-npm run test --workspace=backend   # Jest (NestJS services)
+npm run test --workspace=backend   # Vitest (NestJS services)
 
 # Run E2E tests (Docker-based, recommended)
 npm run test:e2e:docker
@@ -555,7 +555,7 @@ The CI workflow runs **4 jobs in parallel** for fast feedback:
 
 1. **Code Quality** (~2 min) - Formatting, linting, type-checking
 2. **Build** (~2 min) - Compiles all packages (frontend, backend, infra)
-3. **Unit Tests** (~1 min) - Fast tests for frontend (Vitest) and backend (Jest)
+3. **Unit Tests** (~1 min) - Fast tests for frontend (Vitest) and backend (Vitest)
 4. **E2E Tests** (~5-7 min) - End-to-end tests via Docker + Playwright
 
 **Total CI time**: ~7-8 minutes (jobs run in parallel)
