@@ -1,0 +1,59 @@
+=== SNAPSHOT UPDATE WORKFLOW REPORT ===
+
+[metadata]
+timestamp = 2025-10-27T11:54:47Z
+commit = 7dbbe92
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18839949727
+workflow = update-snapshots
+triggered_by = workflow_dispatch
+
+[execution]
+status = failure
+outcome = failed
+checkout_step = true
+docker_setup = true
+playwright_tests = false
+commit_step = false
+push_step = false
+
+[snapshot_changes]
+has_changes = false
+files_changed = 0
+committed = false
+pushed = false
+
+[diagnostics]
+error_step = playwright_tests
+error_message = Playwright tests failed or timed out
+playwright_exit_code = unknown
+docker_container_status = unknown
+test_env = ci-docker
+updating_snapshots = true
+docker_user = root
+
+[error_details]
+# Captured Docker logs (last 50 lines, filtered for errors)
+playwright_error_log = playwright-1  | ::error file=tests/e2e/expense-workflow.spec.ts,title=[webkit] › tests/e2e/expense-workflow.spec.ts:32:2 › Expense Workflow › can add a single expense,line=41,col=47::  1) [webkit] › tests/e2e/expense-workflow.spec.ts:32:2 › Expense Workflow › can add a single expense %250A    Error: expect(locator).toContainText(expected) failed%250A%250A    Locator: locator('.expense-name')%250A    Expected substring: Coffee%250A    Timeout: 5000ms%250A    Error: element(s) not found%250A%250A    Call log:%250A      - Expect toContainText with timeout 5000ms%250A      - waiting for locator('.expense-name')%250A%250A%250A      39 |%250A      40 | 		// Verify expense appears in list%250A    > 41 | 		await expect(page.locator('.expense-name')).toContainText('Coffee')%250A         | 		                                            ^%250A      42 | 		await expect(page.locator('.expense-amount')).toContainText('4.50')%250A      43 |%250A      44 | 		// In single-currency mode, currency is shown in total section onl
+
+[test_results]
+total_tests = 73
+passed = 34
+failed = 14
+skipped = 25
+
+[timing]
+job_duration_seconds = 256
+timeout_limit_seconds = 1800
+timed_out = false
+
+[trigger_details]
+method = workflow_dispatch
+# workflow_dispatch: Manual trigger from GitHub UI
+# issue_comment: Triggered by /update-snapshots PR comment
+# push: Triggered by [update-snapshots] in commit message
+source_branch = main
+
+[recommendations]
+# For LLM analysis
+next_steps = Analyze error_step and error_message. Check artifacts in run_url.
