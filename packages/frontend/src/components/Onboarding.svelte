@@ -761,7 +761,7 @@
 	.payer-list li {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
+		gap: 0.75rem;
 		padding: 0.75rem 1rem;
 		margin-bottom: 0.5rem;
 		background: var(--color-surface);
@@ -789,6 +789,10 @@
 	.payer-name {
 		font-weight: 500;
 		color: var(--color-text);
+		flex: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.remove-btn {
@@ -815,10 +819,16 @@
 			padding: 0.2rem 0.4rem;
 			font-size: 0.9rem;
 			min-width: 28px;
+			max-width: 28px;
 		}
 
 		.payer-list li {
 			padding: 0.6rem 0.8rem;
+			gap: 0.5rem;
+		}
+
+		.payer-name {
+			min-width: 0;
 		}
 	}
 
