@@ -83,13 +83,14 @@ export default defineConfig({
 				},
 			]
 		: [
-				// CI/Docker: Essential browsers only (Chromium + WebKit for cross-engine coverage)
+				// CI/Docker: Temporarily running webkit only to debug snapshot workflow timeouts
+				// TODO: Re-enable chromium after fixing workflow timeout issues
 				// Mobile browsers removed for 50% faster CI (responsive tested via viewport config)
-				{
-					name: 'chromium',
-					use: { ...devices['Desktop Chrome'] },
-					grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
-				},
+				// {
+				// 	name: 'chromium',
+				// 	use: { ...devices['Desktop Chrome'] },
+				// 	grep: shouldRunVisualTests ? undefined : /^(?!.*Visual)/,
+				// },
 				{
 					name: 'webkit',
 					use: { ...devices['Desktop Safari'] },
