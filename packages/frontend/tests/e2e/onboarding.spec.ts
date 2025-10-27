@@ -22,7 +22,13 @@ test.describe('Onboarding Flow', () => {
 			localStorage.setItem(
 				'appSettings',
 				JSON.stringify({
-					features: { isOnboarded: true, currencyMode: 'multi', defaultCurrency: 'KRW' },
+					features: {
+						isOnboarded: true,
+						currencyMode: 'multi',
+						defaultCurrency: 'KRW',
+						paymentMode: 'single',
+						payers: [],
+					},
 					system: { hasSeenKeyboardHint: false },
 				})
 			)
@@ -42,6 +48,12 @@ test.describe('Onboarding Flow', () => {
 		// Click the "Multiple Currencies" button
 		await page.getByRole('button', { name: /multiple currencies/i }).click()
 
+		// Should show payment mode selection
+		await expect(page.getByRole('heading', { name: 'Payment Mode', exact: true })).toBeVisible()
+
+		// Click "Single Payer" to complete onboarding
+		await page.getByRole('button', { name: /single payer/i }).click()
+
 		// Should navigate to home page
 		await expect(page).toHaveURL('/')
 		await expect(page.getByRole('heading', { name: 'Track Your Expenses' })).toBeVisible()
@@ -51,6 +63,7 @@ test.describe('Onboarding Flow', () => {
 		const settings = JSON.parse(appSettings!)
 		expect(settings.features.isOnboarded).toBe(true)
 		expect(settings.features.currencyMode).toBe('multi')
+		expect(settings.features.paymentMode).toBe('single')
 	})
 
 	test('should complete onboarding with single-currency mode', async ({ page }) => {
@@ -66,7 +79,13 @@ test.describe('Onboarding Flow', () => {
 		// Click on a currency option in the dropdown (it opens automatically with initialOpen=true)
 		await page.getByRole('option', { name: /KRW/ }).click()
 
-		// Should navigate to home page automatically after currency selection
+		// Should show payment mode selection
+		await expect(page.getByRole('heading', { name: 'Payment Mode', exact: true })).toBeVisible()
+
+		// Click "Single Payer" to complete onboarding
+		await page.getByRole('button', { name: /single payer/i }).click()
+
+		// Should navigate to home page automatically after payment mode selection
 		await expect(page).toHaveURL('/')
 		await expect(page.getByRole('heading', { name: 'Track Your Expenses' })).toBeVisible()
 
@@ -75,6 +94,7 @@ test.describe('Onboarding Flow', () => {
 		const settings = JSON.parse(appSettings!)
 		expect(settings.features.isOnboarded).toBe(true)
 		expect(settings.features.currencyMode).toBe('single')
+		expect(settings.features.paymentMode).toBe('single')
 	})
 
 	test('should support keyboard navigation - Enter on multi-currency button', async ({ page }) => {
@@ -82,6 +102,13 @@ test.describe('Onboarding Flow', () => {
 
 		// Navigate to multi-currency button and press Enter
 		await page.getByRole('button', { name: /multiple currencies/i }).focus()
+		await page.keyboard.press('Enter')
+
+		// Should show payment mode selection
+		await expect(page.getByRole('heading', { name: 'Payment Mode', exact: true })).toBeVisible()
+
+		// Navigate to single-payer button and press Enter
+		await page.getByRole('button', { name: /single payer/i }).focus()
 		await page.keyboard.press('Enter')
 
 		// Should navigate to home page
@@ -93,6 +120,7 @@ test.describe('Onboarding Flow', () => {
 		const settings = JSON.parse(appSettings!)
 		expect(settings.features.isOnboarded).toBe(true)
 		expect(settings.features.currencyMode).toBe('multi')
+		expect(settings.features.paymentMode).toBe('single')
 	})
 
 	test('should support keyboard navigation - Enter on single-currency button', async ({ page }) => {
@@ -108,6 +136,13 @@ test.describe('Onboarding Flow', () => {
 		// Select currency with keyboard (auto-completes, no Continue button)
 		await page.getByRole('option', { name: /KRW/ }).click()
 
+		// Should show payment mode selection
+		await expect(page.getByRole('heading', { name: 'Payment Mode', exact: true })).toBeVisible()
+
+		// Navigate to single-payer button and press Enter
+		await page.getByRole('button', { name: /single payer/i }).focus()
+		await page.keyboard.press('Enter')
+
 		// Should navigate to home page automatically
 		await expect(page).toHaveURL('/')
 
@@ -116,6 +151,7 @@ test.describe('Onboarding Flow', () => {
 		const settings = JSON.parse(appSettings!)
 		expect(settings.features.isOnboarded).toBe(true)
 		expect(settings.features.currencyMode).toBe('single')
+		expect(settings.features.paymentMode).toBe('single')
 	})
 
 	test('should support keyboard navigation - Escape to skip', async ({ page }) => {
@@ -166,9 +202,9 @@ test.describe('Onboarding Flow', () => {
 	test('should display currency mode options', async ({ page }) => {
 		await page.goto('/onboarding')
 
-		// Check for currency mode options
-		await expect(page.getByText(/single currency/i)).toBeVisible()
-		await expect(page.getByText(/multiple currencies/i)).toBeVisible()
+		// Check for currency mode options (inside buttons)
+		await expect(page.getByRole('button', { name: /single currency/i })).toBeVisible()
+		await expect(page.getByRole('button', { name: /multiple currencies/i })).toBeVisible()
 		// Descriptions are now hidden by default on mobile, shown via "Show more" button
 		// Just verify the mode titles are visible
 	})

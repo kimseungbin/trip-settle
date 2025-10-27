@@ -10,16 +10,24 @@ import { test, expect } from '@playwright/test'
 test.describe('Keyboard Navigation', () => {
 	test.beforeEach(async ({ page }) => {
 		// Set up as returning user to skip onboarding
-		await page.goto('/')
-		await page.evaluate(() => {
+		// IMPORTANT: Set localStorage BEFORE navigating to the page
+		await page.context().addInitScript(() => {
+			localStorage.clear()
 			localStorage.setItem(
 				'appSettings',
 				JSON.stringify({
-					features: { isOnboarded: true, currencyMode: 'multi', defaultCurrency: 'KRW' },
+					features: {
+						isOnboarded: true,
+						currencyMode: 'multi',
+						defaultCurrency: 'KRW',
+						paymentMode: 'single',
+						payers: [],
+					},
 					system: { hasSeenKeyboardHint: false },
 				})
 			)
 		})
+		// Now navigate - localStorage is already set
 		await page.goto('/')
 	})
 
@@ -242,7 +250,8 @@ test.describe('Keyboard Navigation', () => {
 				localStorage.setItem('appSettings', JSON.stringify(parsed))
 			}
 		})
-		await page.goto('/')
+		// Force a full page reload to ensure settings are re-read
+		await page.reload()
 
 		// Trigger toast by clicking Add button (mouse submission)
 		await page.getByPlaceholder('Expense name').fill('Test')
@@ -270,7 +279,8 @@ test.describe('Keyboard Navigation', () => {
 				localStorage.setItem('appSettings', JSON.stringify(parsed))
 			}
 		})
-		await page.goto('/')
+		// Force a full page reload to ensure settings are re-read
+		await page.reload()
 
 		// Trigger toast by clicking Add button (mouse submission)
 		await page.getByPlaceholder('Expense name').fill('Test')
@@ -293,17 +303,25 @@ test.describe('Keyboard Navigation', () => {
 test.describe('Keyboard Accessibility - Visual Indicators', () => {
 	test.beforeEach(async ({ page }) => {
 		// Set up as returning user to skip onboarding
-		await page.goto('/')
+		// Force a full page reload to ensure settings are re-read
+		await page.reload()
 		await page.evaluate(() => {
 			localStorage.setItem(
 				'appSettings',
 				JSON.stringify({
-					features: { isOnboarded: true, currencyMode: 'multi', defaultCurrency: 'KRW' },
+					features: {
+						isOnboarded: true,
+						currencyMode: 'multi',
+						defaultCurrency: 'KRW',
+						paymentMode: 'single',
+						payers: [],
+					},
 					system: { hasSeenKeyboardHint: false },
 				})
 			)
 		})
-		await page.goto('/')
+		// Force a full page reload to ensure settings are re-read
+		await page.reload()
 	})
 
 	test('focused elements have visible focus indicator', async ({ page }) => {
@@ -326,7 +344,8 @@ test.describe('Keyboard Accessibility - Visual Indicators', () => {
 	})
 
 	test('focus is visible when tabbing through page', async ({ page }) => {
-		await page.goto('/')
+		// Force a full page reload to ensure settings are re-read
+		await page.reload()
 
 		// Add an expense so we have more elements to tab through
 		await page.getByPlaceholder('Expense name').fill('Focus Test')

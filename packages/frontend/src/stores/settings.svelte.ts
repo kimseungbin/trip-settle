@@ -162,13 +162,24 @@ export function settingsStore() {
 		system: { ...DEFAULT_SYSTEM_PREFERENCES },
 	})
 
+	// Track the last loaded settings string to detect localStorage changes
+	let lastLoadedSettings: string | null = null
 	// Flag to track if we've loaded from localStorage yet
 	let isLoaded = false
 
-	// Lazy load function - only loads once on first access
+	// Lazy load function - reloads if localStorage has changed
 	function ensureLoaded() {
-		if (!isLoaded && typeof window !== 'undefined') {
+		if (typeof window === 'undefined') return
+
+		// Get current localStorage value
+		const currentSettings = localStorage.getItem(STORAGE_KEY)
+
+		// Reload if:
+		// 1. Never loaded before, OR
+		// 2. localStorage value has changed since last load
+		if (!isLoaded || currentSettings !== lastLoadedSettings) {
 			settings = loadSettings()
+			lastLoadedSettings = currentSettings
 			isLoaded = true
 		}
 	}
@@ -337,8 +348,20 @@ export function settingsStore() {
  * This approach avoids WebKit issues with early reactive state initialization
  */
 let _settings: ReturnType<typeof settingsStore> | undefined
+// Track the last seen localStorage value to detect changes
+let _lastSeenStorage: string | null = null
 
 function getSettingsInstance() {
+	// Check if localStorage has changed since last access
+	if (typeof window !== 'undefined') {
+		const currentStorage = localStorage.getItem(STORAGE_KEY)
+		if (_lastSeenStorage !== currentStorage) {
+			// localStorage changed - invalidate the store to force reload
+			_settings = undefined
+			_lastSeenStorage = currentStorage
+		}
+	}
+
 	if (!_settings) {
 		// Only initialize when actually accessed (not at module load time)
 		_settings = settingsStore()

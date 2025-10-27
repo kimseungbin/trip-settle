@@ -3,16 +3,24 @@ import { test, expect } from '@playwright/test'
 test.describe('Expense Workflow', () => {
 	test.beforeEach(async ({ page }) => {
 		// Set up as returning user to skip onboarding
-		await page.goto('/')
-		await page.evaluate(() => {
+		// IMPORTANT: Set localStorage BEFORE navigating to the page
+		await page.context().addInitScript(() => {
+			localStorage.clear()
 			localStorage.setItem(
 				'appSettings',
 				JSON.stringify({
-					features: { isOnboarded: true, currencyMode: 'single', defaultCurrency: 'KRW' },
+					features: {
+						isOnboarded: true,
+						currencyMode: 'single',
+						defaultCurrency: 'KRW',
+						paymentMode: 'single',
+						payers: [],
+					},
 					system: { hasSeenKeyboardHint: true },
 				})
 			)
 		})
+		// Now navigate - localStorage is already set
 		await page.goto('/')
 	})
 

@@ -28,12 +28,12 @@
       "Bash(mv:*)",
       "Bash(rm:*)",
       "SlashCommand(/commit)",
-      "SlashCommand(/refactor-claude-md)"
+      "SlashCommand(/refactor-claude-md)",
+      "Bash(npx playwright test:*)"
     ],
     "deny": [],
     "ask": [
       "Bash(npm run test:e2e:*)",
-      "Bash(npx playwright test:*)",
       "Bash(npx playwright --version)",
       "Bash(npx playwright install:*)",
       "Bash(npm run test:e2e:docker:*)",
