@@ -447,6 +447,14 @@ tips:
   - "Check timestamp age - 'status=running' with old timestamp (>30min) indicates timeout or stale metadata"
   - "When playwright_tests fails consistently, check: timeout duration, Docker resource limits, test flakiness"
 
+bash_command_best_practices:
+  - "❌ NEVER use multi-line for loops with newlines in zsh - they cause parse errors"
+  - "❌ NEVER pipe large git notes content to xargs -I {} sh -c - command line too long"
+  - "✅ ALWAYS use single-line for loops with semicolons: for x in a b c; do cmd; done"
+  - "✅ ALWAYS call Bash multiple times in parallel instead of complex loops"
+  - "✅ ALWAYS extract small fields first (grep/cut) before passing to xargs"
+  - "✅ Example working pattern: for commit in a b c; do echo \"$commit: $(git show --no-patch --format='%s' $commit | head -c 60)... | $(git notes show $commit | grep '^error_step' | cut -d= -f2 | xargs || echo 'no error')\"; done"
+
 output_format: |
   Present analysis in clear sections:
   1. Overall workflow health (success rate)
