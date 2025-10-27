@@ -17,9 +17,11 @@ async function submitExpenseForm(page: any) {
 
 test.describe('Expense Workflow', () => {
 	test.beforeEach(async ({ page }) => {
+		// Navigate first to initialize the page
+		await page.goto('/')
+
 		// Set up as returning user to skip onboarding
-		// IMPORTANT: Set localStorage BEFORE navigating to the page
-		await page.context().addInitScript(() => {
+		await page.evaluate(() => {
 			localStorage.clear()
 			localStorage.setItem(
 				'appSettings',
@@ -35,7 +37,9 @@ test.describe('Expense Workflow', () => {
 				})
 			)
 		})
-		// Now navigate - localStorage is already set
+
+		// Navigate again to apply localStorage changes
+		// The settings store lazy-loads and will pick up the new localStorage value
 		await page.goto('/')
 
 		// Wait for the expense form to be fully loaded
