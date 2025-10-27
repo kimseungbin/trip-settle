@@ -55,7 +55,10 @@
 		expenseName = ''
 		expenseAmount = ''
 		// Keep the payer selection for the next expense (don't reset it)
-		nameInput?.focus()
+		// Defer focus to next frame to avoid webkit timing issues
+		requestAnimationFrame(() => {
+			nameInput?.focus()
+		})
 		isMouseClick = false
 	}
 
@@ -89,15 +92,21 @@
 				selectedPayer = lastPayer
 			}
 
-			// Focus payer selector if no payer is selected, otherwise focus name input
-			if (!selectedPayer) {
-				payerSelect?.focus()
-			} else {
-				nameInput?.focus()
-			}
+			// Defer focus to next frame to ensure DOM is fully rendered (fixes webkit timing issues)
+			requestAnimationFrame(() => {
+				// Focus payer selector if no payer is selected, otherwise focus name input
+				if (!selectedPayer) {
+					payerSelect?.focus()
+				} else {
+					nameInput?.focus()
+				}
+			})
 		} else {
-			// In single-payer mode, focus name input directly
-			nameInput?.focus()
+			// Defer focus to next frame to ensure DOM is fully rendered (fixes webkit timing issues)
+			requestAnimationFrame(() => {
+				// In single-payer mode, focus name input directly
+				nameInput?.focus()
+			})
 		}
 	})
 </script>

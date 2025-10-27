@@ -27,7 +27,10 @@
 	 * Focus the first interactive element on mount for keyboard accessibility
 	 */
 	onMount(() => {
-		firstButton?.focus()
+		// Defer focus to next frame to ensure DOM is fully rendered (fixes webkit timing issues)
+		requestAnimationFrame(() => {
+			firstButton?.focus()
+		})
 	})
 
 	/**
@@ -35,7 +38,10 @@
 	 */
 	$effect(() => {
 		if (showPayerCollection && payerInput) {
-			payerInput.focus()
+			// Defer focus to next frame to ensure DOM is fully rendered (fixes webkit timing issues)
+			requestAnimationFrame(() => {
+				payerInput?.focus()
+			})
 		}
 	})
 
@@ -160,7 +166,10 @@
 			const name = input.value.trim()
 			addPayer(name)
 			input.value = ''
-			input.focus()
+			// Defer focus to next frame to avoid webkit timing issues
+			requestAnimationFrame(() => {
+				input.focus()
+			})
 		}
 	}
 
@@ -172,7 +181,10 @@
 			const name = payerInput.value.trim()
 			addPayer(name)
 			payerInput.value = ''
-			payerInput.focus()
+			// Defer focus to next frame to avoid webkit timing issues
+			requestAnimationFrame(() => {
+				payerInput?.focus()
+			})
 		}
 	}
 </script>
