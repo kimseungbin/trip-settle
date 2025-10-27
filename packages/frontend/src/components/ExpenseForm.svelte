@@ -157,7 +157,7 @@
 
 	h3 {
 		margin: 0 0 0.5em;
-		color: #333;
+		color: var(--color-text);
 	}
 
 	form {
@@ -168,7 +168,7 @@
 
 	input {
 		padding: 0.6em;
-		border: 1px solid #ddd;
+		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		font-size: 1em;
 		min-width: 0; /* Allow inputs to shrink below content size */
@@ -186,8 +186,8 @@
 		padding: 0.6em 1.2em;
 		font-size: 1em;
 		cursor: pointer;
-		background: #ff3e00;
-		color: white;
+		background: var(--color-primary);
+		color: var(--color-surface);
 		border: none;
 		border-radius: 4px;
 		transition: background 0.2s;
@@ -196,7 +196,7 @@
 	}
 
 	button:hover {
-		background: #e63900;
+		background: var(--color-primary-hover);
 	}
 
 	/* Mobile responsive layout */

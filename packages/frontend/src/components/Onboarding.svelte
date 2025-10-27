@@ -808,9 +808,9 @@
 	}
 
 	.remove-btn:hover {
-		background: #f44336;
-		color: white;
-		border-color: #f44336;
+		background: var(--color-error);
+		color: var(--color-surface);
+		border-color: var(--color-error);
 	}
 
 	/* Mobile: Smaller remove button */

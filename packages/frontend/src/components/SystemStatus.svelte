@@ -62,18 +62,18 @@
 		margin: 2em 0;
 		padding: 1.5em;
 		border-radius: 8px;
-		background: #f5f5f5;
+		background: var(--color-surface-1);
 	}
 
 	h3 {
 		margin: 1em 0 0.5em;
-		color: #333;
+		color: var(--color-text);
 	}
 
 	.api-url {
 		font-family: monospace;
 		font-size: 0.9em;
-		color: #666;
+		color: var(--color-text-secondary);
 		margin: 0.5em 0 1em;
 		word-break: break-all; /* Break URLs at any character to prevent overflow */
 		overflow-wrap: break-word;
@@ -93,7 +93,7 @@
 	.status-row .label {
 		font-weight: 600;
 		min-width: 80px;
-		color: #333;
+		color: var(--color-text);
 	}
 
 	.health {
@@ -104,17 +104,17 @@
 	}
 
 	.health.loading {
-		background: #fff3cd;
-		color: #856404;
+		background: var(--color-warning-light);
+		color: var(--color-warning);
 	}
 
 	.health.ok {
-		background: #d4edda;
-		color: #155724;
+		background: var(--color-success-light);
+		color: var(--color-success);
 	}
 
 	.health.error {
-		background: #f8d7da;
-		color: #721c24;
+		background: var(--color-error-light);
+		color: var(--color-error);
 	}
 </style>

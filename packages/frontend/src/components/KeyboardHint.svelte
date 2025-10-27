@@ -80,8 +80,8 @@
 		top: -100px;
 		left: 50%;
 		transform: translateX(-50%);
-		background: #fff;
-		border: 2px solid #ff3e00;
+		background: var(--color-surface);
+		border: 2px solid var(--color-primary);
 		border-radius: 8px;
 		padding: 1em 1.5em;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -106,20 +106,20 @@
 	.content {
 		flex: 1;
 		font-size: 0.95em;
-		color: #333;
+		color: var(--color-text);
 		line-height: 1.4;
 	}
 
 	/* Styles for HTML elements injected via {@html} */
 	.content :global(strong) {
-		color: #ff3e00;
+		color: var(--color-primary);
 	}
 
 	.content :global(kbd) {
 		display: inline-block;
 		padding: 0.2em 0.4em;
-		background: #f5f5f5;
-		border: 1px solid #ccc;
+		background: var(--color-surface-1);
+		border: 1px solid var(--color-border);
 		border-radius: 3px;
 		font-family: monospace;
 		font-size: 0.9em;
@@ -130,7 +130,7 @@
 		background: none;
 		border: none;
 		font-size: 1.5em;
-		color: #999;
+		color: var(--color-text-tertiary);
 		cursor: pointer;
 		padding: 0;
 		width: 24px;
@@ -144,8 +144,8 @@
 	}
 
 	.dismiss:hover {
-		background: #f5f5f5;
-		color: #333;
+		background: var(--color-surface-1);
+		color: var(--color-text);
 	}
 
 	@media (max-width: 600px) {

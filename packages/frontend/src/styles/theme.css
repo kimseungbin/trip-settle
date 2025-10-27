@@ -38,10 +38,11 @@
 	--color-neutral-900-l: 12%; /* Darkest gray */
 	--color-neutral-1000-l: 0%; /* Black */
 
-	/* Success, Warning, Error */
+	/* Success, Warning, Error, Info */
 	--color-success-h: 145deg; /* Green */
 	--color-warning-h: 85deg; /* Yellow */
 	--color-error-h: 15deg; /* Red */
+	--color-info-h: 220deg; /* Blue */
 
 	/* ===== Semantic Tokens (Light Mode) ===== */
 
@@ -85,6 +86,8 @@
 	--color-warning-light: oklch(90% 0.08 var(--color-warning-h));
 	--color-error: oklch(60% 0.18 var(--color-error-h));
 	--color-error-light: oklch(85% 0.09 var(--color-error-h));
+	--color-info: oklch(65% 0.15 var(--color-info-h));
+	--color-info-light: oklch(88% 0.08 var(--color-info-h));
 
 	/* Shadows */
 	--shadow-sm: 0 1px 2px 0 oklch(var(--color-neutral-900-l) 0 0 / 0.05);
@@ -136,6 +139,8 @@
 	--color-warning-light: oklch(30% 0.08 var(--color-warning-h));
 	--color-error: oklch(68% 0.18 var(--color-error-h));
 	--color-error-light: oklch(25% 0.09 var(--color-error-h));
+	--color-info: oklch(70% 0.15 var(--color-info-h));
+	--color-info-light: oklch(25% 0.08 var(--color-info-h));
 
 	/* Shadows - subtle for dark mode */
 	--shadow-sm: 0 1px 2px 0 oklch(0% 0 0 / 0.3);
@@ -182,6 +187,8 @@
 		--color-warning-light: #fef3c7;
 		--color-error: #ef4444;
 		--color-error-light: #fee2e2;
+		--color-info: #3b82f6;
+		--color-info-light: #dbeafe;
 
 		--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 		--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -218,6 +225,8 @@
 		--color-warning-light: #3d301a;
 		--color-error: #f87171;
 		--color-error-light: #3d1a1a;
+		--color-info: #60a5fa;
+		--color-info-light: #1e3a5f;
 
 		--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
 		--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);

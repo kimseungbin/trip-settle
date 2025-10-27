@@ -125,13 +125,13 @@
 	.settings-viewer {
 		padding: 1em;
 		border-radius: 8px;
-		background: white;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		background: var(--color-surface);
+		box-shadow: var(--shadow-md);
 	}
 
 	h3 {
 		margin: 0 0 1em;
-		color: #333;
+		color: var(--color-text);
 		font-size: 1.2em;
 		font-weight: 600;
 	}
@@ -143,12 +143,12 @@
 	.section-header {
 		font-size: 0.85em;
 		font-weight: 700;
-		color: #666;
+		color: var(--color-text-secondary);
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 		margin-bottom: 0.75em;
 		padding-bottom: 0.5em;
-		border-bottom: 2px solid #e0e0e0;
+		border-bottom: 2px solid var(--color-border-light);
 	}
 
 	.settings-grid {
@@ -161,8 +161,8 @@
 		width: 100%;
 		padding: 0.75em 1.2em;
 		font-size: 0.9em;
-		background: #2196f3;
-		color: white;
+		background: var(--color-info);
+		color: var(--color-surface);
 		border: none;
 		border-radius: 6px;
 		box-sizing: border-box; /* Include padding in width calculation */
@@ -172,16 +172,17 @@
 	}
 
 	.reset-onboarding-button:hover {
-		background: #1976d2;
+		background: var(--color-info);
+		filter: brightness(0.9);
 		transform: translateY(-1px);
-		box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+		box-shadow: var(--shadow-md);
 	}
 
 	.toggle-button {
 		padding: 0.4em 0.8em;
 		font-size: 0.85em;
-		background: #2196f3;
-		color: white;
+		background: var(--color-info);
+		color: var(--color-surface);
 		border: none;
 		border-radius: 4px;
 		cursor: pointer;
@@ -190,14 +191,15 @@
 	}
 
 	.toggle-button:hover {
-		background: #1976d2;
+		background: var(--color-info);
+		filter: brightness(0.9);
 	}
 
 	/* Collapsible Section */
 	.collapsible-section {
-		background: #f9f9f9;
+		background: var(--color-surface-1);
 		border-radius: 6px;
-		border-left: 3px solid #9c27b0;
+		border-left: 3px solid var(--color-primary);
 		overflow: hidden;
 	}
 
@@ -217,30 +219,30 @@
 	}
 
 	.collapsible-header:hover {
-		background: rgba(156, 39, 176, 0.05);
+		background: var(--color-hover-overlay);
 	}
 
 	.expand-icon {
 		font-size: 0.8em;
-		color: #9c27b0;
+		color: var(--color-primary);
 		transition: transform 0.2s;
 	}
 
 	.section-title {
 		font-weight: 600;
-		color: #555;
+		color: var(--color-text-secondary);
 		flex: 1;
 	}
 
 	.collapsible-content {
 		padding: 0.5em 0.75em 0.75em;
-		border-top: 1px solid #e0e0e0;
+		border-top: 1px solid var(--color-border-light);
 	}
 
 	.empty-state {
 		padding: 1em;
 		text-align: center;
-		color: #999;
+		color: var(--color-text-tertiary);
 		font-style: italic;
 	}
 
@@ -249,10 +251,10 @@
 		align-items: center;
 		gap: 0.75em;
 		padding: 0.6em;
-		background: white;
+		background: var(--color-surface);
 		border-radius: 4px;
 		margin-bottom: 0.5em;
-		border: 1px solid #e0e0e0;
+		border: 1px solid var(--color-border-light);
 	}
 
 	.hint-item:last-child {
@@ -262,7 +264,7 @@
 	.hint-id {
 		flex: 1;
 		font-family: 'Courier New', monospace;
-		color: #555;
+		color: var(--color-text-secondary);
 		font-weight: 500;
 		word-break: break-word;
 		overflow-wrap: break-word;
@@ -271,7 +273,7 @@
 
 	.hint-status {
 		font-size: 0.85em;
-		color: #666;
+		color: var(--color-text-secondary);
 	}
 
 	.actions {
@@ -280,7 +282,7 @@
 		flex-wrap: wrap;
 		margin-top: 1.5em;
 		padding-top: 1em;
-		border-top: 2px solid #e0e0e0;
+		border-top: 2px solid var(--color-border-light);
 	}
 
 	button {
@@ -294,25 +296,27 @@
 	}
 
 	.danger {
-		background: #f44336;
-		color: white;
+		background: var(--color-error);
+		color: var(--color-surface);
 	}
 
 	.danger:hover {
-		background: #d32f2f;
+		background: var(--color-error);
+		filter: brightness(0.9);
 		transform: translateY(-1px);
-		box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+		box-shadow: var(--shadow-md);
 	}
 
 	.warning {
-		background: #ff9800;
-		color: white;
+		background: var(--color-warning);
+		color: var(--color-surface);
 	}
 
 	.warning:hover {
-		background: #f57c00;
+		background: var(--color-warning);
+		filter: brightness(0.9);
 		transform: translateY(-1px);
-		box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+		box-shadow: var(--shadow-md);
 	}
 
 	@media (max-width: 640px) {

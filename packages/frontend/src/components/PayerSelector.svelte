@@ -16,12 +16,12 @@
 <style>
 	select {
 		padding: 0.6em;
-		border: 1px solid #ddd;
+		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		font-size: 1em;
 		min-width: 0;
 		flex: 1 1 100px;
-		background: white;
+		background: var(--color-surface);
 		cursor: pointer;
 	}
 
