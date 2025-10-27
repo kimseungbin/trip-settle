@@ -1,0 +1,59 @@
+=== SNAPSHOT UPDATE WORKFLOW REPORT ===
+
+[metadata]
+timestamp = 2025-10-27T13:53:51Z
+commit = b41e9a5
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18843272907
+workflow = update-snapshots
+triggered_by = push
+
+[execution]
+status = failure
+outcome = failed
+checkout_step = true
+docker_setup = true
+playwright_tests = false
+commit_step = false
+push_step = false
+
+[snapshot_changes]
+has_changes = false
+files_changed = 0
+committed = false
+pushed = false
+
+[diagnostics]
+error_step = playwright_tests
+error_message = Playwright tests failed or timed out
+playwright_exit_code = unknown
+docker_container_status = unknown
+test_env = ci-docker
+updating_snapshots = true
+docker_user = root
+
+[error_details]
+# Captured Docker logs (last 50 lines, filtered for errors)
+playwright_error_log = playwright-1  |     Error: page.waitForSelector: Test timeout of 30000ms exceeded.%0Aplaywright-1  | ::error file=tests/e2e/keyboard-navigation.spec.ts,title=[webkit] › tests/e2e/keyboard-navigation.spec.ts:363:2 › Keyboard Accessibility - Visual Indicators › focused elements have visible focus indicator,line=344,col=14::  1) [webkit] › tests/e2e/keyboard-navigation.spec.ts:363:2 › Keyboard Accessibility - Visual Indicators › focused elements have visible focus indicator %250A    Error: page.evaluate: SecurityError: The operation is insecure.%250A%250A      342 | 		// Force a full page reload to ensure settings are re-read%250A      343 | 		await page.reload()%250A    > 344 | 		await page.evaluate(() => {%250A          | 		           ^%250A      345 | 			localStorage.setItem(%250A      346 | 				'appSettings',%250A      347 | 				JSON.stringify({%250A        at /app/packages/frontend/tests/e2e/keyboard-navigation.spec.ts:344:14%0Aplaywright-1  | ::error file=tests/e2e/keyboard-navigation.spec.ts,t
+
+[test_results]
+total_tests = 73
+passed = 45
+failed = 3
+skipped = 25
+
+[timing]
+job_duration_seconds = 239
+timeout_limit_seconds = 1800
+timed_out = false
+
+[trigger_details]
+method = push
+# workflow_dispatch: Manual trigger from GitHub UI
+# issue_comment: Triggered by /update-snapshots PR comment
+# push: Triggered by [update-snapshots] in commit message
+source_branch = main
+
+[recommendations]
+# For LLM analysis
+next_steps = Analyze error_step and error_message. Check artifacts in run_url.
