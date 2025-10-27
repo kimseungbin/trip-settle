@@ -1,0 +1,106 @@
+=== E2E TEST FAILURE REPORT ===
+
+[metadata]
+timestamp = 2025-10-27T12:54:58.021Z
+commit = 2b99f55
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18841473853
+total_tests = 0
+passed = 0
+failed = 0
+skipped = 0
+pass_rate = 0.0%
+duration_sec = 0
+
+[summary]
+status = PASSED
+new_failures = 7
+timeout_failures = 5
+visual_failures = 0
+assertion_failures = 0
+navigation_failures = 0
+setup_failures = 0
+
+[failure.1]
+test_file = e2e/expense-workflow.spec.ts
+test_name = e2e/expense-workflow.spec.ts › Expense Workflow › can add multiple expenses
+browser = webkit
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveCount[2m([22m[32mexpected[39m[2m)[22m failed
+duration_ms = 8223
+screenshots = /app/packages/frontend/test-results/e2e-expense-workflow-Expen-57a85-w-can-add-multiple-expenses-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-expense-workflow-Expen-57a85-w-can-add-multiple-expenses-webkit/video.webm
+traces = none
+
+[failure.2]
+test_file = e2e/keyboard-navigation.spec.ts
+test_name = e2e/keyboard-navigation.spec.ts › Keyboard Navigation › can dismiss keyboard hint toast with Escape key
+browser = webkit
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+duration_ms = 8154
+screenshots = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-4266b--hint-toast-with-Escape-key-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-4266b--hint-toast-with-Escape-key-webkit/video.webm
+traces = none
+
+[failure.3]
+test_file = e2e/keyboard-navigation.spec.ts
+test_name = e2e/keyboard-navigation.spec.ts › Keyboard Navigation › can dismiss keyboard hint toast with close button
+browser = webkit
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+duration_ms = 6617
+screenshots = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-9db34-int-toast-with-close-button-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-9db34-int-toast-with-close-button-webkit/video.webm
+traces = none
+
+[failure.4]
+test_file = e2e/keyboard-navigation.spec.ts
+test_name = e2e/keyboard-navigation.spec.ts › Keyboard Accessibility - Visual Indicators › focused elements have visible focus indicator
+browser = webkit
+error_type = unknown
+error_message = Error: page.evaluate: SecurityError: The operation is insecure.
+duration_ms = 399
+screenshots = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-f693c-ave-visible-focus-indicator-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-f693c-ave-visible-focus-indicator-webkit/video.webm
+traces = none
+
+[failure.5]
+test_file = e2e/keyboard-navigation.spec.ts
+test_name = e2e/keyboard-navigation.spec.ts › Keyboard Accessibility - Visual Indicators › focus is visible when tabbing through page
+browser = webkit
+error_type = unknown
+error_message = Error: page.evaluate: SecurityError: The operation is insecure.
+duration_ms = 465
+screenshots = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-1b4c2-e-when-tabbing-through-page-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-keyboard-navigation-Ke-1b4c2-e-when-tabbing-through-page-webkit/video.webm
+traces = none
+
+[failure.6]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › initial empty state
+browser = webkit
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveScreenshot[2m([22m[32mexpected[39m[2m)[22m failed
+duration_ms = 9448
+screenshots = /app/packages/frontend/tests/visual/ui-snapshots.spec.ts-snapshots/empty-state-webkit-linux.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/empty-state-actual.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/empty-state-diff.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/video.webm
+traces = none
+
+[failure.7]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › expense list with single item
+browser = webkit
+error_type = timeout
+error_message = [31mTest timeout of 30000ms exceeded.[39m
+duration_ms = 30231
+screenshots = /app/packages/frontend/test-results/visual-ui-snapshots-Visual-e7e52-pense-list-with-single-item-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/visual-ui-snapshots-Visual-e7e52-pense-list-with-single-item-webkit/video.webm
+traces = none
+
+[diagnostics]
+playwright_version = 1.56.1
+test_env = unknown
+workers = 4
+reporter_output = packages/frontend/test-results/results.json
+artifacts_uploaded = yes (GitHub Actions)
