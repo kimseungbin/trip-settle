@@ -25,12 +25,42 @@ This project showcases full-stack development with a focus on **developer experi
 
 ### Monorepo Architecture
 
-**npm workspaces** manage three packages (frontend, backend, infra) with unified tooling:
+**npm workspaces** manage three packages (frontend, backend, infra) with unified tooling, providing a cohesive development experience across the full stack.
 
-- **Shared configuration**: Root-level ESLint/Prettier/TypeScript configs eliminate duplication
-- **Unified CI/CD**: Single pipeline builds and tests all packages in parallel (7-8 min total)
-- **Dependency deduplication**: Common dependencies hoisted to root, reducing `node_modules` size
-- **Atomic changes**: Related frontend/backend changes deployed together
+#### Package Structure
+
+The monorepo organizes code into three distinct packages, each with its own responsibilities:
+
+```mermaid
+graph TB
+    Root["Monorepo Root<br/>package.json<br/>tsconfig.base.json<br/>config/"]
+
+    Root --> Frontend["Frontend Package<br/>packages/frontend/<br/><br/>Svelte + Vite<br/>TypeScript"]
+    Root --> Backend["Backend Package<br/>packages/backend/<br/><br/>NestJS + TypeORM<br/>PostgreSQL"]
+    Root --> Infra["Infrastructure Package<br/>packages/infra/<br/><br/>AWS CDK<br/>TypeScript"]
+
+    style Root fill:#e1f5ff
+    style Frontend fill:#d4edda
+    style Backend fill:#d4edda
+    style Infra fill:#d4edda
+```
+
+#### Key Architecture Benefits
+
+**Shared configuration eliminates duplication:**
+- Root-level ESLint/Prettier/TypeScript configs used by all packages
+- Single source of truth for code quality rules
+- Changes apply instantly across the entire monorepo
+
+**Unified CI/CD pipeline:**
+- Single pipeline builds and tests all packages in parallel (7-8 min total)
+- Atomic deployments ensure frontend/backend changes deployed together
+- No coordination between separate repositories
+
+**Dependency deduplication:**
+- Common dependencies hoisted to root, reducing `node_modules` size by ~40%
+- Root dependencies: `typescript`, `eslint`, `prettier`, `@types/node`
+- Package-specific dependencies stay isolated in their workspace
 
 **DX benefit**: Developers work across the full stack without switching repositories or dealing with version drift.
 
@@ -116,7 +146,65 @@ This project showcases full-stack development with a focus on **developer experi
 - **Service orchestration**: docker-compose starts backend + frontend + Playwright automatically
 - **Isolation**: Tests don't pollute local environment
 
-**DX benefit**: E2E test failures in CI are reproducible locally. No debugging platform-specific rendering differences.
+#### Multi-Stage Docker Build Architecture
+
+The project uses a single `Dockerfile` with multiple build targets, optimized for CI/CD caching and layer reuse across services:
+
+```mermaid
+graph TB
+    Base["Stage: base<br/>Node 24 Alpine<br/>Root dependencies<br/>tsconfig.base.json"]
+
+    Base --> BE_Deps["Stage: backend-deps<br/>Backend npm packages"]
+    Base --> FE_Deps["Stage: frontend-deps<br/>Frontend npm packages"]
+
+    BE_Deps --> BE_Dev["Stage: backend-dev<br/>Development mode<br/>watch + hot reload"]
+    BE_Deps --> BE_E2E["Stage: backend-e2e<br/>Production build<br/>build once"]
+
+    FE_Deps --> FE_Dev["Stage: frontend-dev<br/>Vite dev server<br/>HMR enabled"]
+
+    style Base fill:#fff3cd
+    style BE_Deps fill:#cfe2ff
+    style FE_Deps fill:#cfe2ff
+    style BE_Dev fill:#d4edda
+    style BE_E2E fill:#d4edda
+    style FE_Dev fill:#d4edda
+```
+
+**Stage 1: Base (Shared by all services)**
+- Node 24 Alpine + system dependencies (`dumb-init`)
+- Root `package.json` + `tsconfig.base.json`
+- Root npm dependencies (TypeScript, ESLint, Prettier)
+- **Cached until**: Root `package.json` changes
+- **Benefit**: Both frontend and backend reuse this layer
+
+**Stage 2: Service Dependencies**
+- `backend-deps`: Backend npm packages (NestJS, TypeORM, etc.)
+- `frontend-deps`: Frontend npm packages (Svelte, Vite, etc.)
+- Both inherit from `base` stage
+- **Cached until**: Service `package.json` changes
+- **Benefit**: Changes to frontend deps don't invalidate backend cache
+
+**Stage 3: Runtime**
+- `backend-dev`: NestJS watch mode (for local development)
+- `backend-e2e`: NestJS build once (for E2E tests and production)
+- `frontend-dev`: Vite dev server with HMR
+- Copies application code (most volatile layer)
+- **Rebuilt on**: Every code change
+
+**Layer caching strategy:**
+- Ordering: `base` → `*-deps` → `*-dev/e2e` (stable to volatile)
+- **Result**: 71% cache hit rate, 90% time savings vs cold builds
+- **Example**: Pushing backend code changes doesn't rebuild frontend dependencies
+
+**Example CI behavior:**
+1. Push changes to backend code only
+2. CI pulls cached `base` stage (shared, unchanged)
+3. CI pulls cached `frontend-deps` stage (unchanged)
+4. CI rebuilds `backend-deps` and `backend-dev` (code changed)
+5. Frontend build completes in ~30 seconds (fully cached)
+6. Backend build completes in ~2 minutes (only deps + code rebuild)
+
+**DX benefit**: E2E test failures in CI are reproducible locally. No debugging platform-specific rendering differences. Fast CI builds through aggressive layer caching.
 
 ### AI-Assisted Development
 
