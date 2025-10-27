@@ -67,10 +67,12 @@ instructions: |
 
   **What it captures:**
   - Trigger method (workflow_dispatch, issue_comment, push)
-  - Workflow status (success, failure, in_progress)
+  - Workflow status (success, failure, timeout, in_progress)
   - Step-level success/failure (checkout, docker, playwright, commit, push)
   - Snapshot changes (whether changes occurred, file count)
-  - Error details (failed step, error message)
+  - Error details (failed step, error message, exit code)
+  - Test results (total, passed, failed, skipped)
+  - Timing information (duration, timeout detection)
 
   **Output format:** INI-style structure (see examples below)
 
@@ -105,9 +107,21 @@ instructions: |
   [diagnostics]
   error_step = none
   error_message = none
+  playwright_exit_code = 0
   test_env = ci-docker
   updating_snapshots = true
   docker_user = root
+
+  [test_results]
+  total_tests = 64
+  passed = 64
+  failed = 0
+  skipped = 0
+
+  [timing]
+  job_duration_seconds = 420
+  timeout_limit_seconds = 1800
+  timed_out = false
 
   [trigger_details]
   method = push
@@ -359,19 +373,20 @@ examples:
 common_issues:
   stale_running_status:
     symptom: "Commits show 'status = running' hours after workflow completed"
-    cause: "Post-job metadata capture occurred before workflow timed out or failed"
+    cause: "Post-job metadata capture received empty/null result from main job (typically timeout)"
     solution: |
-      Check the timestamp field - if it's old (>30 minutes), the workflow likely:
-      1. Timed out (check timeout-minutes setting in workflow)
-      2. Failed without proper error propagation
-      3. Got stuck in Docker operations
+      **FIXED in latest version**: The workflow now handles this case properly.
 
-      Investigation steps:
-      - Check GitHub Actions logs via run_url in metadata
-      - Look for "SIGTERM" or "timeout" in workflow logs
-      - Verify Docker compose exit codes are being captured
+      Check these new fields for diagnosis:
+      - `timed_out = true` in [timing] section confirms timeout
+      - `job_duration_seconds` shows actual runtime
+      - `playwright_exit_code` shows if tests were killed (137 = SIGKILL)
+      - `total_tests` / `passed` / `failed` show partial progress
 
-      Prevention: Ensure workflow has proper timeout and error handling
+      If you still see 'status = running', the workflow file needs updating:
+      1. Check `.github/workflows/update-snapshots.yml` has timeout handling (line 275-278)
+      2. Ensure extraction script handles 'timeout' status (line 68)
+      3. Verify capture-metadata job runs even when main job times out
 
   no_notes_found:
     symptom: "No git notes found"

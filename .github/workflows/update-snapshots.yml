@@ -63,12 +63,22 @@ jobs:
       checkout_success: ${{ steps.record_checkout.outputs.success }}
       docker_success: ${{ steps.record_docker.outputs.success }}
       playwright_success: ${{ steps.record_playwright.outputs.success }}
+      playwright_exit_code: ${{ steps.record_playwright.outputs.exit_code }}
+      tests_total: ${{ steps.extract_results.outputs.tests_total }}
+      tests_passed: ${{ steps.extract_results.outputs.tests_passed }}
+      tests_failed: ${{ steps.extract_results.outputs.tests_failed }}
+      tests_skipped: ${{ steps.extract_results.outputs.tests_skipped }}
       has_changes: ${{ steps.check_changes.outputs.has_changes }}
       files_changed: ${{ steps.check_changes.outputs.files_count }}
       commit_success: ${{ steps.record_commit.outputs.success }}
       push_success: ${{ steps.record_push.outputs.success }}
+      job_start_time: ${{ steps.record_start.outputs.start_time }}
 
     steps:
+      - name: Record job start time
+        id: record_start
+        run: echo "start_time=$(date +%s)" >> $GITHUB_OUTPUT
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -127,6 +137,9 @@ jobs:
           echo "⏰ Completed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
           echo "📊 Docker compose exit code: $EXIT_CODE"
 
+          # Always record exit code for diagnostics
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
           if [ $EXIT_CODE -ne 0 ]; then
             echo "::error::Playwright tests failed with exit code $EXIT_CODE"
             exit $EXIT_CODE
@@ -137,6 +150,34 @@ jobs:
           DOCKER_USER: root
           TEST_ENV: ci-docker
           UPDATING_SNAPSHOTS: true
+
+      - name: Extract test results from Docker container
+        if: always() && steps.record_playwright.outcome != 'skipped'
+        id: extract_results
+        run: |
+          # Copy test results JSON from Docker volume if available
+          docker compose -f docker-compose.e2e.yml cp playwright:/app/packages/frontend/test-results/results.json ./test-results.json 2>/dev/null || \
+            echo "⚠️ Could not extract test results JSON (tests may not have run)"
+
+          # Parse test results if JSON exists
+          if [ -f ./test-results.json ]; then
+            # Use jq to extract test statistics
+            if command -v jq &> /dev/null; then
+              TOTAL_TESTS=$(jq '.stats.expected + .stats.unexpected + .stats.flaky + .stats.skipped' ./test-results.json 2>/dev/null || echo "0")
+              PASSED_TESTS=$(jq '.stats.expected' ./test-results.json 2>/dev/null || echo "0")
+              FAILED_TESTS=$(jq '.stats.unexpected' ./test-results.json 2>/dev/null || echo "0")
+              SKIPPED_TESTS=$(jq '.stats.skipped' ./test-results.json 2>/dev/null || echo "0")
+
+              echo "tests_total=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+              echo "tests_passed=$PASSED_TESTS" >> $GITHUB_OUTPUT
+              echo "tests_failed=$FAILED_TESTS" >> $GITHUB_OUTPUT
+              echo "tests_skipped=$SKIPPED_TESTS" >> $GITHUB_OUTPUT
+
+              echo "✅ Extracted test results: $PASSED_TESTS passed, $FAILED_TESTS failed, $SKIPPED_TESTS skipped (total: $TOTAL_TESTS)"
+            else
+              echo "⚠️ jq not available, skipping test result parsing"
+            fi
+          fi
 
       - name: Capture Docker logs on failure
         if: failure() && steps.record_playwright.outcome == 'failure'
@@ -271,14 +312,25 @@ jobs:
       - name: Capture metadata in git notes
         run: |
           # Use needs context to get accurate final status
-          WORKFLOW_STATUS="${{ needs.update-snapshots.result }}"  # success, failure, cancelled, skipped
+          # Fallback to 'timeout' if result is empty (happens when job times out)
+          WORKFLOW_STATUS="${{ needs.update-snapshots.result }}"
+          if [ -z "$WORKFLOW_STATUS" ] || [ "$WORKFLOW_STATUS" = "null" ]; then
+            WORKFLOW_STATUS="timeout"
+          fi
+
           CHECKOUT_SUCCESS="${{ needs.update-snapshots.outputs.checkout_success || 'false' }}"
           DOCKER_SUCCESS="${{ needs.update-snapshots.outputs.docker_success || 'false' }}"
           PLAYWRIGHT_SUCCESS="${{ needs.update-snapshots.outputs.playwright_success || 'false' }}"
+          PLAYWRIGHT_EXIT_CODE="${{ needs.update-snapshots.outputs.playwright_exit_code || 'unknown' }}"
+          TESTS_TOTAL="${{ needs.update-snapshots.outputs.tests_total || '0' }}"
+          TESTS_PASSED="${{ needs.update-snapshots.outputs.tests_passed || '0' }}"
+          TESTS_FAILED="${{ needs.update-snapshots.outputs.tests_failed || '0' }}"
+          TESTS_SKIPPED="${{ needs.update-snapshots.outputs.tests_skipped || '0' }}"
           HAS_CHANGES="${{ needs.update-snapshots.outputs.has_changes || 'false' }}"
           CHANGED_FILES_COUNT="${{ needs.update-snapshots.outputs.files_changed || '0' }}"
           COMMIT_SUCCESS="${{ needs.update-snapshots.outputs.commit_success || 'false' }}"
           PUSH_SUCCESS="${{ needs.update-snapshots.outputs.push_success || 'false' }}"
+          JOB_START_TIME="${{ needs.update-snapshots.outputs.job_start_time || 'unknown' }}"
           TRIGGER_METHOD="${{ github.event_name }}"
 
           # Export for extraction script
@@ -286,10 +338,16 @@ jobs:
           export CHECKOUT_SUCCESS
           export DOCKER_SUCCESS
           export PLAYWRIGHT_SUCCESS
+          export PLAYWRIGHT_EXIT_CODE
+          export TESTS_TOTAL
+          export TESTS_PASSED
+          export TESTS_FAILED
+          export TESTS_SKIPPED
           export HAS_CHANGES
           export CHANGED_FILES_COUNT
           export COMMIT_SUCCESS
           export PUSH_SUCCESS
+          export JOB_START_TIME
           export TRIGGER_METHOD
 
           # Extract metadata

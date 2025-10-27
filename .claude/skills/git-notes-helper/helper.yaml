@@ -656,6 +656,32 @@ common_namespaces:
       - "test_name"
       - "error_message"
 
+  snapshot-updates:
+    description: "Visual snapshot update workflow execution metadata from CI"
+    sections:
+      - "[metadata]"
+      - "[execution]"
+      - "[snapshot_changes]"
+      - "[diagnostics]"
+      - "[test_results]"
+      - "[timing]"
+      - "[trigger_details]"
+    fields:
+      - "timestamp"
+      - "commit"
+      - "status (success, failure, timeout, in_progress)"
+      - "outcome (snapshots_updated, no_changes_needed, failed, in_progress)"
+      - "error_step"
+      - "error_message"
+      - "playwright_exit_code"
+      - "total_tests"
+      - "passed"
+      - "failed"
+      - "skipped"
+      - "job_duration_seconds"
+      - "timed_out"
+      - "triggered_by (push, issue_comment, workflow_dispatch)"
+
 output_format: |
   When using this skill to provide git notes operations:
 
