@@ -64,6 +64,8 @@ jobs:
       docker_success: ${{ steps.record_docker.outputs.success }}
       playwright_success: ${{ steps.record_playwright.outputs.success }}
       playwright_exit_code: ${{ steps.record_playwright.outputs.exit_code }}
+      playwright_error_log: ${{ steps.capture_error_details.outputs.error_log }}
+      docker_container_status: ${{ steps.capture_error_details.outputs.container_status }}
       tests_total: ${{ steps.extract_results.outputs.tests_total }}
       tests_passed: ${{ steps.extract_results.outputs.tests_passed }}
       tests_failed: ${{ steps.extract_results.outputs.tests_failed }}
@@ -150,6 +152,29 @@ jobs:
           DOCKER_USER: root
           TEST_ENV: ci-docker
           UPDATING_SNAPSHOTS: true
+
+      - name: Capture error details
+        if: always() && steps.record_playwright.outcome != 'skipped' && steps.record_playwright.outcome != 'success'
+        id: capture_error_details
+        run: |
+          # Capture last 50 lines of Playwright container logs
+          ERROR_LOG=$(docker compose -f docker-compose.e2e.yml logs playwright --tail=50 2>&1 | grep -E "Error:|FAIL|TIMEOUT|exit code" | head -20 || echo "No error logs captured")
+
+          # Escape special characters for GitHub output
+          ERROR_LOG=$(echo "$ERROR_LOG" | head -c 1000)  # Limit to 1000 chars
+          ERROR_LOG="${ERROR_LOG//'%'/'%25'}"
+          ERROR_LOG="${ERROR_LOG//$'\n'/'%0A'}"
+          ERROR_LOG="${ERROR_LOG//$'\r'/'%0D'}"
+
+          echo "error_log=$ERROR_LOG" >> $GITHUB_OUTPUT
+
+          # Get container exit status
+          CONTAINER_STATUS=$(docker compose -f docker-compose.e2e.yml ps -a playwright --format json 2>/dev/null | jq -r '.[0].State // "unknown"' || echo "unknown")
+          echo "container_status=$CONTAINER_STATUS" >> $GITHUB_OUTPUT
+
+          echo "📋 Captured error details"
+          echo "   Container status: $CONTAINER_STATUS"
+          echo "   Error log preview: ${ERROR_LOG:0:200}..."
 
       - name: Extract test results from Docker container
         if: always() && steps.record_playwright.outcome != 'skipped'
@@ -322,6 +347,8 @@ jobs:
           DOCKER_SUCCESS="${{ needs.update-snapshots.outputs.docker_success || 'false' }}"
           PLAYWRIGHT_SUCCESS="${{ needs.update-snapshots.outputs.playwright_success || 'false' }}"
           PLAYWRIGHT_EXIT_CODE="${{ needs.update-snapshots.outputs.playwright_exit_code || 'unknown' }}"
+          PLAYWRIGHT_ERROR_LOG="${{ needs.update-snapshots.outputs.playwright_error_log || 'none' }}"
+          DOCKER_CONTAINER_STATUS="${{ needs.update-snapshots.outputs.docker_container_status || 'unknown' }}"
           TESTS_TOTAL="${{ needs.update-snapshots.outputs.tests_total || '0' }}"
           TESTS_PASSED="${{ needs.update-snapshots.outputs.tests_passed || '0' }}"
           TESTS_FAILED="${{ needs.update-snapshots.outputs.tests_failed || '0' }}"
@@ -339,6 +366,8 @@ jobs:
           export DOCKER_SUCCESS
           export PLAYWRIGHT_SUCCESS
           export PLAYWRIGHT_EXIT_CODE
+          export PLAYWRIGHT_ERROR_LOG
+          export DOCKER_CONTAINER_STATUS
           export TESTS_TOTAL
           export TESTS_PASSED
           export TESTS_FAILED

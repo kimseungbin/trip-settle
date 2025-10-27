@@ -19,6 +19,8 @@
 #   CHANGED_FILES_COUNT: Number of snapshot files changed
 #   CHECKOUT_SUCCESS, DOCKER_SUCCESS, PLAYWRIGHT_SUCCESS, COMMIT_SUCCESS, PUSH_SUCCESS
 #   PLAYWRIGHT_EXIT_CODE: Exit code from Playwright tests (optional)
+#   PLAYWRIGHT_ERROR_LOG: Captured error logs from Playwright container (optional)
+#   DOCKER_CONTAINER_STATUS: Docker container exit status (optional)
 #   TESTS_TOTAL, TESTS_PASSED, TESTS_FAILED, TESTS_SKIPPED: Test result counts (optional)
 #   JOB_START_TIME: Job start timestamp in seconds since epoch (optional)
 #   GITHUB_SHA, GITHUB_REF_NAME, GITHUB_RUN_ID, etc.
@@ -44,6 +46,8 @@ PLAYWRIGHT_SUCCESS="${PLAYWRIGHT_SUCCESS:-false}"
 COMMIT_SUCCESS="${COMMIT_SUCCESS:-false}"
 PUSH_SUCCESS="${PUSH_SUCCESS:-false}"
 PLAYWRIGHT_EXIT_CODE="${PLAYWRIGHT_EXIT_CODE:-unknown}"
+PLAYWRIGHT_ERROR_LOG="${PLAYWRIGHT_ERROR_LOG:-none}"
+DOCKER_CONTAINER_STATUS="${DOCKER_CONTAINER_STATUS:-unknown}"
 TESTS_TOTAL="${TESTS_TOTAL:-0}"
 TESTS_PASSED="${TESTS_PASSED:-0}"
 TESTS_FAILED="${TESTS_FAILED:-0}"
@@ -134,9 +138,14 @@ pushed = ${PUSH_SUCCESS}
 error_step = ${ERROR_STEP}
 error_message = ${ERROR_MESSAGE}
 playwright_exit_code = ${PLAYWRIGHT_EXIT_CODE}
+docker_container_status = ${DOCKER_CONTAINER_STATUS}
 test_env = ci-docker
 updating_snapshots = true
 docker_user = root
+
+[error_details]
+# Captured Docker logs (last 50 lines, filtered for errors)
+playwright_error_log = ${PLAYWRIGHT_ERROR_LOG}
 
 [test_results]
 total_tests = ${TESTS_TOTAL}

@@ -108,9 +108,14 @@ instructions: |
   error_step = none
   error_message = none
   playwright_exit_code = 0
+  docker_container_status = exited
   test_env = ci-docker
   updating_snapshots = true
   docker_user = root
+
+  [error_details]
+  # Captured Docker logs (last 50 lines, filtered for errors)
+  playwright_error_log = none
 
   [test_results]
   total_tests = 64
