@@ -881,3 +881,46 @@ Visual snapshots are ONLY updated in CI (GitHub Actions), never locally. Enforce
 - Selective scope optimization (`update:visual`, `update:e2e`)
 - When to update snapshots (CSS, layout, visual elements)
 - Verification and best practices
+
+## CSS & Mobile Responsive Design Best Practices
+
+### Mobile Flexbox Alignment
+
+**Problem**: Multiple sibling flex containers (e.g., list, input row, button row) appearing misaligned on mobile despite being in the same parent.
+
+**Root Causes**:
+- Global mobile styles like `button { width: 100% }` affect some buttons but not others
+- Flex containers naturally stretch to fit content without explicit width constraints
+- Missing `box-sizing: border-box` causes borders to add extra width
+
+**Solution Pattern**:
+```css
+@media (max-width: 640px) {
+  /* Force all sibling sections to same width */
+  .section-1,
+  .section-2,
+  .section-3 {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Allow flex children to shrink */
+  .flex-child-input {
+    min-width: 0; /* Critical for flexbox */
+  }
+
+  /* Keep specific buttons compact */
+  .specific-button {
+    width: auto;
+    flex-shrink: 0;
+  }
+}
+```
+
+**Key Principles**:
+1. **Explicit width for siblings**: Set `width: 100%` on all sibling containers in mobile responsive rules
+2. **Box sizing**: Always use `box-sizing: border-box` to include borders/padding in width
+3. **Min-width for flex**: Add `min-width: 0` to flex items that should shrink (default `auto` prevents shrinking)
+4. **Specificity matters**: More specific selectors override general rules - need explicit mobile overrides
+
+**When to apply**: Multiple sibling flex containers that should visually align, mobile layouts with full-width buttons, forms with input rows alongside button rows.

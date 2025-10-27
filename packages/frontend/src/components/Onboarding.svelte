@@ -851,12 +851,14 @@
 		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		font-size: 1rem;
+		box-sizing: border-box;
 	}
 
 	.payer-input button {
 		padding: 0.75rem 1.5rem;
 		background: var(--color-primary);
 		color: white;
+		box-sizing: border-box;
 	}
 
 	.payer-input button:hover {
@@ -969,6 +971,26 @@
 
 		.currency-selection {
 			padding: 1rem;
+		}
+
+		.payer-collection {
+			padding: 1rem;
+		}
+
+		.payer-list,
+		.payer-input,
+		.actions {
+			width: 100%;
+			box-sizing: border-box;
+		}
+
+		.payer-input button {
+			width: auto;
+			flex-shrink: 0;
+		}
+
+		.payer-input input {
+			min-width: 0;
 		}
 	}
 </style>
