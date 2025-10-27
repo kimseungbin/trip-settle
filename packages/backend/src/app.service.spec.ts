@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AppService } from './app.service'
 import { DataSource } from 'typeorm'
@@ -8,7 +9,7 @@ describe('AppService', () => {
 	beforeEach(async () => {
 		// Create a mock DataSource for unit testing
 		const mockDataSource = {
-			query: jest.fn(),
+			query: vi.fn(),
 		} as unknown as DataSource
 
 		const module: TestingModule = await Test.createTestingModule({

@@ -176,11 +176,13 @@ npm run build --workspace=backend
 # Start production server
 npm run start --workspace=backend
 
-# Run tests
-npm run test --workspace=backend
-npm run test:watch --workspace=backend
-npm run test:cov --workspace=backend
-npm run test:e2e --workspace=backend
+# Run tests (Vitest)
+npm run test --workspace=backend         # Run all unit and integration tests
+npm run test:watch --workspace=backend   # Watch mode
+npm run test:ui --workspace=backend      # Interactive UI mode
+npm run test:cov --workspace=backend     # With coverage report
+
+# Note: E2E tests are currently not functional (see Testing & CI/CD Readiness section)
 ```
 
 **Backend Run Modes:**
@@ -231,6 +233,7 @@ npm run destroy --workspace=infra
 - **Framework**: NestJS with Express
 - **Database**: PostgreSQL with TypeORM
 - **ORM**: TypeORM (configured in `app.module.ts`)
+- **Testing**: Vitest (unit and integration tests)
 - **API Prefix**: `/api` (all routes prefixed)
 - **CORS**: Enabled for frontend origin
 - **Validation**: Global validation pipe with class-validator
@@ -527,30 +530,35 @@ git notes --ref=ci/<namespace> list
 
 This section tracks the implementation status of tests needed for continuous integration. Tests ensure code quality, prevent regressions, and validate functionality before deployment.
 
-### Backend Tests (NestJS + Jest)
+### Backend Tests (NestJS + Vitest)
 
-**Note**: Backend currently has no tests. CI uses `--passWithNoTests` flag to prevent failures. This is temporary until tests are implemented.
+**Testing Framework**: The backend uses Vitest for unit and integration tests.
 
 #### Unit Tests
-- [ ] AppController tests (`app.controller.spec.ts`)
-- 
-- [ ] AppService tests (`app.service.spec.ts`)
-- [ ] Database configuration tests (`database.config.spec.ts`)
+- [x] AppService tests (`app.service.spec.ts`)
+  - getHello() method tests
+  - Basic service functionality
 
 #### Integration Tests
+- [x] AppService integration tests (`app.service.integration.spec.ts`)
+  - getHealth() with database connection
+  - Database error handling
 - [ ] TypeORM entity CRUD operations
-- [ ] Database connection with pg-mem
+- [x] Database connection with pg-mem
 - [ ] Environment-specific configuration loading
 
-#### E2E Tests (test/jest-e2e.json)
+#### E2E Tests
+**Note**: E2E tests are currently not functional with Vitest due to decorator metadata limitations. The migration from Jest to Vitest is complete for unit and integration tests. E2E tests require additional configuration work with SWC or ts-node to properly handle NestJS decorators (`emitDecoratorMetadata`).
+
+Existing E2E test file (`test/app.e2e-spec.ts`) has been migrated to Vitest syntax but is not executable:
 - [ ] Health check endpoint (`GET /api/health`)
 - [ ] Hello endpoint (`GET /api`)
 - [ ] CORS configuration validation
 - [ ] Global validation pipe behavior
 
 #### Backend Infrastructure Tests
-- [ ] Module initialization tests
-- [ ] Dependency injection validation
+- [x] Module initialization tests
+- [x] Dependency injection validation
 
 ### Frontend Tests (Svelte + Vitest)
 
