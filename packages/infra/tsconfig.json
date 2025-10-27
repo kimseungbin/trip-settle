@@ -17,7 +17,9 @@
 		"inlineSourceMap": true,
 		"inlineSources": true,
 		"strictPropertyInitialization": false,
-		"types": ["node"]
+		"types": ["node"],
+		"noEmit": true,
+		"incremental": true
 	},
 	"exclude": ["cdk.out", "eslint.config.mjs"]
 }

@@ -18,6 +18,7 @@ build/
 config/**/*.js
 config/**/*.js.map
 config/**/*.d.ts
+*.tsbuildinfo
 
 # Environment
 .env
