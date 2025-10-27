@@ -1,8 +1,13 @@
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
 	"compilerOptions": {
-		// Type checking
-		"strict": false,
+		// Strict type checking (packages can override if needed)
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"noImplicitThis": true,
+		"alwaysStrict": true,
+		"noImplicitReturns": true,
 		"skipLibCheck": true,
 
 		// Module resolution
@@ -15,11 +20,17 @@
 		"declaration": true,
 		"sourceMap": true,
 		"removeComments": true,
+		"incremental": true,
 
 		// Interop constraints
 		"isolatedModules": true,
 		"forceConsistentCasingInFileNames": true,
 		"experimentalDecorators": true,
+
+		// Common practical settings
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"noFallthroughCasesInSwitch": false,
 
 		// Type roots for monorepo structure
 		"typeRoots": ["./node_modules/@types", "../node_modules/@types"]

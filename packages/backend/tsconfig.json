@@ -8,7 +8,6 @@
 
 		// Output
 		"outDir": "./dist",
-		"incremental": true,
 
 		// Paths
 		"baseUrl": "./",
@@ -16,11 +15,11 @@
 			"@/*": ["src/*"]
 		},
 
-		// NestJS requires relaxed strict checks
+		// NestJS requires relaxed strict checks (override base)
+		"strict": false,
 		"strictNullChecks": false,
 		"noImplicitAny": false,
 		"strictBindCallApply": false,
-		"noFallthroughCasesInSwitch": false,
 
 		// Monorepo type resolution
 		"types": []
