@@ -548,9 +548,15 @@ This section tracks the implementation status of tests needed for continuous int
 - [ ] Environment-specific configuration loading
 
 #### E2E Tests
-**Note**: E2E tests are currently not functional with Vitest due to decorator metadata limitations. The migration from Jest to Vitest is complete for unit and integration tests. E2E tests require additional configuration work with SWC or ts-node to properly handle NestJS decorators (`emitDecoratorMetadata`).
+**Note**: E2E tests are currently not functional with Vitest due to decorator metadata limitations. The migration from Jest to Vitest is complete for unit and integration tests.
 
-Existing E2E test file (`test/app.e2e-spec.ts`) has been migrated to Vitest syntax but is not executable:
+**Technical Details**: NestJS requires `emitDecoratorMetadata: true` for dependency injection, but Vitest's default esbuild transformer doesn't support this. The recommended solution is using `@swc/core` with `unplugin-swc` (per [NestJS docs](https://docs.nestjs.com/recipes/swc)), but this encounters native binding issues on macOS (`Cannot find module './swc.darwin-arm64.node'`). This is a known limitation of SWC's optional peer dependencies on macOS.
+
+**Alternative Approaches Explored**:
+- SWC with unplugin-swc: Failed due to native binding issues
+- ts-node with fork pool: Not attempted due to SWC being the official recommendation
+
+**Current State**: Existing E2E test file (`test/app.e2e-spec.ts`) has been migrated to Vitest syntax but is not executable:
 - [ ] Health check endpoint (`GET /api/health`)
 - [ ] Hello endpoint (`GET /api`)
 - [ ] CORS configuration validation

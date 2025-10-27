@@ -5,6 +5,7 @@ export default defineConfig({
 		globals: true,
 		environment: 'node',
 		// Match both unit tests (*.spec.ts) and integration tests (*.integration.spec.ts)
+		// E2E tests excluded due to NestJS decorator metadata requirements
 		include: ['src/**/*.spec.ts'],
 		exclude: [
 			'**/node_modules/**',
