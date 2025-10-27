@@ -19,5 +19,5 @@
 		"strictPropertyInitialization": false,
 		"types": ["node"]
 	},
-	"exclude": ["cdk.out"]
+	"exclude": ["cdk.out", "eslint.config.mjs"]
 }
