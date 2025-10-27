@@ -349,6 +349,22 @@ Entity files should follow the pattern `*.entity.ts` and will be auto-loaded by 
 - Config: `.prettierrc.yaml` (root level)
 - 120 character line width, tabs (width: 4), single quotes, no semicolons, ES5 trailing commas
 
+### Style Linting (Stylelint)
+- **Purpose**: Detect hardcoded colors in CSS and Svelte `<style>` blocks
+- **Config**: `packages/frontend/.stylelintrc.json`
+- **Rules**: Enforces CSS custom properties (`var(--color-*)`) instead of hardcoded colors
+- **Commands**:
+  ```bash
+  npm run stylelint --workspace=frontend        # Check for violations
+  npm run stylelint:fix --workspace=frontend    # Auto-fix where possible
+  ```
+- **Exceptions**:
+  - `theme.css`: Allows all color definitions (source of truth)
+  - `DevTools.svelte`: Dev-only component with intentional hardcoded colors
+  - `Toast.svelte`: Allows hex fallbacks in `var(--color-*, #fallback)` format
+  - `KeyboardHint.svelte`: Allows rgba() for shadow opacity
+- **Pre-commit hook**: Automatically checks for hardcoded colors before commit
+
 ### Testing
 - Frontend: Vitest with happy-dom (unit tests), Playwright (E2E tests)
 - Backend: Jest with ts-jest

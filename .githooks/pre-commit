@@ -70,7 +70,15 @@ else
     print_error "Linting failed. Fix the issues above."
 fi
 
-# 4. Type check all TypeScript files (including tests)
+# 4. Style linting (CSS hardcoded colors check)
+print_step "Checking CSS for hardcoded colors..."
+if npm run stylelint --workspace=frontend; then
+    print_success "Stylelint passed"
+else
+    print_error "Stylelint failed. Hardcoded colors detected. Use CSS custom properties (var(--color-*))."
+fi
+
+# 5. Type check all TypeScript files (including tests)
 print_step "Type checking TypeScript files..."
 if npm run type-check --workspace=frontend; then
     print_success "Type checking passed"
@@ -78,7 +86,7 @@ else
     print_error "Type checking failed. Fix type errors above."
 fi
 
-# 5. Build all packages
+# 6. Build all packages
 print_step "Building all packages..."
 if npm run build; then
     print_success "Build successful"
@@ -86,7 +94,7 @@ else
     print_error "Build failed. Fix compilation errors above."
 fi
 
-# 6. Clean build artifacts after validation
+# 7. Clean build artifacts after validation
 print_step "Cleaning build artifacts..."
 find packages/infra -type f \( -name "*.js" -o -name "*.d.ts" -o -name "*.js.map" \) ! -name "jest.config.js" ! -name ".eslintrc.js" -delete 2>/dev/null || true
 print_success "Build artifacts cleaned"

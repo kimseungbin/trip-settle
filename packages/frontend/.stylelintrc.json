@@ -1,0 +1,59 @@
+{
+	"extends": ["stylelint-config-standard", "stylelint-config-html/svelte"],
+	"customSyntax": "postcss-html",
+	"rules": {
+		"color-named": ["never", { "ignore": ["inside-function"] }],
+		"color-no-hex": [true, { "ignore": ["inside-function"] }],
+		"function-disallowed-list": ["rgb", "rgba", "hsl", "hsla"],
+		"selector-class-pattern": null,
+		"selector-pseudo-class-no-unknown": [
+			true,
+			{
+				"ignorePseudoClasses": ["global"]
+			}
+		],
+		"declaration-property-value-disallowed-list": null,
+		"alpha-value-notation": null,
+		"color-function-notation": null,
+		"color-function-alias-notation": null,
+		"media-feature-range-notation": null,
+		"rule-empty-line-before": null,
+		"keyframes-name-pattern": null,
+		"no-descending-specificity": null,
+		"declaration-property-value-keyword-no-deprecated": null
+	},
+	"overrides": [
+		{
+			"files": ["*.svelte", "**/*.svelte"],
+			"customSyntax": "postcss-html"
+		},
+		{
+			"files": ["**/styles/theme.css"],
+			"rules": {
+				"color-no-hex": null,
+				"color-named": null,
+				"function-disallowed-list": null
+			}
+		},
+		{
+			"files": ["**/components/DevTools.svelte"],
+			"rules": {
+				"color-no-hex": null,
+				"color-named": null,
+				"function-disallowed-list": null
+			}
+		},
+		{
+			"files": ["**/components/Toast.svelte"],
+			"rules": {
+				"color-no-hex": null
+			}
+		},
+		{
+			"files": ["**/components/KeyboardHint.svelte"],
+			"rules": {
+				"function-disallowed-list": null
+			}
+		}
+	]
+}
