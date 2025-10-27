@@ -7,6 +7,7 @@ description: |
   - Reading notes from commits
   - Parsing INI-format note data
   - Historical analysis across commits
+  - Writing notes in CI (post-job architecture pattern)
 
   This skill is used by other skills (docker-cache-analysis, e2e-failure-analysis)
   that store structured metadata in git notes.
@@ -304,6 +305,122 @@ instructions: |
   - Track improvements
   - Identify what changed between runs
   - Regression alerts
+
+  ## Writing Git Notes in CI
+
+  This section covers how to **create** git notes in CI workflows (GitHub Actions).
+  The patterns below are used in this project's CI workflows to capture metadata.
+
+  ### Post-Job Architecture for Accurate Status Capture
+
+  **Problem**: Within a GitHub Actions job, `${{ job.status }}` always evaluates to "running"
+  during execution, making it impossible to capture the final result (success/failure/cancelled).
+
+  **Solution**: Use a separate post-job that runs AFTER the main job completes.
+
+  **Implementation Pattern**:
+
+  ```yaml
+  jobs:
+    main-job:
+      runs-on: ubuntu-latest
+      outputs:
+        # Export step success flags as job outputs
+        step1_success: ${{ steps.step1.outputs.success }}
+        step2_success: ${{ steps.step2.outputs.success }}
+      steps:
+        - name: Some step
+          id: step1
+          run: |
+            # ... do work
+            echo "success=true" >> $GITHUB_OUTPUT  # Only set if successful
+
+        - name: Another step
+          id: step2
+          run: |
+            # ... do work
+            echo "success=true" >> $GITHUB_OUTPUT
+
+    # Post-job captures accurate final status
+    capture-metadata:
+      needs: [main-job]
+      if: always()  # Run even if main-job fails
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0  # Need full history for git notes
+
+        - name: Capture workflow metadata
+          run: |
+            # Accurate final status from needs context
+            STATUS="${{ needs.main-job.result }}"  # success, failure, cancelled, skipped
+            STEP1="${{ needs.main-job.outputs.step1_success || 'false' }}"
+            STEP2="${{ needs.main-job.outputs.step2_success || 'false' }}"
+
+            # Generate INI-format metadata
+            cat > note.txt <<EOF
+            timestamp = $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            commit = ${{ github.sha }}
+            workflow_status = $STATUS
+            step1_success = $STEP1
+            step2_success = $STEP2
+            run_url = ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            EOF
+
+            # Attach note to commit
+            git notes --ref=ci/my-namespace add -F note.txt ${{ github.sha }}
+
+        - name: Push notes to remote
+          run: |
+            git push origin refs/notes/ci/my-namespace
+  ```
+
+  **Key Benefits**:
+  - ✅ Captures accurate final status (not "running")
+  - ✅ Runs even when main job fails (`if: always()`)
+  - ✅ Identifies which specific step failed (via outputs)
+  - ✅ Enables reliable workflow analytics
+
+  **Real Examples in This Project**:
+  - `.github/workflows/update-snapshots.yml` - Snapshot update workflow with metadata capture
+  - `.github/workflows/ci.yml` - E2E tests with cache metrics capture
+
+  ### INI Format for Note Data
+
+  Git notes in this project use INI format for structured data:
+
+  ```ini
+  # Top-level fields (key=value)
+  timestamp = 2025-10-26T10:30:00Z
+  commit = abc123def456
+  status = success
+
+  # Sections (bracket notation)
+  [metadata]
+  workflow = ci.yml
+  run_id = 123456
+
+  [summary]
+  total_tests = 42
+  passed = 40
+  failed = 2
+
+  # Numbered sections for multiple items
+  [failure.1]
+  test_name = ExpenseTracker › Add expense
+  error_message = Timeout waiting for element
+
+  [failure.2]
+  test_name = Login › Invalid credentials
+  error_message = Expected "error" class
+  ```
+
+  **Why INI format?**
+  - Simple to parse with grep/cut/sed
+  - Human-readable for debugging
+  - Supports sections for structured data
+  - Easy to extend with new fields
 
   ## Best Practices
 
