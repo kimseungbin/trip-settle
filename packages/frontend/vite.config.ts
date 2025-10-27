@@ -10,10 +10,15 @@ const backendUrl = process.env.API_URL ? process.env.API_URL.replace('/api', '')
 // In development and other deployments, use root
 const base = process.env.VITE_BASE_PATH || '/'
 
-// Only expose to network (0.0.0.0) when needed for local cross-device testing
-// In CI, this defaults to false (no network exposure needed)
-// In Docker E2E, the --host CLI flag overrides this config (required for inter-container communication)
-const shouldExposeToNetwork = process.env.CI !== 'true' && process.env.VITE_HOST !== 'false'
+// Only expose to network (0.0.0.0) when needed for local cross-device testing or Docker E2E
+// - VITE_HOST=0.0.0.0 or true: Explicitly enable (Docker E2E needs this with CI=true)
+// - VITE_HOST=false: Explicitly disable
+// - CI=true: Default to localhost only (unless VITE_HOST overrides)
+// - CI=false/unset: Default to network exposure (local dev)
+const shouldExposeToNetwork =
+	process.env.VITE_HOST === '0.0.0.0' ||
+	process.env.VITE_HOST === 'true' ||
+	(process.env.CI !== 'true' && process.env.VITE_HOST !== 'false')
 
 export default defineConfig({
 	base,

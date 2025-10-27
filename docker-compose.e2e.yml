@@ -50,7 +50,8 @@ services:
       - "5173:5173"
     environment:
       - NODE_ENV=local
-      - CI=true  # Disable network exposure by default; --host flag overrides for Docker
+      - CI=true
+      - VITE_HOST=0.0.0.0  # Expose Vite server to all network interfaces for Docker inter-container communication
       - VITE_ALLOW_ORIGINS=*
       - API_URL=http://backend:3000/api
     depends_on:
