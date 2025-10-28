@@ -5,7 +5,7 @@
 	"description": "Determines if visual snapshot update workflow should run",
 	"main": "dist/index.js",
 	"scripts": {
-		"build": "esbuild src/main.ts --bundle --platform=node --target=node24 --format=esm --outfile=dist/index.js --sourcemap",
+		"build": "node ../build.mjs",
 		"test": "jest",
 		"format": "prettier --write 'src/**/*.ts' '__tests__/**/*.ts'",
 		"format:check": "prettier --check 'src/**/*.ts' '__tests__/**/*.ts'",
