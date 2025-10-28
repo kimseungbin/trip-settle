@@ -1,0 +1,31 @@
+name: 'Extract E2E Failures'
+description: 'Extract E2E test failure metadata from Playwright JSON reporter output for git notes storage'
+author: 'Trip Settle'
+
+inputs:
+  results-path:
+    description: 'Path to Playwright JSON results file'
+    required: true
+    default: 'packages/frontend/test-results/results.json'
+  output-path:
+    description: 'Path to output INI-format note file'
+    required: true
+    default: 'e2e-failure-note.txt'
+
+outputs:
+  tests-total:
+    description: 'Total number of tests executed'
+  tests-passed:
+    description: 'Number of tests that passed'
+  tests-failed:
+    description: 'Number of tests that failed'
+  tests-skipped:
+    description: 'Number of tests that were skipped'
+  pass-rate:
+    description: 'Test pass rate percentage (e.g., "95.5")'
+  failures-count:
+    description: 'Number of test failures detected'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

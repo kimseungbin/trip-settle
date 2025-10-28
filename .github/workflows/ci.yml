@@ -350,24 +350,20 @@ jobs:
           path: packages/frontend/test-results/
           retention-days: 30
 
-      - name: Capture E2E test failure metadata
-        if: always()  # Run even if tests fail
+      - name: Extract E2E test failure metadata
+        if: always() && hashFiles('packages/frontend/test-results/results.json') != ''
+        id: extract-failures
+        uses: ./.github/actions/extract-e2e-failures
+        with:
+          results-path: packages/frontend/test-results/results.json
+          output-path: e2e-failure-note.txt
+
+      - name: Store failure metadata in git notes
+        if: always() && steps.extract-failures.conclusion == 'success'
         run: |
-          echo "📊 Capturing E2E test failure metadata..."
+          echo "📊 Storing E2E failure metadata in git notes..."
 
-          # Check if results.json exists
-          if [ ! -f packages/frontend/test-results/results.json ]; then
-            echo "⚠️ No results.json found - tests may not have run or JSON reporter not configured"
-            echo "Skipping failure metadata capture"
-            exit 0
-          fi
-
-          # Extract failure metadata using Node.js script
-          node .github/scripts/extract-e2e-failures.js \
-            packages/frontend/test-results/results.json \
-            e2e-failure-note.txt
-
-          # Store in git notes
+          # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -430,15 +426,10 @@ jobs:
 
       - name: Generate failure report
         if: contains(needs.*.result, 'failure')
-        run: node .github/scripts/generate-failure-report.js
-        env:
-          BUILD_LOG_PATH: build-log.txt
-          OUTPUT_PATH: ci-failure-report.md
-          GITHUB_SERVER_URL: ${{ github.server_url }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REF: ${{ github.ref }}
+        uses: ./.github/actions/generate-failure-report
+        with:
+          build-log-path: build-log.txt
+          output-path: ci-failure-report.md
 
       - name: Add report to job summary
         if: contains(needs.*.result, 'failure') && hashFiles('ci-failure-report.md') != ''

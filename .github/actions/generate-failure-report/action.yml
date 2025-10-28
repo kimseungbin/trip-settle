@@ -1,0 +1,21 @@
+name: 'Generate Failure Report'
+description: 'Generate CI failure report aggregating build errors and test failures'
+author: 'Trip Settle'
+
+inputs:
+  build-log-path:
+    description: 'Path to build log file'
+    required: false
+    default: 'build-log.txt'
+  output-path:
+    description: 'Path to output markdown report'
+    required: false
+    default: 'ci-failure-report.md'
+
+outputs:
+  report-path:
+    description: 'Path to the generated report file'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
