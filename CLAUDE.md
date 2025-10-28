@@ -2,24 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
-
-Trip Settle is a full-stack TypeScript monorepo for managing trip expense settlements. The project uses npm workspaces to manage three main packages:
-
-- **frontend**: Svelte application with Vite
-- **backend**: NestJS REST API
-- **infra**: AWS CDK infrastructure as code
-
-## Design Requirements
-
-All features must meet these requirements:
-- **Keyboard accessible**: Work without mouse (Enter/Escape/Arrow keys)
-- **ARIA compliant**: Screen reader support, semantic HTML
-- **Mobile-first responsive**: Design for mobile viewport, enhance for desktop
-- **Fast interactions**: Sub-second loads, instant feedback
-- **Visual feedback**: Clear response for every user action
-
-See README.md "Design Philosophy" section for rationale and implementation details.
+# TIER 1: CRITICAL PROCESS (Always Check First)
 
 ## Feature Development Workflow (MANDATORY)
 
@@ -92,59 +75,18 @@ During TDD cycles, only run unit tests (< 5 seconds). E2E tests take 2-5 minutes
 
 See `.claude/skills/tdd-workflow/workflow.yaml` for complete testing strategy.
 
-## Monorepo Structure
+## Design Requirements
 
-```
-trip-settle/
-├── packages/
-│   ├── frontend/     # Svelte + Vite + TypeScript
-│   ├── backend/      # NestJS + TypeORM + PostgreSQL
-│   └── infra/        # AWS CDK
-├── .github/actions/  # TypeScript GitHub Actions (workspace members)
-│   ├── check-snapshot-trigger/
-│   ├── extract-e2e-failures/
-│   └── generate-failure-report/
-└── package.json      # Root workspace configuration
-```
+All features must meet these requirements:
+- **Keyboard accessible**: Work without mouse (Enter/Escape/Arrow keys)
+- **ARIA compliant**: Screen reader support, semantic HTML
+- **Mobile-first responsive**: Design for mobile viewport, enhance for desktop
+- **Fast interactions**: Sub-second loads, instant feedback
+- **Visual feedback**: Clear response for every user action
 
-## GitHub Actions as Workspace Members
+See README.md "Design Philosophy" section for rationale and implementation details.
 
-Custom GitHub Actions are written in TypeScript and integrated as npm workspace members for better monorepo cohesion.
-
-**Structure** (`.github/actions/<action-name>/`):
-```
-action-name/
-├── src/
-│   └── main.ts              # TypeScript source
-├── dist/
-│   └── index.js             # Bundled ESM output (committed with esbuild)
-├── action.yml               # Action metadata
-├── package.json             # Dependencies & scripts (with "type": "module")
-├── tsconfig.json            # TypeScript config
-└── README.md                # Documentation
-```
-
-**Actions**:
-- **check-snapshot-trigger** - Determines if visual snapshot update workflow should run
-- **extract-e2e-failures** - Parses Playwright JSON results and categorizes failures
-- **generate-failure-report** - Aggregates build errors into markdown reports
-
-**Benefits**:
-- ✅ Type safety with full TypeScript interfaces
-- ✅ Shared dependencies hoisted to root (saves ~400MB)
-- ✅ Unified build/lint/format commands
-- ✅ Better error handling with @actions/core
-- ✅ Action outputs available to downstream workflow steps
-- ✅ Testability with Jest infrastructure
-
-**Build command**:
-```bash
-npm run build --workspace=.github/actions/<action-name>
-# Or build all actions:
-npm run build:actions
-```
-
-**Important**: The `dist/` directory must be committed (GitHub Actions requirement). Always rebuild and commit after changing `src/main.ts`.
+# TIER 2: FREQUENTLY REFERENCED (Active Development)
 
 ## Development Commands
 
@@ -256,6 +198,215 @@ npm run deploy --workspace=infra
 
 # Destroy infrastructure
 npm run destroy --workspace=infra
+```
+
+## Code Quality
+
+### Linting
+- ESLint configured per package
+- Frontend: Svelte-specific rules
+- Backend: NestJS-specific rules
+- Infra: TypeScript-only rules
+
+### Formatting
+- Prettier with Svelte plugin
+- Config: `.prettierrc.yaml` (root level)
+- 120 character line width, tabs (width: 4), single quotes, no semicolons, ES5 trailing commas
+
+### Style Linting (Stylelint)
+- **Purpose**: Detect hardcoded colors in CSS and Svelte `<style>` blocks
+- **Config**: `packages/frontend/.stylelintrc.json`
+- **Rules**: Enforces CSS custom properties (`var(--color-*)`) instead of hardcoded colors
+- **Commands**:
+  ```bash
+  npm run stylelint --workspace=frontend        # Check for violations
+  npm run stylelint:fix --workspace=frontend    # Auto-fix where possible
+  ```
+- **Exceptions**:
+  - `theme.css`: Allows all color definitions (source of truth)
+  - `DevTools.svelte`: Dev-only component with intentional hardcoded colors
+  - `Toast.svelte`: Allows hex fallbacks in `var(--color-*, #fallback)` format
+  - `KeyboardHint.svelte`: Allows rgba() for shadow opacity
+- **Pre-commit hook**: Automatically checks for hardcoded colors before commit
+
+### Testing
+- Frontend: Vitest with happy-dom (unit tests), Playwright (E2E tests)
+- Backend: Jest with ts-jest
+- Infra: Jest with ts-jest
+- E2E tests: Playwright for frontend, Jest for backend API
+
+### Configuration Commonization
+
+**Principle**: Always maximize configuration reuse through base/shared configs to reduce duplication and ensure consistency.
+
+#### TypeScript Configuration Hierarchy
+
+The monorepo uses a hierarchical TypeScript configuration system:
+
+```
+tsconfig.base.json (root)
+├── packages/backend/tsconfig.json
+│   └── module: ESNext, moduleResolution: bundler
+├── packages/infra/tsconfig.json
+│   └── module: ESNext, moduleResolution: bundler
+├── packages/frontend/tsconfig.node.json
+│   └── module: ESNext, moduleResolution: bundler
+└── .github/actions/tsconfig.base.json
+    ├── check-snapshot-trigger/tsconfig.json
+    ├── extract-e2e-failures/tsconfig.json
+    └── generate-failure-report/tsconfig.json
+        └── Inherits module: ESNext from root (ESM with esbuild bundler)
+```
+
+**Key points**:
+- `tsconfig.base.json` defines shared compiler options (module: ESNext, strict mode, etc.)
+- Package-specific configs extend the base and override only what's unique
+- GitHub Actions share `.github/actions/tsconfig.base.json` to eliminate duplication
+- **ESM for Actions**: All GitHub Actions use ESM (module: ESNext) bundled with esbuild for consistency with the monorepo. This provides 20-50x faster builds compared to the previous @vercel/ncc + CommonJS approach, while maintaining compatibility with GitHub Actions' Node.js 24 runtime.
+
+#### ESLint Configuration
+
+ESLint configs should follow similar patterns:
+- **Root config**: Define shared rules in root `.eslintrc.js` or `eslint.config.js`
+- **Package overrides**: Extend root config and add package-specific rules (e.g., Svelte rules for frontend)
+- **Avoid duplication**: Don't repeat rules that apply to all TypeScript files
+
+#### Prettier Configuration
+
+- **Single source**: `.prettierrc.yaml` at root level applies to all packages
+- **No overrides needed**: Prettier formatting should be consistent across the monorepo
+- All packages inherit: 120 char width, tabs (width: 4), single quotes, no semicolons
+
+#### Stylelint Configuration
+
+- Frontend-specific: `packages/frontend/.stylelintrc.json`
+- Other packages don't need stylelint (no CSS)
+
+#### General Guidelines for Claude Code
+
+When adding or modifying configurations:
+
+1. **Check for existing base configs** before creating package-specific configs
+2. **Identify commonalities** across packages and extract to shared base
+3. **Use extends** instead of copy-pasting configuration
+4. **Document hierarchy** in comments when creating new base configs
+5. **Minimize overrides** - only override settings that are truly package-specific
+
+**Examples of good candidates for base configs**:
+- TypeScript compiler options (strict mode, module resolution, target)
+- ESLint rules for TypeScript files
+- Prettier formatting rules
+- Vitest/Jest shared test configuration
+- Bundler configuration (Vite, Webpack, esbuild)
+
+**When to create separate configs**:
+- Framework-specific settings (e.g., Svelte config for frontend only)
+- Runtime-specific settings (e.g., Node.js vs browser environments)
+- Package-specific linting rules (e.g., NestJS decorators in backend)
+
+## Git Hooks
+
+Pre-commit hooks validate code quality before commits:
+- Code formatting (Prettier)
+- Linting (ESLint)
+- Build compilation (all packages)
+- **Visual snapshot validation** (enforced when UI files changed)
+
+**Location**: `.githooks/` directory (version-controlled)
+
+**Setup** (one-time, after cloning):
+```bash
+git config core.hooksPath .githooks
+chmod +x .githooks/*
+```
+
+**Note**: E2E tests NOT run in hooks (too slow). Run manually before push: `npm run test:e2e:docker`
+
+### Snapshot Handling Enforcement
+
+When committing changes to `.svelte` or `.css` files, the pre-commit hook **requires** explicit snapshot handling:
+
+**Required footer (add to commit message):**
+
+1. **`Snapshots: update`** - UI appearance changed
+   - Use when: Styling, layout, colors, new visual elements
+   - CI will automatically update snapshots after push
+   - Example:
+     ```
+     feat: Redesign button
+
+     Changes the button color to blue and adds hover effect.
+
+     Snapshots: update
+     ```
+
+2. **`Snapshots: skip`** - UI files changed but appearance unchanged
+   - Use when: Internal refactoring, prop renaming, type changes
+   - You confirm no visual changes occurred
+   - Example:
+     ```
+     refactor: Extract component logic
+
+     Moves validation logic to separate function.
+
+     Snapshots: skip
+     ```
+
+**Why this matters**: Visual regression tests fail when UI changes aren't reflected in snapshots. Explicit declaration prevents forgotten updates and CI failures.
+
+**Bypass hook** (use sparingly):
+```bash
+git commit --no-verify -m "WIP: Your message"
+```
+
+For setup, verification, and troubleshooting, see `.claude/skills/git-hooks-setup/SKILL.md`
+
+## Adding New Features
+
+### Backend API Endpoints
+
+1. Generate resource: `nest g resource <name>` (run in `packages/backend`)
+2. Create DTOs with class-validator decorators
+3. Create entity with TypeORM decorators
+4. Implement service logic
+5. Add tests (`*.spec.ts`)
+
+### Frontend Components
+
+1. Create `.svelte` files in `src/`
+2. Use `<script lang="ts">` for TypeScript
+3. Proxy API calls to `/api` (auto-proxied to backend)
+
+### Infrastructure Resources
+
+1. Add constructs to `lib/trip-settle-stack.ts`
+2. Use CDK L2 constructs when available
+3. Run `npm run diff --workspace=infra` before deploying
+4. Export important values with `CfnOutput`
+
+# TIER 3: PROJECT CONTEXT (Understanding Codebase)
+
+## Project Overview
+
+Trip Settle is a full-stack TypeScript monorepo for managing trip expense settlements. The project uses npm workspaces to manage three main packages:
+
+- **frontend**: Svelte application with Vite
+- **backend**: NestJS REST API
+- **infra**: AWS CDK infrastructure as code
+
+## Monorepo Structure
+
+```
+trip-settle/
+├── packages/
+│   ├── frontend/     # Svelte + Vite + TypeScript
+│   ├── backend/      # NestJS + TypeORM + PostgreSQL
+│   └── infra/        # AWS CDK
+├── .github/actions/  # TypeScript GitHub Actions (workspace members)
+│   ├── check-snapshot-trigger/
+│   ├── extract-e2e-failures/
+│   └── generate-failure-report/
+└── package.json      # Root workspace configuration
 ```
 
 ## Architecture
@@ -379,461 +530,7 @@ CORS_ORIGIN=https://your-frontend-url
 
 Entity files should follow the pattern `*.entity.ts` and will be auto-loaded by TypeORM.
 
-## Code Quality
-
-### Linting
-- ESLint configured per package
-- Frontend: Svelte-specific rules
-- Backend: NestJS-specific rules
-- Infra: TypeScript-only rules
-
-### Formatting
-- Prettier with Svelte plugin
-- Config: `.prettierrc.yaml` (root level)
-- 120 character line width, tabs (width: 4), single quotes, no semicolons, ES5 trailing commas
-
-### Style Linting (Stylelint)
-- **Purpose**: Detect hardcoded colors in CSS and Svelte `<style>` blocks
-- **Config**: `packages/frontend/.stylelintrc.json`
-- **Rules**: Enforces CSS custom properties (`var(--color-*)`) instead of hardcoded colors
-- **Commands**:
-  ```bash
-  npm run stylelint --workspace=frontend        # Check for violations
-  npm run stylelint:fix --workspace=frontend    # Auto-fix where possible
-  ```
-- **Exceptions**:
-  - `theme.css`: Allows all color definitions (source of truth)
-  - `DevTools.svelte`: Dev-only component with intentional hardcoded colors
-  - `Toast.svelte`: Allows hex fallbacks in `var(--color-*, #fallback)` format
-  - `KeyboardHint.svelte`: Allows rgba() for shadow opacity
-- **Pre-commit hook**: Automatically checks for hardcoded colors before commit
-
-### Testing
-- Frontend: Vitest with happy-dom (unit tests), Playwright (E2E tests)
-- Backend: Jest with ts-jest
-- Infra: Jest with ts-jest
-- E2E tests: Playwright for frontend, Jest for backend API
-
-### Configuration Commonization
-
-**Principle**: Always maximize configuration reuse through base/shared configs to reduce duplication and ensure consistency.
-
-#### TypeScript Configuration Hierarchy
-
-The monorepo uses a hierarchical TypeScript configuration system:
-
-```
-tsconfig.base.json (root)
-├── packages/backend/tsconfig.json
-│   └── module: ESNext, moduleResolution: bundler
-├── packages/infra/tsconfig.json
-│   └── module: ESNext, moduleResolution: bundler
-├── packages/frontend/tsconfig.node.json
-│   └── module: ESNext, moduleResolution: bundler
-└── .github/actions/tsconfig.base.json
-    ├── check-snapshot-trigger/tsconfig.json
-    ├── extract-e2e-failures/tsconfig.json
-    └── generate-failure-report/tsconfig.json
-        └── Inherits module: ESNext from root (ESM with esbuild bundler)
-```
-
-**Key points**:
-- `tsconfig.base.json` defines shared compiler options (module: ESNext, strict mode, etc.)
-- Package-specific configs extend the base and override only what's unique
-- GitHub Actions share `.github/actions/tsconfig.base.json` to eliminate duplication
-- **ESM for Actions**: All GitHub Actions use ESM (module: ESNext) bundled with esbuild for consistency with the monorepo. This provides 20-50x faster builds compared to the previous @vercel/ncc + CommonJS approach, while maintaining compatibility with GitHub Actions' Node.js 24 runtime.
-
-#### ESLint Configuration
-
-ESLint configs should follow similar patterns:
-- **Root config**: Define shared rules in root `.eslintrc.js` or `eslint.config.js`
-- **Package overrides**: Extend root config and add package-specific rules (e.g., Svelte rules for frontend)
-- **Avoid duplication**: Don't repeat rules that apply to all TypeScript files
-
-#### Prettier Configuration
-
-- **Single source**: `.prettierrc.yaml` at root level applies to all packages
-- **No overrides needed**: Prettier formatting should be consistent across the monorepo
-- All packages inherit: 120 char width, tabs (width: 4), single quotes, no semicolons
-
-#### Stylelint Configuration
-
-- Frontend-specific: `packages/frontend/.stylelintrc.json`
-- Other packages don't need stylelint (no CSS)
-
-#### General Guidelines for Claude Code
-
-When adding or modifying configurations:
-
-1. **Check for existing base configs** before creating package-specific configs
-2. **Identify commonalities** across packages and extract to shared base
-3. **Use extends** instead of copy-pasting configuration
-4. **Document hierarchy** in comments when creating new base configs
-5. **Minimize overrides** - only override settings that are truly package-specific
-
-**Examples of good candidates for base configs**:
-- TypeScript compiler options (strict mode, module resolution, target)
-- ESLint rules for TypeScript files
-- Prettier formatting rules
-- Vitest/Jest shared test configuration
-- Bundler configuration (Vite, Webpack, esbuild)
-
-**When to create separate configs**:
-- Framework-specific settings (e.g., Svelte config for frontend only)
-- Runtime-specific settings (e.g., Node.js vs browser environments)
-- Package-specific linting rules (e.g., NestJS decorators in backend)
-
-## Adding New Features
-
-### Backend API Endpoints
-
-1. Generate resource: `nest g resource <name>` (run in `packages/backend`)
-2. Create DTOs with class-validator decorators
-3. Create entity with TypeORM decorators
-4. Implement service logic
-5. Add tests (`*.spec.ts`)
-
-### Frontend Components
-
-1. Create `.svelte` files in `src/`
-2. Use `<script lang="ts">` for TypeScript
-3. Proxy API calls to `/api` (auto-proxied to backend)
-
-### Infrastructure Resources
-
-1. Add constructs to `lib/trip-settle-stack.ts`
-2. Use CDK L2 constructs when available
-3. Run `npm run diff --workspace=infra` before deploying
-4. Export important values with `CfnOutput`
-
-## AWS CDK Deployment
-
-### First-Time Setup
-
-**IMPORTANT**: AWS CDK requires a one-time bootstrap operation and OIDC configuration for GitHub Actions. This setup is performed manually by humans and only needs to be done once per AWS account/region.
-
-**For detailed first-time setup instructions**, refer to:
-- **Human-readable guide**: See README.md section "Setting Up GitHub Actions for Continuous Deployment"
-- **Interactive AI guidance**: Use the `cdk-setup` skill (`.claude/skills/cdk-setup/setup-guide.yaml`)
-
-The setup process includes:
-1. **CDK Bootstrap** - Creates S3 bucket, ECR repository, IAM roles for deployments
-2. **OIDC Provider** - Enables GitHub Actions to authenticate with AWS without stored credentials
-3. **IAM Role Configuration** - Creates role with trust policy for this GitHub repository
-4. **GitHub Variables** - Stores AWS_ROLE_ARN and AWS_REGION as repository variables
-
-### Deployment Strategy
-
-**Continuous Deployment (Recommended):**
-All infrastructure changes deploy automatically via GitHub Actions when pushed to `main`. The workflow file is at `.github/workflows/deploy.yml`.
-
-**Manual Deployment (Optional):**
-For testing infrastructure changes locally (requires AWS credentials configured):
-```bash
-npm run diff --workspace=infra   # Preview changes
-npm run deploy --workspace=infra # Deploy to AWS
-```
-
-## Git Hooks
-
-Pre-commit hooks validate code quality before commits:
-- Code formatting (Prettier)
-- Linting (ESLint)
-- Build compilation (all packages)
-- **Visual snapshot validation** (enforced when UI files changed)
-
-**Location**: `.githooks/` directory (version-controlled)
-
-**Setup** (one-time, after cloning):
-```bash
-git config core.hooksPath .githooks
-chmod +x .githooks/*
-```
-
-**Note**: E2E tests NOT run in hooks (too slow). Run manually before push: `npm run test:e2e:docker`
-
-### Snapshot Handling Enforcement
-
-When committing changes to `.svelte` or `.css` files, the pre-commit hook **requires** explicit snapshot handling:
-
-**Required footer (add to commit message):**
-
-1. **`Snapshots: update`** - UI appearance changed
-   - Use when: Styling, layout, colors, new visual elements
-   - CI will automatically update snapshots after push
-   - Example:
-     ```
-     feat: Redesign button
-
-     Changes the button color to blue and adds hover effect.
-
-     Snapshots: update
-     ```
-
-2. **`Snapshots: skip`** - UI files changed but appearance unchanged
-   - Use when: Internal refactoring, prop renaming, type changes
-   - You confirm no visual changes occurred
-   - Example:
-     ```
-     refactor: Extract component logic
-
-     Moves validation logic to separate function.
-
-     Snapshots: skip
-     ```
-
-**Why this matters**: Visual regression tests fail when UI changes aren't reflected in snapshots. Explicit declaration prevents forgotten updates and CI failures.
-
-**Bypass hook** (use sparingly):
-```bash
-git commit --no-verify -m "WIP: Your message"
-```
-
-For setup, verification, and troubleshooting, see `.claude/skills/git-hooks-setup/SKILL.md`
-
-## Git Notes for CI Metadata
-
-Git notes store CI/CD metadata alongside commits without modifying commit history.
-
-**Namespaces**:
-- `refs/notes/ci/cache-metrics` - Docker build cache efficiency metrics
-- `refs/notes/ci/e2e-failures` - Playwright E2E test failure metadata
-- `refs/notes/ci/snapshot-updates` - Visual snapshot update workflow execution metadata
-- `refs/notes/ci/workflow-metrics` - GitHub Actions job/step timing metrics
-
-See README.md "Why Git Notes for CI Metadata?" for rationale and benefits.
-
-### How Metadata is Captured
-
-CI workflows use a **post-job architecture** to accurately capture workflow execution status.
-
-For implementation details, see `.claude/skills/git-notes-helper/` → "Writing Git Notes in CI" section.
-
-### Helper Skill
-
-**Skill**: `.claude/skills/git-notes-helper/helper.yaml`
-- **Purpose**: Provides reusable git notes operations (fetch, parse, compare, historical analysis, writing in CI)
-- **Used by**: `docker-cache-analysis`, `e2e-failure-analysis`, `snapshot-update-analysis`, `workflow-metrics-analysis` skills
-- **Operations**: Fetch notes, show note content, parse INI fields, compare commits, historical walking, CI post-job pattern
-
-### Usage
-
-```bash
-# Fetch notes from remote (not fetched by default)
-git fetch origin refs/notes/ci/<namespace>:refs/notes/ci/<namespace>
-
-# Show note for commit
-git notes --ref=ci/<namespace> show <commit-hash>
-
-# List all commits with notes
-git notes --ref=ci/<namespace> list
-```
-
-**See also**:
-- Docker cache analysis: `.claude/skills/docker-cache-analysis/`
-- E2E failure analysis: `.claude/skills/e2e-failure-analysis/`
-- Snapshot update analysis: `.claude/skills/snapshot-update-analysis/`
-- Git notes helper: `.claude/skills/git-notes-helper/`
-
-## TypeScript Configuration
-
-The project uses a hierarchical TypeScript configuration system with a shared base config:
-
-- **Root base** (`tsconfig.base.json`): Defines common compiler options (module: ESNext, bundler resolution)
-- **Backend**: Inherits ESNext modules (relaxed strict mode for NestJS decorators, requires `.js` extensions for ESM)
-- **Frontend**: Inherits ESNext modules (Svelte-specific settings)
-- **Infra**: Inherits ESNext modules (CDK-specific settings)
-- **GitHub Actions**: Inherits ESNext modules (bundled with esbuild for 20-50x faster builds)
-
-All packages use ESM throughout the monorepo. All packages extend `tsconfig.base.json` and override only package-specific settings. See "Configuration Commonization" section for detailed hierarchy and best practices.
-
-## Testing & CI/CD Readiness
-
-This section tracks the implementation status of tests needed for continuous integration. Tests ensure code quality, prevent regressions, and validate functionality before deployment.
-
-### Backend Tests (NestJS + Vitest)
-
-**Testing Framework**: The backend uses Vitest for unit and integration tests.
-
-#### Unit Tests
-- [x] AppService tests (`app.service.spec.ts`)
-  - getHello() method tests
-  - Basic service functionality
-
-#### Integration Tests
-- [x] AppService integration tests (`app.service.integration.spec.ts`)
-  - getHealth() with database connection
-  - Database error handling
-- [ ] TypeORM entity CRUD operations
-- [x] Database connection with pg-mem
-- [ ] Environment-specific configuration loading
-
-#### E2E Tests
-**Note**: E2E tests are currently not functional with Vitest due to decorator metadata limitations. The migration from Jest to Vitest is complete for unit and integration tests.
-
-**Technical Details**: NestJS requires `emitDecoratorMetadata: true` for dependency injection, but Vitest's default esbuild transformer doesn't support this. The recommended solution is using `@swc/core` with `unplugin-swc` (per [NestJS docs](https://docs.nestjs.com/recipes/swc)), but this encounters native binding issues on macOS (`Cannot find module './swc.darwin-arm64.node'`). This is a known limitation of SWC's optional peer dependencies on macOS.
-
-**Alternative Approaches Explored**:
-- SWC with unplugin-swc: Failed due to native binding issues
-- ts-node with fork pool: Not attempted due to SWC being the official recommendation
-
-**Current State**: Existing E2E test file (`test/app.e2e-spec.ts`) has been migrated to Vitest syntax but is not executable:
-- [ ] Health check endpoint (`GET /api/health`)
-- [ ] Hello endpoint (`GET /api`)
-- [ ] CORS configuration validation
-- [ ] Global validation pipe behavior
-
-#### Backend Infrastructure Tests
-- [x] Module initialization tests
-- [x] Dependency injection validation
-
-### Frontend Tests (Svelte + Vitest)
-
-#### Component Unit Tests
-- [ ] App.svelte component tests
-- [ ] ExpenseTracker.svelte component tests
-- [ ] ExpenseForm.svelte component tests
-- [ ] ExpenseList.svelte component tests
-- [ ] CurrencySelector.svelte component tests
-- [ ] SystemStatus.svelte component tests
-- [ ] KeyboardHint.svelte component tests
-
-#### Integration Tests (Playwright E2E)
-- [x] ExpenseTracker with form and list integration
-- [x] Currency selection flow
-- [x] Expense CRUD operations (add, delete)
-
-#### Accessibility Tests (Playwright + axe-core) - TODO
-- [ ] Keyboard navigation (Enter, Escape, Arrow keys)
-- [ ] Tab order validation
-- [ ] ARIA attributes and roles
-- [ ] Screen reader compatibility
-
-**Note**: Accessibility test suite exists but is marked with `test.fixme()` and will be implemented later after the UI is stabilized.
-
-#### User Interaction Tests (Playwright E2E)
-- [x] Form submission with Enter key
-- [x] Form clearing with Escape key
-- [x] Currency selector keyboard navigation
-- [x] Mobile touch interactions
-
-### Infrastructure Tests (AWS CDK + Jest)
-
-#### CDK Tests
-- [ ] Stack synthesis (CloudFormation generation)
-- [ ] VPC configuration validation
-- [ ] RDS PostgreSQL configuration
-- [ ] Snapshot tests for CloudFormation templates
-- [ ] Resource tagging validation
-
-#### Infrastructure Unit Tests
-- [ ] TripSettleStack construct tests
-- [ ] Database security group rules
-- [ ] VPC subnet configuration
-
-### Cross-Cutting Tests
-
-#### Code Quality
-- [ ] ESLint validation (all packages)
-- [ ] Prettier formatting checks (all packages)
-- [ ] TypeScript compilation (all packages)
-- [ ] Type-checking (frontend with svelte-check)
-
-#### Build Validation
-- [ ] Frontend production build
-- [ ] Backend production build
-- [ ] Infrastructure CDK synth
-- [ ] All workspaces build in CI
-
-#### Security & Dependencies
-- [ ] npm audit for vulnerabilities
-- [ ] Dependency license compliance
-- [ ] No hardcoded secrets in code
-
-### Integration Tests (Frontend + Backend)
-
-#### API Contract Tests
-- [ ] Frontend API client tests
-- [ ] Backend endpoint availability
-- [ ] CORS configuration between frontend and backend
-- [ ] API response format validation
-
-#### End-to-End Scenarios
-- [ ] Full expense workflow (create, read, update, delete)
-- [ ] Multi-currency expense handling
-- [ ] System status indicator shows backend connectivity
-
-### CI Pipeline Requirements
-
-#### Pre-Commit Checks
-- [ ] Format check passes
-- [ ] Lint check passes
-- [ ] Type check passes
-- [ ] Unit tests pass
-
-#### CI Build Steps
-- [ ] Install dependencies
-- [ ] Build all packages
-- [ ] Run all tests
-- [ ] Generate test coverage reports
-- [ ] Validate test coverage thresholds
-
-#### Environment-Specific Tests
-- [ ] Tests run with NODE_ENV=local
-- [ ] Tests run with NODE_ENV=development
-- [ ] Tests run with NODE_ENV=production (mocked externals)
-
-### Test Coverage Goals
-
-- Backend: 80% coverage (lines, branches, functions, statements)
-- Frontend: 70% coverage (components, utilities)
-- Infrastructure: 90% coverage (CDK constructs)
-
-### Running Tests Locally
-
-```bash
-# Run all tests across all packages
-npm test
-
-# Run tests for specific package
-npm run test --workspace=backend
-npm run test --workspace=frontend
-npm run test --workspace=infra
-
-# Run tests with coverage
-npm run test:cov --workspace=backend
-npm run test --workspace=frontend -- --coverage
-
-# Run tests in watch mode
-npm run test:watch --workspace=backend
-npm run test --workspace=frontend -- --watch
-
-# Run E2E tests
-npm run test:e2e:docker                  # Recommended: Docker-based
-npm run test:e2e --workspace=frontend   # Alternative: Local (requires setup)
-npm run test:e2e --workspace=backend    # Backend API E2E tests
-```
-
-## CI/CD Pipeline Optimization
-
-The CI pipeline uses parallel execution (4 jobs) and Docker caching for speed (~7-8 min total).
-
-**Critical Guidelines for Claude Code**:
-
-1. **Preserve parallelization**: Don't add `needs:` dependencies unless truly required
-2. **Maintain Dockerfile layer ordering**: Keep layers ordered from stable to volatile (package.json before code)
-3. **Update .dockerignore**: Add new generated directories to exclusion list
-4. **Test locally first**: Run `npm run test:e2e:docker` before pushing CI changes
-
-**Anti-patterns to avoid**:
-- ❌ Adding unnecessary `needs:` dependencies (breaks parallelization)
-- ❌ Moving COPY before RUN in Dockerfile (invalidates npm cache)
-- ❌ Removing files from .dockerignore without justification
-- ❌ Adding more browsers without performance justification
-- ❌ Using `--force-recreate` flag (bypasses Docker cache)
-
-**Detailed documentation**: `.claude/skills/ci-pipeline-optimization/SKILL.md`
-**Cache analysis**: Use `docker-cache-analysis` skill for performance trends
+# TIER 4: SPECIALIZED WORKFLOWS (As-Needed)
 
 ## Playwright E2E Testing
 
@@ -1003,6 +700,108 @@ Visual snapshots are ONLY updated in CI (GitHub Actions), never locally. Enforce
 - When to update snapshots (CSS, layout, visual elements)
 - Verification and best practices
 
+## CI/CD Pipeline Optimization
+
+The CI pipeline uses parallel execution (4 jobs) and Docker caching for speed (~7-8 min total).
+
+**Critical Guidelines for Claude Code**:
+
+1. **Preserve parallelization**: Don't add `needs:` dependencies unless truly required
+2. **Maintain Dockerfile layer ordering**: Keep layers ordered from stable to volatile (package.json before code)
+3. **Update .dockerignore**: Add new generated directories to exclusion list
+4. **Test locally first**: Run `npm run test:e2e:docker` before pushing CI changes
+
+**Anti-patterns to avoid**:
+- ❌ Adding unnecessary `needs:` dependencies (breaks parallelization)
+- ❌ Moving COPY before RUN in Dockerfile (invalidates npm cache)
+- ❌ Removing files from .dockerignore without justification
+- ❌ Adding more browsers without performance justification
+- ❌ Using `--force-recreate` flag (bypasses Docker cache)
+
+**Detailed documentation**: `.claude/skills/ci-pipeline-optimization/SKILL.md`
+**Cache analysis**: Use `docker-cache-analysis` skill for performance trends
+
+## AWS CDK Deployment
+
+### First-Time Setup
+
+**IMPORTANT**: AWS CDK requires a one-time bootstrap operation and OIDC configuration for GitHub Actions. This setup is performed manually by humans and only needs to be done once per AWS account/region.
+
+**For detailed first-time setup instructions**, refer to:
+- **Human-readable guide**: See README.md section "Setting Up GitHub Actions for Continuous Deployment"
+- **Interactive AI guidance**: Use the `cdk-setup` skill (`.claude/skills/cdk-setup/setup-guide.yaml`)
+
+The setup process includes:
+1. **CDK Bootstrap** - Creates S3 bucket, ECR repository, IAM roles for deployments
+2. **OIDC Provider** - Enables GitHub Actions to authenticate with AWS without stored credentials
+3. **IAM Role Configuration** - Creates role with trust policy for this GitHub repository
+4. **GitHub Variables** - Stores AWS_ROLE_ARN and AWS_REGION as repository variables
+
+### Deployment Strategy
+
+**Continuous Deployment (Recommended):**
+All infrastructure changes deploy automatically via GitHub Actions when pushed to `main`. The workflow file is at `.github/workflows/deploy.yml`.
+
+**Manual Deployment (Optional):**
+For testing infrastructure changes locally (requires AWS credentials configured):
+```bash
+npm run diff --workspace=infra   # Preview changes
+npm run deploy --workspace=infra # Deploy to AWS
+```
+
+## GitHub Actions as Workspace Members
+
+Custom GitHub Actions are written in TypeScript and integrated as npm workspace members for better monorepo cohesion.
+
+**Structure** (`.github/actions/<action-name>/`):
+```
+action-name/
+├── src/
+│   └── main.ts              # TypeScript source
+├── dist/
+│   └── index.js             # Bundled ESM output (committed with esbuild)
+├── action.yml               # Action metadata
+├── package.json             # Dependencies & scripts (with "type": "module")
+├── tsconfig.json            # TypeScript config
+└── README.md                # Documentation
+```
+
+**Actions**:
+- **check-snapshot-trigger** - Determines if visual snapshot update workflow should run
+- **extract-e2e-failures** - Parses Playwright JSON results and categorizes failures
+- **generate-failure-report** - Aggregates build errors into markdown reports
+
+**Benefits**:
+- ✅ Type safety with full TypeScript interfaces
+- ✅ Shared dependencies hoisted to root (saves ~400MB)
+- ✅ Unified build/lint/format commands
+- ✅ Better error handling with @actions/core
+- ✅ Action outputs available to downstream workflow steps
+- ✅ Testability with Jest infrastructure
+
+**Build command**:
+```bash
+npm run build --workspace=.github/actions/<action-name>
+# Or build all actions:
+npm run build:actions
+```
+
+**Important**: The `dist/` directory must be committed (GitHub Actions requirement). Always rebuild and commit after changing `src/main.ts`.
+
+# TIER 5: TECHNICAL REFERENCE (Lookup)
+
+## TypeScript Configuration
+
+The project uses a hierarchical TypeScript configuration system with a shared base config:
+
+- **Root base** (`tsconfig.base.json`): Defines common compiler options (module: ESNext, bundler resolution)
+- **Backend**: Inherits ESNext modules (relaxed strict mode for NestJS decorators, requires `.js` extensions for ESM)
+- **Frontend**: Inherits ESNext modules (Svelte-specific settings)
+- **Infra**: Inherits ESNext modules (CDK-specific settings)
+- **GitHub Actions**: Inherits ESNext modules (bundled with esbuild for 20-50x faster builds)
+
+All packages use ESM throughout the monorepo. All packages extend `tsconfig.base.json` and override only package-specific settings. See "Configuration Commonization" section for detailed hierarchy and best practices.
+
 ## CSS & Mobile Responsive Design Best Practices
 
 ### Mobile Flexbox Alignment
@@ -1045,3 +844,214 @@ Visual snapshots are ONLY updated in CI (GitHub Actions), never locally. Enforce
 4. **Specificity matters**: More specific selectors override general rules - need explicit mobile overrides
 
 **When to apply**: Multiple sibling flex containers that should visually align, mobile layouts with full-width buttons, forms with input rows alongside button rows.
+
+## Git Notes for CI Metadata
+
+Git notes store CI/CD metadata alongside commits without modifying commit history.
+
+**Namespaces**:
+- `refs/notes/ci/cache-metrics` - Docker build cache efficiency metrics
+- `refs/notes/ci/e2e-failures` - Playwright E2E test failure metadata
+- `refs/notes/ci/snapshot-updates` - Visual snapshot update workflow execution metadata
+- `refs/notes/ci/workflow-metrics` - GitHub Actions job/step timing metrics
+
+See README.md "Why Git Notes for CI Metadata?" for rationale and benefits.
+
+### How Metadata is Captured
+
+CI workflows use a **post-job architecture** to accurately capture workflow execution status.
+
+For implementation details, see `.claude/skills/git-notes-helper/` → "Writing Git Notes in CI" section.
+
+### Helper Skill
+
+**Skill**: `.claude/skills/git-notes-helper/helper.yaml`
+- **Purpose**: Provides reusable git notes operations (fetch, parse, compare, historical analysis, writing in CI)
+- **Used by**: `docker-cache-analysis`, `e2e-failure-analysis`, `snapshot-update-analysis`, `workflow-metrics-analysis` skills
+- **Operations**: Fetch notes, show note content, parse INI fields, compare commits, historical walking, CI post-job pattern
+
+### Usage
+
+```bash
+# Fetch notes from remote (not fetched by default)
+git fetch origin refs/notes/ci/<namespace>:refs/notes/ci/<namespace>
+
+# Show note for commit
+git notes --ref=ci/<namespace> show <commit-hash>
+
+# List all commits with notes
+git notes --ref=ci/<namespace> list
+```
+
+**See also**:
+- Docker cache analysis: `.claude/skills/docker-cache-analysis/`
+- E2E failure analysis: `.claude/skills/e2e-failure-analysis/`
+- Snapshot update analysis: `.claude/skills/snapshot-update-analysis/`
+- Git notes helper: `.claude/skills/git-notes-helper/`
+
+## Testing & CI/CD Readiness
+
+This section tracks the implementation status of tests needed for continuous integration. Tests ensure code quality, prevent regressions, and validate functionality before deployment.
+
+### Backend Tests (NestJS + Vitest)
+
+**Testing Framework**: The backend uses Vitest for unit and integration tests.
+
+#### Unit Tests
+- [x] AppService tests (`app.service.spec.ts`)
+  - getHello() method tests
+  - Basic service functionality
+
+#### Integration Tests
+- [x] AppService integration tests (`app.service.integration.spec.ts`)
+  - getHealth() with database connection
+  - Database error handling
+- [ ] TypeORM entity CRUD operations
+- [x] Database connection with pg-mem
+- [ ] Environment-specific configuration loading
+
+#### E2E Tests
+**Note**: E2E tests are currently not functional with Vitest due to decorator metadata limitations. The migration from Jest to Vitest is complete for unit and integration tests.
+
+**Technical Details**: NestJS requires `emitDecoratorMetadata: true` for dependency injection, but Vitest's default esbuild transformer doesn't support this. The recommended solution is using `@swc/core` with `unplugin-swc` (per [NestJS docs](https://docs.nestjs.com/recipes/swc)), but this encounters native binding issues on macOS (`Cannot find module './swc.darwin-arm64.node'`). This is a known limitation of SWC's optional peer dependencies on macOS.
+
+**Alternative Approaches Explored**:
+- SWC with unplugin-swc: Failed due to native binding issues
+- ts-node with fork pool: Not attempted due to SWC being the official recommendation
+
+**Current State**: Existing E2E test file (`test/app.e2e-spec.ts`) has been migrated to Vitest syntax but is not executable:
+- [ ] Health check endpoint (`GET /api/health`)
+- [ ] Hello endpoint (`GET /api`)
+- [ ] CORS configuration validation
+- [ ] Global validation pipe behavior
+
+#### Backend Infrastructure Tests
+- [x] Module initialization tests
+- [x] Dependency injection validation
+
+### Frontend Tests (Svelte + Vitest)
+
+#### Component Unit Tests
+- [ ] App.svelte component tests
+- [ ] ExpenseTracker.svelte component tests
+- [ ] ExpenseForm.svelte component tests
+- [ ] ExpenseList.svelte component tests
+- [ ] CurrencySelector.svelte component tests
+- [ ] SystemStatus.svelte component tests
+- [ ] KeyboardHint.svelte component tests
+
+#### Integration Tests (Playwright E2E)
+- [x] ExpenseTracker with form and list integration
+- [x] Currency selection flow
+- [x] Expense CRUD operations (add, delete)
+
+#### Accessibility Tests (Playwright + axe-core) - TODO
+- [ ] Keyboard navigation (Enter, Escape, Arrow keys)
+- [ ] Tab order validation
+- [ ] ARIA attributes and roles
+- [ ] Screen reader compatibility
+
+**Note**: Accessibility test suite exists but is marked with `test.fixme()` and will be implemented later after the UI is stabilized.
+
+#### User Interaction Tests (Playwright E2E)
+- [x] Form submission with Enter key
+- [x] Form clearing with Escape key
+- [x] Currency selector keyboard navigation
+- [x] Mobile touch interactions
+
+### Infrastructure Tests (AWS CDK + Jest)
+
+#### CDK Tests
+- [ ] Stack synthesis (CloudFormation generation)
+- [ ] VPC configuration validation
+- [ ] RDS PostgreSQL configuration
+- [ ] Snapshot tests for CloudFormation templates
+- [ ] Resource tagging validation
+
+#### Infrastructure Unit Tests
+- [ ] TripSettleStack construct tests
+- [ ] Database security group rules
+- [ ] VPC subnet configuration
+
+### Cross-Cutting Tests
+
+#### Code Quality
+- [ ] ESLint validation (all packages)
+- [ ] Prettier formatting checks (all packages)
+- [ ] TypeScript compilation (all packages)
+- [ ] Type-checking (frontend with svelte-check)
+
+#### Build Validation
+- [ ] Frontend production build
+- [ ] Backend production build
+- [ ] Infrastructure CDK synth
+- [ ] All workspaces build in CI
+
+#### Security & Dependencies
+- [ ] npm audit for vulnerabilities
+- [ ] Dependency license compliance
+- [ ] No hardcoded secrets in code
+
+### Integration Tests (Frontend + Backend)
+
+#### API Contract Tests
+- [ ] Frontend API client tests
+- [ ] Backend endpoint availability
+- [ ] CORS configuration between frontend and backend
+- [ ] API response format validation
+
+#### End-to-End Scenarios
+- [ ] Full expense workflow (create, read, update, delete)
+- [ ] Multi-currency expense handling
+- [ ] System status indicator shows backend connectivity
+
+### CI Pipeline Requirements
+
+#### Pre-Commit Checks
+- [ ] Format check passes
+- [ ] Lint check passes
+- [ ] Type check passes
+- [ ] Unit tests pass
+
+#### CI Build Steps
+- [ ] Install dependencies
+- [ ] Build all packages
+- [ ] Run all tests
+- [ ] Generate test coverage reports
+- [ ] Validate test coverage thresholds
+
+#### Environment-Specific Tests
+- [ ] Tests run with NODE_ENV=local
+- [ ] Tests run with NODE_ENV=development
+- [ ] Tests run with NODE_ENV=production (mocked externals)
+
+### Test Coverage Goals
+
+- Backend: 80% coverage (lines, branches, functions, statements)
+- Frontend: 70% coverage (components, utilities)
+- Infrastructure: 90% coverage (CDK constructs)
+
+### Running Tests Locally
+
+```bash
+# Run all tests across all packages
+npm test
+
+# Run tests for specific package
+npm run test --workspace=backend
+npm run test --workspace=frontend
+npm run test --workspace=infra
+
+# Run tests with coverage
+npm run test:cov --workspace=backend
+npm run test --workspace=frontend -- --coverage
+
+# Run tests in watch mode
+npm run test:watch --workspace=backend
+npm run test --workspace=frontend -- --watch
+
+# Run E2E tests
+npm run test:e2e:docker                  # Recommended: Docker-based
+npm run test:e2e --workspace=frontend   # Alternative: Local (requires setup)
+npm run test:e2e --workspace=backend    # Backend API E2E tests
+```
