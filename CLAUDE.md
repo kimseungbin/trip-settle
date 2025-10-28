@@ -231,9 +231,9 @@ npm run destroy --workspace=infra
 
 ### Testing
 - Frontend: Vitest with happy-dom (unit tests), Playwright (E2E tests)
-- Backend: Jest with ts-jest
-- Infra: Jest with ts-jest
-- E2E tests: Playwright for frontend, Jest for backend API
+- Backend: Vitest (unit and integration tests)
+- Infra: Vitest (unit tests)
+- E2E tests: Playwright for frontend
 
 ### Configuration Commonization
 
@@ -296,7 +296,7 @@ When adding or modifying configurations:
 - TypeScript compiler options (strict mode, module resolution, target)
 - ESLint rules for TypeScript files
 - Prettier formatting rules
-- Vitest/Jest shared test configuration
+- Vitest shared test configuration
 - Bundler configuration (Vite, Webpack, esbuild)
 
 **When to create separate configs**:
@@ -777,7 +777,7 @@ action-name/
 - ✅ Unified build/lint/format commands
 - ✅ Better error handling with @actions/core
 - ✅ Action outputs available to downstream workflow steps
-- ✅ Testability with Jest infrastructure
+- ✅ Testability with Vitest infrastructure
 
 **Build command**:
 ```bash
@@ -959,7 +959,7 @@ This section tracks the implementation status of tests needed for continuous int
 - [x] Currency selector keyboard navigation
 - [x] Mobile touch interactions
 
-### Infrastructure Tests (AWS CDK + Jest)
+### Infrastructure Tests (AWS CDK + Vitest)
 
 #### CDK Tests
 - [ ] Stack synthesis (CloudFormation generation)
