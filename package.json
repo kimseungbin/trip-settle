@@ -4,7 +4,8 @@
   "private": true,
   "description": "Trip expense settlement application",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    ".github/actions/*"
   ],
   "scripts": {
     "dev": "concurrently \"npm:dev:*\"",
@@ -14,6 +15,7 @@
     "build:frontend": "npm run build --workspace=frontend",
     "build:backend": "npm run build --workspace=backend",
     "build:infra": "npm run build --workspace=infra",
+    "build:actions": "npm run build --workspace=.github/actions/*",
     "test": "npm run test --workspaces",
     "test:e2e:docker": "docker compose -f docker-compose.e2e.yml up --build --abort-on-container-exit",
     "test:e2e:docker:report": "npm run test:e2e:docker && open packages/frontend/playwright-report/index.html",
@@ -21,8 +23,8 @@
     "test:e2e:docker:clean": "docker compose -f docker-compose.e2e.yml down -v --remove-orphans",
     "test:e2e:docker:clean:hard": "docker compose -f docker-compose.e2e.yml down -v --remove-orphans && docker system prune -af --volumes",
     "lint": "npm run lint --workspaces",
-    "format": "prettier --write \"packages/**/*.{ts,js,json,svelte}\"",
-    "format:check": "prettier --check \"packages/**/*.{ts,js,json,svelte}\""
+    "format": "prettier --write \"packages/**/*.{ts,js,json,svelte}\" \".github/actions/**/*.{ts,js,json}\"",
+    "format:check": "prettier --check \"packages/**/*.{ts,js,json,svelte}\" \".github/actions/**/*.{ts,js,json}\""
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
