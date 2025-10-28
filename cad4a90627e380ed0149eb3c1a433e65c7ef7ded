@@ -1,0 +1,59 @@
+=== SNAPSHOT UPDATE WORKFLOW REPORT ===
+
+[metadata]
+timestamp = 2025-10-28T02:38:43Z
+commit = cad4a90
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18862220325
+workflow = update-snapshots
+triggered_by = push
+
+[execution]
+status = failure
+outcome = failed
+checkout_step = true
+docker_setup = true
+playwright_tests = false
+commit_step = false
+push_step = false
+
+[snapshot_changes]
+has_changes = false
+files_changed = 0
+committed = false
+pushed = false
+
+[diagnostics]
+error_step = playwright_tests
+error_message = Playwright tests failed or timed out
+playwright_exit_code = unknown
+docker_container_status = unknown
+test_env = ci-docker
+updating_snapshots = true
+docker_user = root
+
+[error_details]
+# Captured Docker logs (last 50 lines, filtered for errors)
+playwright_error_log = playwright-1  |     Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed%0Aplaywright-1  |     Error: element(s) not found%0Aplaywright-1  | ::error file=tests/visual/ui-snapshots.spec.ts,title=[webkit] › tests/visual/ui-snapshots.spec.ts:56:2 › Visual Regression › expense list with single item,line=66,col=47::  1) [webkit] › tests/visual/ui-snapshots.spec.ts:56:2 › Visual Regression › expense list with single item %250A    Error: expect(locator).toBeVisible() failed%250A%250A    Locator: locator('.expense-item')%250A    Expected: visible%250A    Timeout: 10000ms%250A    Error: element(s) not found%250A%250A    Call log:%250A      - Expect toBeVisible with timeout 10000ms%250A      - waiting for locator('.expense-item')%250A%250A%250A      64 |%250A      65 | 		// Wait for expense to appear using more reliable locator%250A    > 66 | 		await expect(page.locator('.expense-item')).toBeVisible({ timeout: 10000 })%250A         | 		                                            ^
+
+[test_results]
+total_tests = 73
+passed = 47
+failed = 1
+skipped = 25
+
+[timing]
+job_duration_seconds = 236
+timeout_limit_seconds = 1800
+timed_out = false
+
+[trigger_details]
+method = push
+# workflow_dispatch: Manual trigger from GitHub UI
+# issue_comment: Triggered by /update-snapshots PR comment
+# push: Triggered by [update-snapshots] in commit message
+source_branch = main
+
+[recommendations]
+# For LLM analysis
+next_steps = Analyze error_step and error_message. Check artifacts in run_url.
