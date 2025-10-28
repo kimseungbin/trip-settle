@@ -89,11 +89,15 @@ test.describe('Expense Workflow', () => {
 		await page.getByPlaceholder('Expense name').fill('Breakfast')
 		await page.getByPlaceholder('Amount').fill('12.00')
 		await submitExpenseForm(page)
+		// Wait for first expense to appear
+		await expect(page.locator('.expense-item')).toHaveCount(1)
 
 		// Add second expense
 		await page.getByPlaceholder('Expense name').fill('Lunch')
 		await page.getByPlaceholder('Amount').fill('25.50')
 		await submitExpenseForm(page)
+		// Wait for second expense to appear
+		await expect(page.locator('.expense-item')).toHaveCount(2)
 
 		// Add third expense
 		await page.getByPlaceholder('Expense name').fill('Dinner')
