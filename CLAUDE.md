@@ -10,16 +10,16 @@ Trip Settle is a full-stack TypeScript monorepo for managing trip expense settle
 - **backend**: NestJS REST API
 - **infra**: AWS CDK infrastructure as code
 
-## Design Principles
+## Design Requirements
 
-Follow these requirements when implementing features:
-- **Keyboard accessibility**: All features must work without mouse (Enter/Escape/Arrow keys)
-- **Accessibility**: ARIA guidelines, screen reader support
-- **Responsive design**: Mobile-first, desktop enhancements
-- **Performance**: Fast, smooth interactions with minimal latency
-- **User feedback**: Clear visual feedback for all actions
+All features must meet these requirements:
+- **Keyboard accessible**: Work without mouse (Enter/Escape/Arrow keys)
+- **ARIA compliant**: Screen reader support, semantic HTML
+- **Mobile-first responsive**: Design for mobile viewport, enhance for desktop
+- **Fast interactions**: Sub-second loads, instant feedback
+- **Visual feedback**: Clear response for every user action
 
-See README.md "Design Philosophy" for detailed rationale.
+See README.md "Design Philosophy" section for rationale and implementation details.
 
 ## Feature Development Workflow (MANDATORY)
 
