@@ -1,0 +1,59 @@
+=== SNAPSHOT UPDATE WORKFLOW REPORT ===
+
+[metadata]
+timestamp = 2025-10-28T05:35:37Z
+commit = 835bc41
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18865147147
+workflow = update-snapshots
+triggered_by = workflow_dispatch
+
+[execution]
+status = success
+outcome = snapshots_updated
+checkout_step = true
+docker_setup = true
+playwright_tests = true
+commit_step = true
+push_step = true
+
+[snapshot_changes]
+has_changes = true
+files_changed = 2
+committed = true
+pushed = true
+
+[diagnostics]
+error_step = none
+error_message = none
+playwright_exit_code = 0
+docker_container_status = unknown
+test_env = ci-docker
+updating_snapshots = true
+docker_user = root
+
+[error_details]
+# Captured Docker logs (last 50 lines, filtered for errors)
+playwright_error_log = none
+
+[test_results]
+total_tests = 73
+passed = 48
+failed = 0
+skipped = 25
+
+[timing]
+job_duration_seconds = 228
+timeout_limit_seconds = 1800
+timed_out = false
+
+[trigger_details]
+method = workflow_dispatch
+# workflow_dispatch: Manual trigger from GitHub UI
+# issue_comment: Triggered by /update-snapshots PR comment
+# push: Triggered by [update-snapshots] in commit message
+source_branch = main
+
+[recommendations]
+# For LLM analysis
+next_steps = Review snapshot changes in git diff. Ensure visual changes are intentional.
