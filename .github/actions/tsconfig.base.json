@@ -1,11 +1,9 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		// GitHub Actions runtime (override base module system)
-		"target": "ES2022",
-		"module": "commonjs",
-		"moduleResolution": "node",
-		"lib": ["ES2022"],
+		// GitHub Actions runtime (ESM with esbuild bundler)
+		// Inherits target: ESNext from root, specify lib for Node.js runtime
+		"lib": ["ESNext"],
 
 		// Build output (relative paths resolved from each action's directory)
 		"outDir": "./lib",

@@ -1,7 +1,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { DataType, newDb } from 'pg-mem'
-import { config } from './config'
+import { config } from './config/index.js'
 
 let memoryDataSource: DataSource | null = null
 

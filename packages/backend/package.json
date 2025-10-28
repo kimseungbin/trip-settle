@@ -1,6 +1,7 @@
 {
 	"name": "backend",
 	"version": "1.0.0",
+	"type": "module",
 	"private": true,
 	"scripts": {
 		"dev": "NODE_ENV=local tsc-watch --onSuccess \"node dist/packages/backend/src/main.js\"",
