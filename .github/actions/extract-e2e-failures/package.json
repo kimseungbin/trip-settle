@@ -1,7 +1,6 @@
 {
 	"name": "extract-e2e-failures",
 	"version": "1.0.0",
-	"type": "module",
 	"description": "Extract E2E test failure metadata from Playwright JSON reporter output",
 	"main": "dist/index.js",
 	"scripts": {

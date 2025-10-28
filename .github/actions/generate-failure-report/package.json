@@ -1,7 +1,6 @@
 {
 	"name": "generate-failure-report",
 	"version": "1.0.0",
-	"type": "module",
 	"description": "Generate CI failure report aggregating build errors and test failures",
 	"main": "dist/index.js",
 	"scripts": {

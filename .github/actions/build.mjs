@@ -28,12 +28,12 @@ try {
 		bundle: true,
 		platform: 'node',
 		target: 'node24',
-		format: 'esm',
+		format: 'cjs',
 		outfile: 'dist/index.js',
 		sourcemap: true,
-		// Mark all dependencies and Node.js built-ins as external
-		// This prevents bundling and allows GitHub Actions runtime to resolve them
-		packages: 'external',
+		// Only mark Node.js built-ins as external, bundle npm dependencies
+		// GitHub Actions requires dependencies to be bundled or node_modules committed
+		external: nodeBuiltins,
 	})
 
 	console.log(`✓ Built ${actionName} successfully`)

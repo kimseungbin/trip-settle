@@ -1,7 +1,6 @@
 {
 	"name": "check-snapshot-trigger",
 	"version": "1.0.0",
-	"type": "module",
 	"description": "Determines if visual snapshot update workflow should run",
 	"main": "dist/index.js",
 	"scripts": {
