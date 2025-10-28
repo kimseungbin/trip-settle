@@ -103,6 +103,8 @@ test.describe('Expense Workflow', () => {
 		await page.getByPlaceholder('Expense name').fill('Dinner')
 		await page.getByPlaceholder('Amount').fill('45.75')
 		await submitExpenseForm(page)
+		// Wait for third expense to appear (consistent with first two expenses)
+		await expect(page.locator('.expense-item')).toHaveCount(3)
 
 		// Verify all expenses are in the list
 		const expenseItems = page.locator('.expense-item')

@@ -406,6 +406,8 @@ test.describe('Keyboard Accessibility - Visual Indicators', () => {
 
 		// Tab to Add button
 		await page.keyboard.press('Tab')
+		// Wait for focus to settle (WebKit needs time for focus events)
+		await page.waitForTimeout(100)
 		await expect(page.getByRole('button', { name: 'Add' })).toBeFocused()
 
 		// Tab to remove button (on the expense item we added)
