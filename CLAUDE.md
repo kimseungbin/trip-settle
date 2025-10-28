@@ -441,7 +441,7 @@ tsconfig.base.json (root)
 - `tsconfig.base.json` defines shared compiler options (module: ESNext, strict mode, etc.)
 - Package-specific configs extend the base and override only what's unique
 - GitHub Actions share `.github/actions/tsconfig.base.json` to eliminate duplication
-- **Why CommonJS for Actions?** GitHub Actions runtime requires CommonJS modules. Actions run in Node.js with `@vercel/ncc` bundler, which compiles TypeScript → CommonJS for GitHub's action platform. This is a GitHub requirement, not a choice.
+- **Why CommonJS for Actions?** Our GitHub Actions use CommonJS because we bundle with `@vercel/ncc`, which outputs CommonJS format. While GitHub Actions support both ESM and CommonJS, ncc + CommonJS is the de facto standard for TypeScript-based actions due to better compatibility and tooling maturity. Alternative: Use Rollup bundler for ESM support.
 
 #### ESLint Configuration
 
@@ -655,7 +655,7 @@ The project uses a hierarchical TypeScript configuration system with a shared ba
 - **Backend**: Inherits ESNext modules (relaxed strict mode for NestJS decorators)
 - **Frontend**: Inherits ESNext modules (Svelte-specific settings)
 - **Infra**: Inherits ESNext modules (CDK-specific settings)
-- **GitHub Actions**: Overrides to CommonJS + node resolution (GitHub Actions platform requirement)
+- **GitHub Actions**: Overrides to CommonJS + node resolution (our bundler choice: @vercel/ncc outputs CommonJS)
 
 All packages extend `tsconfig.base.json` and override only package-specific settings. See "Configuration Commonization" section for detailed hierarchy and best practices.
 
