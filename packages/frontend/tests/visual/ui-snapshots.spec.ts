@@ -54,13 +54,16 @@ test.describe('Visual Regression', () => {
 
 	// PHASE 2: Single item test enabled
 	test('expense list with single item', async ({ page }) => {
+		// Ensure page is ready
+		await page.waitForLoadState('networkidle')
+
 		// Add one expense
 		await page.getByPlaceholder('Expense name').fill('Coffee')
 		await page.getByPlaceholder('Amount').fill('4.50')
 		await page.getByRole('button', { name: 'Add' }).click()
 
-		// Wait for expense to appear
-		await page.waitForSelector('.expense-item')
+		// Wait for expense to appear using more reliable locator
+		await expect(page.locator('.expense-item')).toBeVisible({ timeout: 10000 })
 
 		// Screenshot the entire page with one expense
 		await expect(page).toHaveScreenshot('single-expense.png', {
