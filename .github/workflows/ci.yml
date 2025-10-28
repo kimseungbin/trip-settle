@@ -196,93 +196,7 @@ jobs:
 
       - name: Capture backend and frontend build metrics
         if: always()
-        run: |
-          echo "📊 Capturing Docker build metrics for backend and frontend..."
-
-          # Calculate total build time (approximation from job)
-          BACKEND_BUILD_TIME=45
-          FRONTEND_BUILD_TIME=60
-          TOTAL_BUILD_TIME=$((BACKEND_BUILD_TIME + FRONTEND_BUILD_TIME))
-
-          # Create initial metrics note
-          cat > cache-note.txt <<'EOF'
-          === DOCKER CACHE METRICS ===
-
-          [summary]
-          total_build_time_sec = 105
-          cache_effectiveness = pending_e2e_job
-          builds_total = 3
-          builds_pending = 1
-          critical_issues = 0
-          warnings = 0
-
-          [pipeline]
-          # Build dependency graph
-          stage_1 = base (node:24-alpine + dumb-init + tsconfig.base.json)
-          stage_2_parallel = backend-deps, frontend-deps (npm ci from base)
-          stage_3_parallel = backend-e2e, frontend-dev (from deps + source code)
-          stage_4_pending = playwright-e2e (will be appended by e2e-tests job)
-
-          [build.backend-e2e]
-          dockerfile = Dockerfile
-          target = backend-e2e
-          scope = backend-e2e
-          build_time_sec = ~45
-          cache_scope = type=gha,scope=backend-e2e
-          cache_mode = max
-          layers_info = See job summary for detailed breakdown
-          image_size_mb = pending
-          status = success
-
-          [build.frontend-dev]
-          dockerfile = Dockerfile
-          target = frontend-dev
-          scope = frontend-dev
-          build_time_sec = ~60
-          cache_scope = type=gha,scope=frontend-dev
-          cache_mode = max
-          layers_info = See job summary for detailed breakdown
-          image_size_mb = pending
-          status = success
-
-          [diagnostics.docker-images-job]
-          backend_build = success
-          frontend_build = success
-          cache_backend = gha (GitHub Actions cache)
-          buildx_version = v0.12+
-          layer_caching = enabled
-          mode = max (all intermediate layers cached)
-
-          [metadata]
-          timestamp = $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          commit = ${GITHUB_SHA:0:7}
-          branch = ${GITHUB_REF_NAME}
-          run_url = ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
-          job = docker-images
-          note = Backend and frontend metrics captured. Playwright metrics will be appended by e2e-tests job.
-          EOF
-
-          echo "📋 Initial cache metrics captured"
-
-          # Store in git notes
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Fetch existing notes (may not exist yet)
-          git fetch origin refs/notes/ci/cache-metrics:refs/notes/ci/cache-metrics 2>/dev/null || \
-            echo "ℹ️ No existing notes found (first run)"
-
-          # Add note to current commit
-          git notes --ref=ci/cache-metrics add -F cache-note.txt ${{ github.sha }} 2>/dev/null || \
-            echo "⚠️ Note already exists, will be updated by e2e-tests job"
-
-          # Push to remote
-          if git push origin refs/notes/ci/cache-metrics --force 2>&1; then
-            echo "✅ Docker build metrics captured and pushed to git notes"
-          else
-            echo "❌ ERROR: Failed to push cache metrics notes"
-            exit 1
-          fi
+        run: ./.github/scripts/docker/capture-cache-metrics.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -417,16 +331,7 @@ jobs:
           fi
 
       - name: Cleanup any existing Docker resources
-        run: |
-          echo "🧹 Cleaning up any existing Docker resources..."
-
-          # Stop and remove containers (anonymous volumes auto-cleaned with -v)
-          docker compose -f docker-compose.e2e.yml down -v --remove-orphans 2>/dev/null || true
-
-          # Remove any dangling images to free up space
-          docker image prune -f || true
-
-          echo "✅ Cleanup complete"
+        run: ./.github/scripts/docker/cleanup-resources.sh docker-compose.e2e.yml
 
       - name: Build Playwright test image
         uses: docker/build-push-action@v6
@@ -446,93 +351,12 @@ jobs:
       - name: Append Playwright build metrics
         if: always()  # Run even if build or tests fail
         run: |
-          echo "📊 Appending Playwright build metrics to existing note..."
-
-          # Compute cache key for diagnostics
-          DOCKERFILE_HASH="${{ hashFiles('packages/frontend/Dockerfile.e2e') }}"
-          CACHE_KEY="playwright-base-image-v1.56.1-noble-${DOCKERFILE_HASH}"
-
-          # Determine if tar file exists
-          if [ -f /tmp/playwright-image.tar ]; then
-            TAR_EXISTS="true"
-          else
-            TAR_EXISTS="false"
-          fi
-
-          # Append Playwright metrics to note
-          cat > playwright-metrics.txt <<EOF
-
-          [build.playwright-e2e]
-          dockerfile = packages/frontend/Dockerfile.e2e
-          scope = playwright-e2e
-          build_time_sec = ~10
-          cache_scope = type=gha,scope=playwright-e2e
-          cache_mode = max
-          base_image_cache = ${{ steps.cache-playwright-image.outputs.cache-hit == 'true' && 'HIT' || 'MISS' }}
-          base_image_size_mb = 786
-          base_image_load_sec = ${DOCKER_LOAD_DURATION:-0}
-          layers_info = See job summary for detailed breakdown
-          status = success
-
-          [diagnostics.e2e-tests-job]
-          playwright_build = success
-          base_image_cache = ${{ steps.cache-playwright-image.outputs.cache-hit == 'true' && 'HIT' || 'MISS' }}
-          base_image_tar_exists = ${TAR_EXISTS}
-          base_image_tar_size_mb = ${TAR_FILE_SIZE_MB:-0}
-          cache_source = ${CACHE_SOURCE:-unknown}
-          load_duration_sec = ${DOCKER_LOAD_DURATION:-0}
-          cache_key = ${CACHE_KEY}
-          dockerfile_hash = ${DOCKERFILE_HASH}
-
-          [summary.final]
-          # Final summary after all builds complete
-          total_build_time_sec = ~115
-          builds_completed = 3
-          backend_build = success
-          frontend_build = success
-          playwright_build = success
-          cache_effectiveness = ${{ steps.cache-playwright-image.outputs.cache-hit == 'true' && 'HIGH (base image cached)' || 'MEDIUM (base image downloaded)' }}
-          overall_status = success
-
-          [diagnostics.thresholds]
-          # Help LLM identify anomalies
-          backend_slow_build = none (45s < 60s threshold)
-          frontend_slow_build = none (60s < 90s threshold)
-          playwright_base_load = ${{ env.DOCKER_LOAD_DURATION > 10 && 'SLOW (>' || 'OK (<' }} 10s threshold)
-          base_image_tar = ${TAR_EXISTS} (should be true)
-
-          [trends]
-          # Comparison data for LLM analysis
-          note = Compare with previous runs using docker-cache-analysis skill
-          view_trends = git notes --ref=ci/cache-metrics show HEAD~1 (previous run)
-          EOF
-
-          echo "📋 Playwright metrics captured:"
-          echo "  Base image cache: ${{ steps.cache-playwright-image.outputs.cache-hit }}"
-          echo "  Cache key: ${CACHE_KEY}"
-          echo "  Load duration: ${DOCKER_LOAD_DURATION:-0}s"
-          echo "  Tar exists: ${TAR_EXISTS}"
-          echo "  Tar size: ${TAR_FILE_SIZE_MB:-0}MB"
-
-          # Fetch and append to existing note
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Fetch existing notes
-          git fetch origin refs/notes/ci/cache-metrics:refs/notes/ci/cache-metrics 2>/dev/null || true
-
-          # Append Playwright metrics to existing note
-          git notes --ref=ci/cache-metrics append -F playwright-metrics.txt ${{ github.sha }} 2>/dev/null || \
-            echo "⚠️ Failed to append (note may not exist yet)"
-
-          # Push updated note
-          if git push origin refs/notes/ci/cache-metrics --force 2>&1; then
-            echo "✅ Playwright metrics appended and pushed to git notes"
-          else
-            echo "❌ ERROR: Failed to push updated metrics"
-            exit 1
-          fi
+          ./.github/scripts/docker/append-playwright-metrics.sh \
+            "${{ github.sha }}" \
+            "${{ steps.cache-playwright-image.outputs.cache-hit }}" \
+            "${DOCKER_LOAD_DURATION:-0}"
         env:
+          DOCKERFILE_HASH: ${{ hashFiles('packages/frontend/Dockerfile.e2e') }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run E2E tests with pre-built images
@@ -608,22 +432,7 @@ jobs:
 
       - name: Verify cache will be saved
         if: always()
-        run: |
-          echo "=== FINAL CACHE VERIFICATION ==="
-          echo "Checking if tar file exists for cache save..."
-          if [ -f /tmp/playwright-image.tar ]; then
-            TAR_SIZE=$(stat -c%s /tmp/playwright-image.tar 2>/dev/null || stat -f%z /tmp/playwright-image.tar)
-            TAR_SIZE_MB=$((TAR_SIZE / 1024 / 1024))
-            echo "✅ Tar file exists: ${TAR_SIZE_MB}MB"
-            echo "📤 Cache will be saved by actions/cache@v4 (automatic post-job)"
-            echo "   Cache key: playwright-base-image-v1.56.1-noble-${{ hashFiles('packages/frontend/Dockerfile.e2e') }}"
-            echo "   Next run should restore this cache"
-          else
-            echo "❌ WARNING: Tar file missing!"
-            echo "   Cache will NOT be saved"
-            echo "   Next run will pull base image again (786MB download)"
-          fi
-          echo "================================"
+        run: ./.github/scripts/docker/verify-cache.sh /tmp/playwright-image.tar "${{ hashFiles('packages/frontend/Dockerfile.e2e') }}"
 
       - name: Clean up Docker resources
         if: always()
