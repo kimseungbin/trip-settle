@@ -1,0 +1,59 @@
+=== SNAPSHOT UPDATE WORKFLOW REPORT ===
+
+[metadata]
+timestamp = 2025-10-28T08:21:38Z
+commit = 3c098b4
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18868376509
+workflow = update-snapshots
+triggered_by = push
+
+[execution]
+status = failure
+outcome = failed
+checkout_step = true
+docker_setup = true
+playwright_tests = false
+commit_step = false
+push_step = false
+
+[snapshot_changes]
+has_changes = false
+files_changed = 0
+committed = false
+pushed = false
+
+[diagnostics]
+error_step = playwright_tests
+error_message = Playwright tests failed or timed out
+playwright_exit_code = unknown
+docker_container_status = unknown
+test_env = ci-docker
+updating_snapshots = true
+docker_user = root
+
+[error_details]
+# Captured Docker logs (last 50 lines, filtered for errors)
+playwright_error_log = playwright-1  |     Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeFocused[2m([22m[2m)[22m failed%0Aplaywright-1  | ::error file=tests/e2e/keyboard-navigation.spec.ts,title=[webkit] › tests/e2e/keyboard-navigation.spec.ts:385:2 › Keyboard Accessibility - Visual Indicators › focus is visible when tabbing through page,line=411,col=59::  1) [webkit] › tests/e2e/keyboard-navigation.spec.ts:385:2 › Keyboard Accessibility - Visual Indicators › focus is visible when tabbing through page %250A    Error: expect(locator).toBeFocused() failed%250A%250A    Locator:  getByRole('button', { name: 'Add' })%250A    Expected: focused%250A    Received: inactive%250A    Timeout:  5000ms%250A%250A    Call log:%250A      - Expect toBeFocused with timeout 5000ms%250A      - waiting for getByRole('button', { name: 'Add' })%250A        9 × locator resolved to <button tabindex=0 type=submit class=s-zaRBhlwSvceV>Add</button>%250A          - unexpected value inactive%250A%250A%250A      409 | 		// Wait for foc
+
+[test_results]
+total_tests = 73
+passed = 47
+failed = 1
+skipped = 25
+
+[timing]
+job_duration_seconds = 229
+timeout_limit_seconds = 1800
+timed_out = false
+
+[trigger_details]
+method = push
+# workflow_dispatch: Manual trigger from GitHub UI
+# issue_comment: Triggered by /update-snapshots PR comment
+# push: Triggered by [update-snapshots] in commit message
+source_branch = main
+
+[recommendations]
+# For LLM analysis
+next_steps = Analyze error_step and error_message. Check artifacts in run_url.
