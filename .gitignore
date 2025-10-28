@@ -18,6 +18,9 @@ build/
 config/**/*.js
 config/**/*.js.map
 config/**/*.d.ts
+packages/backend/src/shared-config/**/*.js
+packages/backend/src/shared-config/**/*.js.map
+packages/backend/src/shared-config/**/*.d.ts
 *.tsbuildinfo
 
 # Environment

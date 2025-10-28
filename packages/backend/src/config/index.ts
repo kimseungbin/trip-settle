@@ -1,9 +1,9 @@
 /**
  * @file Backend-specific configuration
- * Re-exports relevant config from shared config
+ * Re-exports relevant config from backend's shared config
  */
 
-import { config as sharedConfig } from '../../../../config/index.js'
+import { config as sharedConfig } from '../shared-config/index.js'
 
 export const config = {
 	environment: sharedConfig.environment,

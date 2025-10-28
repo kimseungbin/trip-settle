@@ -4,19 +4,20 @@
  */
 
 import type { AppConfig } from '../types.js'
+import { PORTS, LOCAL_URLS } from '../../../../../constants.js'
 
 export const localConfig: AppConfig = {
 	environment: 'local',
 
 	backend: {
-		port: 3000,
-		corsOrigin: 'http://localhost:5173',
+		port: PORTS.backend,
+		corsOrigin: LOCAL_URLS.frontend,
 	},
 
 	frontend: {
-		url: 'http://localhost:5173',
-		apiUrl: 'http://localhost:3000/api',
-		port: 5173,
+		url: LOCAL_URLS.frontend,
+		apiUrl: LOCAL_URLS.api,
+		port: PORTS.frontend,
 	},
 
 	database: {

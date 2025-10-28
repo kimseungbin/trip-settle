@@ -6,7 +6,7 @@ export default [
 	...baseConfig,
 	// Backend-specific ignores
 	{
-		ignores: ['dist/', 'vitest.config.ts'],
+		ignores: ['dist/', 'vitest.config.ts', 'src/shared-config/**/*.js', 'src/shared-config/**/*.d.ts'],
 	},
 	// Backend-specific configuration (NestJS)
 	{
