@@ -1,19 +1,7 @@
-import eslint from '@eslint/js'
-import tseslint from 'typescript-eslint'
+import baseConfig from '../eslint.config.base.mjs'
 
-export default tseslint.config(
-	eslint.configs.recommended,
-	...tseslint.configs.recommendedTypeChecked,
-	{
-		languageOptions: {
-			parserOptions: {
-				projectService: true,
-				tsconfigRootDir: import.meta.dirname,
-				allowDefaultProject: ['*.mjs'],
-			},
-		},
-	},
-	{
-		ignores: ['dist/**', 'lib/**', 'node_modules/**', '__tests__/**', 'eslint.config.mjs'],
-	}
-)
+/**
+ * ESLint configuration for generate-failure-report action
+ * Extends the shared base configuration from ../eslint.config.base.mjs
+ */
+export default baseConfig
