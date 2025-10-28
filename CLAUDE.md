@@ -534,18 +534,6 @@ npm run diff --workspace=infra   # Preview changes
 npm run deploy --workspace=infra # Deploy to AWS
 ```
 
-## Development Workflow
-
-1. **Install dependencies**: `npm install` (only needed once)
-2. **Start backend**: `npm run dev --workspace=backend` (no database setup required!)
-3. **Start frontend**: `npm run dev --workspace=frontend`
-4. Frontend at `http://localhost:5173`, Backend at `http://localhost:3000`
-5. Make changes with hot reload enabled
-6. Run tests before committing
-7. Format code with `npm run format`
-
-Note: The development environment uses pg-mem for zero-configuration PostgreSQL. No need to install or configure a database locally!
-
 ## Git Hooks
 
 Pre-commit hooks validate code quality before commits:
