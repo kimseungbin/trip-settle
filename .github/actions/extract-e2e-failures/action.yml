@@ -27,5 +27,5 @@ outputs:
     description: 'Number of test failures detected'
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
