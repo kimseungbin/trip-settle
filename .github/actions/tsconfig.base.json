@@ -2,8 +2,7 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		// GitHub Actions runtime (ESM with esbuild bundler)
-		// Inherits target: ESNext from root, specify lib for Node.js runtime
-		"lib": ["ESNext"],
+		// Inherits target: ESNext, module: ESNext from root
 
 		// Build output (relative paths resolved from each action's directory)
 		"outDir": "./lib",

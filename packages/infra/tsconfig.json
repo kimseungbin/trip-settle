@@ -1,8 +1,6 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"lib": ["ESNext"],
-
 		// Infra-specific overrides
 		"sourceMap": false,
 		"inlineSourceMap": true,

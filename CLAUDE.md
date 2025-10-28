@@ -117,9 +117,9 @@ action-name/
 ├── src/
 │   └── main.ts              # TypeScript source
 ├── dist/
-│   └── index.js             # Bundled output (committed with @vercel/ncc)
+│   └── index.js             # Bundled ESM output (committed with esbuild)
 ├── action.yml               # Action metadata
-├── package.json             # Dependencies & scripts
+├── package.json             # Dependencies & scripts (with "type": "module")
 ├── tsconfig.json            # TypeScript config
 └── README.md                # Documentation
 ```
@@ -434,14 +434,14 @@ tsconfig.base.json (root)
     ├── check-snapshot-trigger/tsconfig.json
     ├── extract-e2e-failures/tsconfig.json
     └── generate-failure-report/tsconfig.json
-        └── module: commonjs, target: ES2022 (GitHub Actions requirement)
+        └── Inherits module: ESNext from root (ESM with esbuild bundler)
 ```
 
 **Key points**:
 - `tsconfig.base.json` defines shared compiler options (module: ESNext, strict mode, etc.)
 - Package-specific configs extend the base and override only what's unique
 - GitHub Actions share `.github/actions/tsconfig.base.json` to eliminate duplication
-- **Why CommonJS for Actions?** Our GitHub Actions use CommonJS because we bundle with `@vercel/ncc`, which outputs CommonJS format. While GitHub Actions support both ESM and CommonJS, ncc + CommonJS is the de facto standard for TypeScript-based actions due to better compatibility and tooling maturity. Alternative: Use Rollup bundler for ESM support.
+- **ESM for Actions**: All GitHub Actions use ESM (module: ESNext) bundled with esbuild for consistency with the monorepo. This provides 20-50x faster builds compared to the previous @vercel/ncc + CommonJS approach, while maintaining compatibility with GitHub Actions' Node.js 24 runtime.
 
 #### ESLint Configuration
 
@@ -652,12 +652,12 @@ git notes --ref=ci/<namespace> list
 The project uses a hierarchical TypeScript configuration system with a shared base config:
 
 - **Root base** (`tsconfig.base.json`): Defines common compiler options (module: ESNext, bundler resolution)
-- **Backend**: Inherits ESNext modules (relaxed strict mode for NestJS decorators)
+- **Backend**: Inherits ESNext modules (relaxed strict mode for NestJS decorators, requires `.js` extensions for ESM)
 - **Frontend**: Inherits ESNext modules (Svelte-specific settings)
 - **Infra**: Inherits ESNext modules (CDK-specific settings)
-- **GitHub Actions**: Overrides to CommonJS + node resolution (our bundler choice: @vercel/ncc outputs CommonJS)
+- **GitHub Actions**: Inherits ESNext modules (bundled with esbuild for 20-50x faster builds)
 
-All packages extend `tsconfig.base.json` and override only package-specific settings. See "Configuration Commonization" section for detailed hierarchy and best practices.
+All packages use ESM throughout the monorepo. All packages extend `tsconfig.base.json` and override only package-specific settings. See "Configuration Commonization" section for detailed hierarchy and best practices.
 
 ## Testing & CI/CD Readiness
 
