@@ -25684,26 +25684,15 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(7930));
 const fs = __importStar(__nccwpck_require__(9896));
-/**
- * Generate CI Failure Report
- *
- * This action aggregates failure information from various CI jobs and creates
- * a unified markdown report optimized for Claude Code to read and provide
- * actionable feedback.
- */
 function run() {
     try {
-        // Get inputs
         const buildLogPath = core.getInput('build-log-path') || 'build-log.txt';
         const outputPath = core.getInput('output-path') || 'ci-failure-report.md';
         core.info('🔍 Generating CI failure report...');
         core.info(`   Build log: ${buildLogPath}`);
         core.info(`   Output: ${outputPath}`);
-        // Generate report
         const markdown = generateReport(buildLogPath);
-        // Write report
         fs.writeFileSync(outputPath, markdown, 'utf-8');
-        // Set outputs
         core.setOutput('report-path', outputPath);
         core.info('✅ Report generated successfully');
     }
@@ -25716,13 +25705,9 @@ function run() {
         }
     }
 }
-/**
- * Main function to generate the failure report
- */
 function generateReport(buildLogPath) {
     let markdown = generateHeader();
     let hasErrors = false;
-    // Process build log if exists
     if (fs.existsSync(buildLogPath)) {
         core.info(`📄 Reading build log: ${buildLogPath}`);
         const logContent = fs.readFileSync(buildLogPath, 'utf-8');
@@ -25742,19 +25727,14 @@ function generateReport(buildLogPath) {
         markdown += '⚠️ Build log file not found. The build may have failed before generating logs.\n\n';
         hasErrors = true;
     }
-    // Add footer
     markdown += generateFooter();
     if (!hasErrors) {
         core.info('✅ No failures to report');
     }
     return markdown;
 }
-/**
- * Parse TypeScript compilation errors from build output
- */
 function parseBuildErrors(logContent) {
     const errors = [];
-    // Match TypeScript errors: "path/to/file.ts(line,col): error TS1234: message"
     const tsErrorRegex = /^(.+?\.tsx?)\((\d+),(\d+)\): error (TS\d+): (.+)$/gm;
     let match;
     while ((match = tsErrorRegex.exec(logContent)) !== null) {
@@ -25767,10 +25747,8 @@ function parseBuildErrors(logContent) {
             type: 'typescript',
         });
     }
-    // Match generic build errors
     const genericErrorRegex = /^error (.+)$/gim;
     while ((match = genericErrorRegex.exec(logContent)) !== null) {
-        // Skip if already captured as TypeScript error
         if (!match[1].startsWith('TS')) {
             errors.push({
                 message: match[1],
@@ -25780,18 +25758,13 @@ function parseBuildErrors(logContent) {
     }
     return errors;
 }
-/**
- * Generate markdown section for build failures
- */
 function generateBuildSection(errors) {
     if (errors.length === 0) {
         return '';
     }
     let markdown = '## Build Failures\n\n';
     markdown += `**Total Errors:** ${errors.length}\n\n`;
-    // Group errors by file
     const errorsByFile = groupErrorsByFile(errors);
-    // Output file-specific errors
     for (const [file, fileErrors] of Object.entries(errorsByFile)) {
         if (file === '_general')
             continue;
@@ -25803,7 +25776,6 @@ function generateBuildSection(errors) {
             }
         }
     }
-    // Output general errors
     if (errorsByFile['_general']) {
         markdown += '### General Build Errors\n\n';
         for (const error of errorsByFile['_general']) {
@@ -25815,9 +25787,6 @@ function generateBuildSection(errors) {
     }
     return markdown;
 }
-/**
- * Group errors by file
- */
 function groupErrorsByFile(errors) {
     return errors.reduce((acc, error) => {
         if (error.type === 'typescript') {
@@ -25836,9 +25805,6 @@ function groupErrorsByFile(errors) {
         return acc;
     }, {});
 }
-/**
- * Generate markdown header with CI context
- */
 function generateHeader() {
     const githubServerUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
     const githubRepository = process.env.GITHUB_REPOSITORY || '';
@@ -25861,9 +25827,6 @@ function generateHeader() {
     markdown += '---\n\n';
     return markdown;
 }
-/**
- * Generate markdown footer with guidance
- */
 function generateFooter() {
     let markdown = '\n---\n\n';
     markdown += '## How to Fix\n\n';
@@ -25878,7 +25841,6 @@ function generateFooter() {
     markdown += '3. Claude Code will analyze the errors and suggest fixes\n';
     return markdown;
 }
-// Run the action
 void run();
 
 

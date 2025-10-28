@@ -1,0 +1,19 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		// GitHub Actions runtime target
+		"target": "ES2022",
+		"module": "commonjs",
+		"lib": ["ES2022"],
+
+		// Build output (relative paths resolved from each action's directory)
+		"outDir": "./lib",
+		"rootDir": "./src",
+
+		// Enhanced strictness for actions
+		"declarationMap": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true
+	}
+}

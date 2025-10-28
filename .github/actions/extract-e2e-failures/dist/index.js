@@ -25684,19 +25684,13 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(7930));
 const fs = __importStar(__nccwpck_require__(9896));
-/**
- * Extract E2E test failure metadata from Playwright JSON reporter output
- * and generate INI-format note for git notes storage.
- */
 function run() {
     try {
-        // Get inputs
         const resultsPath = core.getInput('results-path', { required: true });
         const outputPath = core.getInput('output-path', { required: true });
         core.info(`📊 Extracting E2E failure metadata...`);
         core.info(`   Results: ${resultsPath}`);
         core.info(`   Output: ${outputPath}`);
-        // Read Playwright JSON results
         let results;
         try {
             const resultsData = fs.readFileSync(resultsPath, 'utf-8');
@@ -25705,18 +25699,15 @@ function run() {
         catch (error) {
             throw new Error(`Failed to read results file: ${error instanceof Error ? error.message : String(error)}`);
         }
-        // Extract metadata from environment
         const timestamp = new Date().toISOString();
         const commit = process.env.GITHUB_SHA?.substring(0, 7) || 'unknown';
         const branch = process.env.GITHUB_REF_NAME || 'unknown';
         const runUrl = process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID
             ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
             : 'local';
-        // Analyze test results
         const stats = analyzeTestStats(results);
         const failures = extractFailures(results);
         const passRate = stats.total > 0 ? ((stats.passed / stats.total) * 100).toFixed(1) : '0.0';
-        // Generate INI-format note
         const note = generateNote({
             timestamp,
             commit,
@@ -25728,16 +25719,13 @@ function run() {
             resultsPath,
             config: results.config,
         });
-        // Write output
         fs.writeFileSync(outputPath, note, 'utf-8');
-        // Set outputs
         core.setOutput('tests-total', stats.total.toString());
         core.setOutput('tests-passed', stats.passed.toString());
         core.setOutput('tests-failed', stats.failed.toString());
         core.setOutput('tests-skipped', stats.skipped.toString());
         core.setOutput('pass-rate', passRate);
         core.setOutput('failures-count', failures.length.toString());
-        // Log summary
         core.info(`✅ E2E failure metadata extracted successfully`);
         core.info(`   Tests: ${stats.total} total, ${stats.passed} passed, ${stats.failed} failed`);
         if (failures.length > 0) {
@@ -25756,9 +25744,6 @@ function run() {
         }
     }
 }
-/**
- * Analyze test statistics from Playwright results
- */
 function analyzeTestStats(results) {
     const stats = {
         total: 0,
@@ -25794,9 +25779,6 @@ function analyzeTestStats(results) {
     results.suites?.forEach(suite => processSuite(suite));
     return stats;
 }
-/**
- * Extract failure details from Playwright results
- */
 function extractFailures(results) {
     const failures = [];
     function processSuite(suite, suitePath = []) {
@@ -25806,12 +25788,10 @@ function extractFailures(results) {
                 const result = test.results?.[0];
                 if (!result || result.status === 'passed' || result.status === 'skipped')
                     return;
-                // Classify error type
                 const error = result.error || {};
                 const errorMessage = error.message || 'No error message';
                 const stackTrace = error.stack || '';
                 const errorType = classifyError(errorMessage);
-                // Extract artifact paths
                 const artifacts = {
                     screenshots: [],
                     videos: [],
@@ -25833,8 +25813,8 @@ function extractFailures(results) {
                     testName: [...currentPath, spec.title].join(' › '),
                     browser: test.projectName || 'unknown',
                     errorType,
-                    errorMessage: errorMessage.split('\n')[0], // First line only
-                    stackTrace: stackTrace.split('\n').slice(0, 5).join('\n'), // First 5 lines
+                    errorMessage: errorMessage.split('\n')[0],
+                    stackTrace: stackTrace.split('\n').slice(0, 5).join('\n'),
                     duration: result.duration || 0,
                     artifacts,
                 });
@@ -25845,9 +25825,6 @@ function extractFailures(results) {
     results.suites?.forEach(suite => processSuite(suite));
     return failures;
 }
-/**
- * Classify error type based on error message
- */
 function classifyError(errorMessage) {
     if (/Timeout|timeout|exceeded/i.test(errorMessage)) {
         return 'timeout';
@@ -25866,9 +25843,6 @@ function classifyError(errorMessage) {
     }
     return 'unknown';
 }
-/**
- * Generate INI-format note
- */
 function generateNote(data) {
     const { timestamp, commit, branch, runUrl, stats, passRate, failures, resultsPath, config } = data;
     let note = `=== E2E TEST FAILURE REPORT ===
@@ -25895,7 +25869,6 @@ navigation_failures = ${failures.filter(f => f.errorType === 'navigation').lengt
 setup_failures = ${failures.filter(f => f.errorType === 'setup_teardown').length}
 
 `;
-    // Add individual failure details
     failures.forEach((failure, index) => {
         const num = index + 1;
         note += `[failure.${num}]
@@ -25911,7 +25884,6 @@ traces = ${failure.artifacts.traces.join(', ') || 'none'}
 
 `;
     });
-    // Add diagnostics section
     note += `[diagnostics]
 playwright_version = ${config?.version || 'unknown'}
 test_env = ${process.env.TEST_ENV || 'unknown'}
@@ -25921,7 +25893,6 @@ artifacts_uploaded = ${process.env.CI === 'true' ? 'yes (GitHub Actions)' : 'no 
 `;
     return note;
 }
-// Run the action
 void run();
 
 
