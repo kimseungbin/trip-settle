@@ -181,6 +181,114 @@ Compiles all packages to verify no TypeScript errors:
 
 **Note**: Build artifacts are cleaned after validation to avoid committing generated files.
 
+## Snapshot Handling Enforcement
+
+### Overview
+
+When committing changes to `.svelte` or `.css` files, the pre-commit hook **requires** explicit snapshot handling declaration in the commit message footer.
+
+This ensures visual regression test snapshots are kept in sync with UI changes.
+
+### Required Commit Message Footer
+
+Add one of these footers to your commit message:
+
+#### 1. `Snapshots: update` - UI appearance changed
+
+Use when changes affect visual appearance:
+- Styling changes (colors, spacing, fonts)
+- Layout modifications
+- New visual elements added
+- Component visual restructuring
+
+**What happens**: CI will automatically update snapshot baselines after push and commit them back to the branch.
+
+**Example commit message**:
+```
+feat(frontend): Redesign expense card layout
+
+- Increase card padding for better readability
+- Add subtle shadow for depth
+- Update typography hierarchy
+
+Snapshots: update
+```
+
+#### 2. `Snapshots: skip` - UI files changed but appearance unchanged
+
+Use when changes don't affect visual output:
+- Internal refactoring
+- Prop renaming or restructuring
+- Type changes
+- Logic extraction
+- Performance optimizations
+
+**What happens**: Hook allows commit without snapshot updates. You confirm no visual changes occurred.
+
+**Example commit message**:
+```
+refactor(frontend): Extract validation logic from ExpenseForm
+
+Moves validation logic to separate function for reusability.
+No visual changes to component appearance.
+
+Snapshots: skip
+```
+
+### Why This Matters
+
+Visual regression tests compare current UI against baseline snapshots. When UI changes but snapshots aren't updated:
+- E2E tests fail with snapshot mismatches
+- CI pipeline blocks
+- Manual snapshot update workflow required
+
+Explicit declaration prevents forgotten updates and CI failures.
+
+### Decision Guide
+
+**Use `Snapshots: update` when**:
+- You modified CSS styling
+- You changed component layout/structure
+- You added/removed visual elements
+- You're unsure (safer to update than skip)
+
+**Use `Snapshots: skip` when**:
+- You only changed TypeScript/logic
+- You refactored props without visual impact
+- You verified no visual changes in browser
+- Changes are internal implementation only
+
+### Bypassing Snapshot Enforcement
+
+If you need to commit without the snapshot footer (not recommended):
+
+```bash
+git commit --no-verify -m "WIP: Your message"
+```
+
+**Use sparingly**: This bypasses all pre-commit checks including snapshot validation.
+
+### Troubleshooting
+
+**Problem**: Forgot to add snapshot footer, commit blocked
+
+**Solution**: Amend commit message:
+```bash
+git commit --amend
+# Add "Snapshots: update" or "Snapshots: skip" footer
+```
+
+**Problem**: Added "Snapshots: update" but snapshots not updated in CI
+
+**Solution**: Check GitHub Actions workflow logs. Ensure snapshot update workflow triggered and completed successfully.
+
+**Problem**: Not sure if visual changes occurred
+
+**Solution**:
+1. Run frontend locally: `npm run dev --workspace=frontend`
+2. Visually inspect changes in browser
+3. If any doubt, use `Snapshots: update` (safer)
+
 ## E2E Tests (Not in Hooks)
 
 E2E tests are **intentionally excluded** from pre-commit hooks due to execution time (2-5 minutes with Docker).

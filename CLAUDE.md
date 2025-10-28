@@ -264,42 +264,11 @@ chmod +x .githooks/*
 
 ### Snapshot Handling Enforcement
 
-When committing changes to `.svelte` or `.css` files, the pre-commit hook **requires** explicit snapshot handling:
+When committing changes to `.svelte` or `.css` files, add commit message footer:
+- **`Snapshots: update`** - UI appearance changed (styling, layout, visual elements)
+- **`Snapshots: skip`** - UI files changed but appearance unchanged (refactoring, logic only)
 
-**Required footer (add to commit message):**
-
-1. **`Snapshots: update`** - UI appearance changed
-   - Use when: Styling, layout, colors, new visual elements
-   - CI will automatically update snapshots after push
-   - Example:
-     ```
-     feat: Redesign button
-
-     Changes the button color to blue and adds hover effect.
-
-     Snapshots: update
-     ```
-
-2. **`Snapshots: skip`** - UI files changed but appearance unchanged
-   - Use when: Internal refactoring, prop renaming, type changes
-   - You confirm no visual changes occurred
-   - Example:
-     ```
-     refactor: Extract component logic
-
-     Moves validation logic to separate function.
-
-     Snapshots: skip
-     ```
-
-**Why this matters**: Visual regression tests fail when UI changes aren't reflected in snapshots. Explicit declaration prevents forgotten updates and CI failures.
-
-**Bypass hook** (use sparingly):
-```bash
-git commit --no-verify -m "WIP: Your message"
-```
-
-For setup, verification, and troubleshooting, see `.claude/skills/git-hooks-setup/SKILL.md`
+For examples, decision guide, and troubleshooting, see `.claude/skills/git-hooks-setup/SKILL.md`
 
 ## Adding New Features
 
