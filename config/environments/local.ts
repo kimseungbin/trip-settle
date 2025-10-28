@@ -3,7 +3,7 @@
  * No environment variables needed - everything has safe defaults
  */
 
-import type { AppConfig } from '../types'
+import type { AppConfig } from '../types.js'
 
 export const localConfig: AppConfig = {
 	environment: 'local',

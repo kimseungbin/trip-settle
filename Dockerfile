@@ -28,6 +28,19 @@ COPY tsconfig.base.json ./
 RUN npm ci --ignore-scripts --omit=optional
 
 # ==================================================
+# Stage: config-build
+# Build shared configuration (used by backend)
+# ==================================================
+FROM base AS config-build
+
+# Copy shared config source
+COPY config ./config
+
+# Build config TypeScript to ESM
+WORKDIR /app/config
+RUN npm run build
+
+# ==================================================
 # Stage: backend-deps
 # Install backend dependencies
 # ==================================================
@@ -46,8 +59,8 @@ RUN npm ci --workspace=backend --include=dev
 # ==================================================
 FROM backend-deps AS backend-dev
 
-# Copy shared config
-COPY config ./config
+# Copy pre-built config from config-build stage
+COPY --from=config-build /app/config ./config
 
 # Copy backend source code
 COPY packages/backend ./packages/backend
@@ -70,8 +83,8 @@ CMD ["npm", "run", "dev"]
 # ==================================================
 FROM backend-deps AS backend-e2e
 
-# Copy shared config
-COPY config ./config
+# Copy pre-built config from config-build stage
+COPY --from=config-build /app/config ./config
 
 # Copy backend source code
 COPY packages/backend ./packages/backend

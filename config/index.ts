@@ -3,7 +3,7 @@
  * Loads the appropriate config based on NODE_ENV
  */
 
-import type { AppConfig, Environment } from './types'
+import type { AppConfig, Environment } from './types.js'
 
 const getEnvironment = (): Environment => {
 	const env = process.env.NODE_ENV as Environment | undefined
@@ -20,27 +20,28 @@ const getEnvironment = (): Environment => {
 	return 'local'
 }
 
-const loadConfig = (): AppConfig => {
+const loadConfig = async (): Promise<AppConfig> => {
 	const environment = getEnvironment()
 
-	// Use dynamic require to only load the selected environment config
+	// Use dynamic imports to only load the selected environment config
 	// This prevents other environments from executing their validation code
 	switch (environment) {
 		case 'local': {
-			const { localConfig } = require('./environments/local')
+			const { localConfig } = await import('./environments/local.js')
 			return localConfig
 		}
 		case 'development': {
-			const { developmentConfig } = require('./environments/development')
+			const { developmentConfig } = await import('./environments/development.js')
 			return developmentConfig
 		}
 		case 'production': {
-			const { productionConfig } = require('./environments/production')
+			const { productionConfig } = await import('./environments/production.js')
 			return productionConfig
 		}
 	}
 }
 
-export const config = loadConfig()
+// Top-level await (requires ES2022+)
+export const config = await loadConfig()
 
-export type { AppConfig, Environment, BackendConfig, FrontendConfig, DatabaseConfig, InfraConfig } from './types'
+export type { AppConfig, Environment, BackendConfig, FrontendConfig, DatabaseConfig, InfraConfig } from './types.js'

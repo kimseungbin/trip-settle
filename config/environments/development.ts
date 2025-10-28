@@ -3,7 +3,7 @@
  * Reads from environment variables injected by CI/CD
  */
 
-import type { AppConfig } from '../types'
+import type { AppConfig } from '../types.js'
 
 const getRequiredEnv = (key: string): string => {
 	const value = process.env[key]

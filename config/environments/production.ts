@@ -4,7 +4,7 @@
  * All critical values are required
  */
 
-import type { AppConfig } from '../types'
+import type { AppConfig } from '../types.js'
 
 const getRequiredEnv = (key: string): string => {
 	const value = process.env[key]

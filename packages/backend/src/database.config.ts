@@ -2,6 +2,12 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { DataType, newDb } from 'pg-mem'
 import { config } from './config/index.js'
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
+
+// Get __dirname equivalent in ESM
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 let memoryDataSource: DataSource | null = null
 

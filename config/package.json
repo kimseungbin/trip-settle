@@ -1,0 +1,10 @@
+{
+	"name": "@trip-settle/config",
+	"version": "1.0.0",
+	"type": "module",
+	"private": true,
+	"description": "Shared configuration for Trip Settle monorepo",
+	"scripts": {
+		"build": "tsc"
+	}
+}

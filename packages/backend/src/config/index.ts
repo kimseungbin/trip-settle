@@ -3,7 +3,7 @@
  * Re-exports relevant config from shared config
  */
 
-import { config as sharedConfig } from '../../../../config'
+import { config as sharedConfig } from '../../../../config/index.js'
 
 export const config = {
 	environment: sharedConfig.environment,
