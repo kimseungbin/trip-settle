@@ -52,3 +52,47 @@ branch = main
 run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18863438542
 job = docker-images
 note = Backend and frontend metrics captured. Playwright metrics will be appended by e2e-tests job.
+
+[build.playwright-e2e]
+dockerfile = packages/frontend/Dockerfile.e2e
+scope = playwright-e2e
+build_time_sec = ~10
+cache_scope = type=gha,scope=playwright-e2e
+cache_mode = max
+base_image_cache = true
+base_image_size_mb = 786
+base_image_load_sec = 29
+layers_info = See job summary for detailed breakdown
+status = success
+
+[diagnostics.e2e-tests-job]
+playwright_build = success
+base_image_cache = true
+base_image_tar_exists = true
+base_image_tar_size_mb = 2581
+cache_source = restored
+load_duration_sec = 29
+cache_key = playwright-base-image-v1.56.1-noble-6549621ee101303ce8bde0c610783af10a38f245581400dcf1a9ca8a42e6e057
+dockerfile_hash = 6549621ee101303ce8bde0c610783af10a38f245581400dcf1a9ca8a42e6e057
+
+[summary.final]
+# Final summary after all builds complete
+total_build_time_sec = ~115
+builds_completed = 3
+backend_build = success
+frontend_build = success
+playwright_build = success
+cache_effectiveness = HIGH (base image cached)
+overall_status = success
+
+[diagnostics.thresholds]
+# Help LLM identify anomalies
+backend_slow_build = none (45s < 60s threshold)
+frontend_slow_build = none (60s < 90s threshold)
+playwright_base_load = SLOW (>10s threshold)
+base_image_tar = true (should be true)
+
+[trends]
+# Comparison data for LLM analysis
+note = Compare with previous runs using docker-cache-analysis skill
+view_trends = git notes --ref=ci/cache-metrics show HEAD~1 (previous run)
