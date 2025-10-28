@@ -37,7 +37,6 @@
 		"@testing-library/svelte": "^5.2.8",
 		"@testing-library/user-event": "^14.6.1",
 		"@tsconfig/svelte": "^5.0.2",
-		"@vitest/ui": "^3.2.4",
 		"eslint-plugin-svelte": "^2.35.1",
 		"happy-dom": "^20.0.8",
 		"postcss-html": "^1.8.0",
@@ -46,7 +45,6 @@
 		"stylelint-config-standard": "^39.0.1",
 		"svelte-check": "^4.3.3",
 		"tslib": "^2.6.2",
-		"vite": "^7.1.11",
-		"vitest": "^3.2.4"
+		"vite": "^7.1.11"
 	}
 }

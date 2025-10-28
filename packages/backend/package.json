@@ -34,13 +34,11 @@
 		"@nestjs/testing": "^10.3.0",
 		"@types/express": "^4.17.21",
 		"@types/supertest": "^6.0.3",
-		"@vitest/ui": "^3.2.4",
 		"pg-mem": "^3.0.2",
 		"supertest": "^7.1.4",
 		"ts-loader": "^9.5.1",
 		"ts-node": "^10.9.2",
 		"tsc-watch": "^7.2.0",
-		"tsconfig-paths": "^4.2.0",
-		"vitest": "^3.2.4"
+		"tsconfig-paths": "^4.2.0"
 	}
 }
