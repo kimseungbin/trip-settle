@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { t } from 'svelte-i18n'
+	import { TOAST_TIMING, ANIMATION_DURATION } from '../constants/timing'
 
 	let {
 		visible = false,
@@ -15,10 +16,10 @@
 	onMount(() => {
 		if (visible) {
 			show = true
-			// Auto-dismiss after 8 seconds
+			// Auto-dismiss after configured duration
 			const timer = setTimeout(() => {
 				handleDismiss()
-			}, 8000)
+			}, TOAST_TIMING.KEYBOARD_HINT)
 
 			return () => clearTimeout(timer)
 		}
@@ -52,7 +53,7 @@
 		// Wait for animation to complete before calling onDismiss
 		setTimeout(() => {
 			onDismiss()
-		}, 300)
+		}, ANIMATION_DURATION.FAST)
 	}
 </script>
 

@@ -10,6 +10,7 @@
 	import { toast } from '../stores/toast.svelte'
 	import type { PaymentMode } from '../stores/settings.svelte'
 	import { focusElement } from '../lib/focus'
+	import { ANIMATION_DURATION, TOAST_TIMING } from '../constants/timing'
 
 	let currencyMode = $state<CurrencyMode>('multi')
 	let defaultCurrency = $state(DEFAULT_CURRENCY)
@@ -56,7 +57,7 @@
 			// Clear the animation marker after animation completes
 			setTimeout(() => {
 				lastAddedPayer = null
-			}, 300)
+			}, ANIMATION_DURATION.FAST)
 		}
 	}
 
@@ -97,7 +98,10 @@
 		if (currencyMode === 'single' && defaultCurrency !== DEFAULT_CURRENCY) {
 			const currency = getCurrencyByCode(defaultCurrency)
 			const currencyDisplay = currency ? `${currency.code}` : defaultCurrency
-			toast.success($t('toast.currencySelected', { values: { currency: currencyDisplay } }), 4000)
+			toast.success(
+				$t('toast.currencySelected', { values: { currency: currencyDisplay } }),
+				TOAST_TIMING.CURRENCY_SUCCESS
+			)
 		}
 
 		// Navigate to home page

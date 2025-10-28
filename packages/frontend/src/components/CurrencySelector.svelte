@@ -3,6 +3,7 @@
 	import { DEFAULT_CURRENCY, getCurrencyByCode, searchCurrencies, getCurrencyDisplayName } from '../data/currencies'
 	import { locale, t } from 'svelte-i18n'
 	import { focusElementImmediate } from '../lib/focus'
+	import { FOCUS_TIMING, ANIMATION_DURATION } from '../constants/timing'
 
 	let {
 		value = $bindable(DEFAULT_CURRENCY),
@@ -29,10 +30,10 @@
 		if (autofocus) {
 			if (initialOpen && inputElement) {
 				// If starting open, focus the search input
-				focusElementImmediate(inputElement, 100)
+				focusElementImmediate(inputElement, FOCUS_TIMING.WEBKIT_SAFE)
 			} else if (buttonElement) {
 				// If starting closed, focus the button
-				focusElementImmediate(buttonElement, 100)
+				focusElementImmediate(buttonElement, FOCUS_TIMING.WEBKIT_SAFE)
 			}
 		}
 	})
@@ -65,7 +66,7 @@
 		if (isOpen) {
 			searchQuery = ''
 			selectedIndex = 0
-			focusElementImmediate(inputElement, 0)
+			focusElementImmediate(inputElement, FOCUS_TIMING.IMMEDIATE)
 		}
 	}
 
@@ -122,7 +123,7 @@
 			setTimeout(() => {
 				isOpen = false
 				searchQuery = ''
-			}, 150)
+			}, ANIMATION_DURATION.BLUR_DELAY)
 		}
 	}
 </script>
