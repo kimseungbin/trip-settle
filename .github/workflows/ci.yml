@@ -292,43 +292,7 @@ jobs:
           echo "==================================="
 
       - name: Load or pull Playwright base image
-        run: |
-          START_TIME=$(date +%s)
-
-          if [ -f /tmp/playwright-image.tar ]; then
-            echo "📦 Loading cached Playwright base image (786MB)..."
-            docker load -i /tmp/playwright-image.tar
-            echo "✅ Base image loaded from cache"
-            echo "CACHE_SOURCE=restored" >> $GITHUB_ENV
-          else
-            echo "⬇️ Pulling Playwright base image (first time - 786MB)..."
-            docker pull mcr.microsoft.com/playwright:v1.56.1-noble
-            echo "💾 Saving base image to cache..."
-
-            if docker save mcr.microsoft.com/playwright:v1.56.1-noble -o /tmp/playwright-image.tar; then
-              echo "✅ Base image pulled and saved successfully"
-              echo "CACHE_SOURCE=pulled_and_saved" >> $GITHUB_ENV
-            else
-              echo "❌ ERROR: Failed to save Docker image to tar"
-              echo "CACHE_SOURCE=pulled_save_failed" >> $GITHUB_ENV
-              exit 1
-            fi
-          fi
-
-          END_TIME=$(date +%s)
-          DURATION=$((END_TIME - START_TIME))
-          echo "DOCKER_LOAD_DURATION=${DURATION}" >> $GITHUB_ENV
-
-          # Verify tar file for diagnostics
-          if [ -f /tmp/playwright-image.tar ]; then
-            TAR_SIZE=$(stat -c%s /tmp/playwright-image.tar 2>/dev/null || stat -f%z /tmp/playwright-image.tar)
-            TAR_SIZE_MB=$((TAR_SIZE / 1024 / 1024))
-            echo "TAR_FILE_SIZE_MB=${TAR_SIZE_MB}" >> $GITHUB_ENV
-            echo "📊 Tar file size: ${TAR_SIZE_MB}MB (expected ~786MB)"
-          else
-            echo "TAR_FILE_SIZE_MB=0" >> $GITHUB_ENV
-            echo "⚠️ WARNING: Tar file does not exist!"
-          fi
+        run: ./.github/scripts/docker/load-playwright-image.sh /tmp/playwright-image.tar mcr.microsoft.com/playwright:v1.56.1-noble
 
       - name: Cleanup any existing Docker resources
         run: ./.github/scripts/docker/cleanup-resources.sh docker-compose.e2e.yml
