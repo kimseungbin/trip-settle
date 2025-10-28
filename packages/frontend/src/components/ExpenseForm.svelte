@@ -6,6 +6,7 @@
 	import { loadLastPayer, saveLastPayer } from '../lib/lastPayer'
 	import { onMount } from 'svelte'
 	import { t } from 'svelte-i18n'
+	import { focusElement, focusElementImmediate } from '../lib/focus'
 
 	let {
 		onAdd,
@@ -58,10 +59,7 @@
 		expenseName = ''
 		expenseAmount = ''
 		// Keep the payer selection for the next expense (don't reset it)
-		// Defer focus to next frame to avoid webkit timing issues
-		requestAnimationFrame(() => {
-			nameInput?.focus()
-		})
+		focusElement(nameInput)
 		isMouseClick = false
 	}
 
@@ -71,7 +69,7 @@
 
 	function handleCurrencySelect() {
 		// Auto-focus submit button after currency selection
-		setTimeout(() => submitButton?.focus(), 0)
+		focusElementImmediate(submitButton, 0)
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -95,21 +93,15 @@
 				selectedPayer = lastPayer
 			}
 
-			// Defer focus to next frame to ensure DOM is fully rendered (fixes webkit timing issues)
-			requestAnimationFrame(() => {
-				// Focus payer selector if no payer is selected, otherwise focus name input
-				if (!selectedPayer) {
-					payerSelect?.focus()
-				} else {
-					nameInput?.focus()
-				}
-			})
+			// Focus payer selector if no payer is selected, otherwise focus name input
+			if (!selectedPayer) {
+				focusElement(payerSelect)
+			} else {
+				focusElement(nameInput)
+			}
 		} else {
-			// Defer focus to next frame to ensure DOM is fully rendered (fixes webkit timing issues)
-			requestAnimationFrame(() => {
-				// In single-payer mode, focus name input directly
-				nameInput?.focus()
-			})
+			// In single-payer mode, focus name input directly
+			focusElement(nameInput)
 		}
 	})
 </script>

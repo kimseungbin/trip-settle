@@ -2,6 +2,7 @@
 	import type { Currency } from '../types/currency'
 	import { DEFAULT_CURRENCY, getCurrencyByCode, searchCurrencies, getCurrencyDisplayName } from '../data/currencies'
 	import { locale, t } from 'svelte-i18n'
+	import { focusElementImmediate } from '../lib/focus'
 
 	let {
 		value = $bindable(DEFAULT_CURRENCY),
@@ -28,10 +29,10 @@
 		if (autofocus) {
 			if (initialOpen && inputElement) {
 				// If starting open, focus the search input
-				setTimeout(() => inputElement?.focus(), 100)
+				focusElementImmediate(inputElement, 100)
 			} else if (buttonElement) {
 				// If starting closed, focus the button
-				setTimeout(() => buttonElement?.focus(), 100)
+				focusElementImmediate(buttonElement, 100)
 			}
 		}
 	})
@@ -64,7 +65,7 @@
 		if (isOpen) {
 			searchQuery = ''
 			selectedIndex = 0
-			setTimeout(() => inputElement?.focus(), 0)
+			focusElementImmediate(inputElement, 0)
 		}
 	}
 

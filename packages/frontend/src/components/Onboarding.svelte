@@ -9,6 +9,7 @@
 	import { setLocale } from '../i18n'
 	import { toast } from '../stores/toast.svelte'
 	import type { PaymentMode } from '../stores/settings.svelte'
+	import { focusElement } from '../lib/focus'
 
 	let currencyMode = $state<CurrencyMode>('multi')
 	let defaultCurrency = $state(DEFAULT_CURRENCY)
@@ -27,10 +28,7 @@
 	 * Focus the first interactive element on mount for keyboard accessibility
 	 */
 	onMount(() => {
-		// Defer focus to next frame to ensure DOM is fully rendered (fixes webkit timing issues)
-		requestAnimationFrame(() => {
-			firstButton?.focus()
-		})
+		focusElement(firstButton)
 	})
 
 	/**
@@ -38,10 +36,7 @@
 	 */
 	$effect(() => {
 		if (showPayerCollection && payerInput) {
-			// Defer focus to next frame to ensure DOM is fully rendered (fixes webkit timing issues)
-			requestAnimationFrame(() => {
-				payerInput?.focus()
-			})
+			focusElement(payerInput)
 		}
 	})
 
@@ -166,10 +161,7 @@
 			const name = input.value.trim()
 			addPayer(name)
 			input.value = ''
-			// Defer focus to next frame to avoid webkit timing issues
-			requestAnimationFrame(() => {
-				input.focus()
-			})
+			focusElement(input)
 		}
 	}
 
@@ -181,10 +173,7 @@
 			const name = payerInput.value.trim()
 			addPayer(name)
 			payerInput.value = ''
-			// Defer focus to next frame to avoid webkit timing issues
-			requestAnimationFrame(() => {
-				payerInput?.focus()
-			})
+			focusElement(payerInput)
 		}
 	}
 </script>
