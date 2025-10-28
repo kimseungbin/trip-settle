@@ -25,11 +25,11 @@ This project showcases full-stack development with a focus on **developer experi
 
 ### Monorepo Architecture
 
-**npm workspaces** manage three packages (frontend, backend, infra) with unified tooling, providing a cohesive development experience across the full stack.
+**npm workspaces** manage four workspace members (frontend, backend, infra, GitHub Actions) with unified tooling, providing a cohesive development experience across the full stack and CI/CD infrastructure.
 
 #### Package Structure
 
-The monorepo organizes code into three distinct packages, each with its own responsibilities:
+The monorepo organizes code into four workspace members, each with its own responsibilities:
 
 ```mermaid
 graph TB
@@ -38,11 +38,13 @@ graph TB
     Root --> Frontend["Frontend Package<br/>packages/frontend/<br/><br/>Svelte + Vite<br/>TypeScript"]
     Root --> Backend["Backend Package<br/>packages/backend/<br/><br/>NestJS + TypeORM<br/>PostgreSQL"]
     Root --> Infra["Infrastructure Package<br/>packages/infra/<br/><br/>AWS CDK<br/>TypeScript"]
+    Root --> Actions["GitHub Actions<br/>.github/actions/*<br/><br/>TypeScript Actions<br/>@vercel/ncc"]
 
     style Root fill:#e1f5ff
     style Frontend fill:#d4edda
     style Backend fill:#d4edda
     style Infra fill:#d4edda
+    style Actions fill:#fff3cd
 ```
 
 #### Key Architecture Benefits
@@ -62,7 +64,16 @@ graph TB
 - Root dependencies: `typescript`, `eslint`, `prettier`, `@types/node`
 - Package-specific dependencies stay isolated in their workspace
 
-**DX benefit**: Developers work across the full stack without switching repositories or dealing with version drift.
+**GitHub Actions as workspace members:**
+- Custom actions written in TypeScript, not bash/Node.js scripts
+- Integrated into npm workspaces (`.github/actions/*`)
+- Shared dependencies with main packages (saves ~400MB)
+- Full type safety with `@actions/core` and `@actions/github`
+- Unified build/lint/format commands across all workspaces
+
+**Actions**: `check-snapshot-trigger`, `extract-e2e-failures`, `generate-failure-report`
+
+**DX benefit**: Developers work across the full stack without switching repositories or dealing with version drift. CI tooling benefits from the same monorepo advantages as application code.
 
 ### Modern Build Tooling
 

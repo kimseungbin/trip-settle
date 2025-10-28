@@ -100,8 +100,51 @@ trip-settle/
 │   ├── frontend/     # Svelte + Vite + TypeScript
 │   ├── backend/      # NestJS + TypeORM + PostgreSQL
 │   └── infra/        # AWS CDK
+├── .github/actions/  # TypeScript GitHub Actions (workspace members)
+│   ├── check-snapshot-trigger/
+│   ├── extract-e2e-failures/
+│   └── generate-failure-report/
 └── package.json      # Root workspace configuration
 ```
+
+## GitHub Actions as Workspace Members
+
+Custom GitHub Actions are written in TypeScript and integrated as npm workspace members for better monorepo cohesion.
+
+**Structure** (`.github/actions/<action-name>/`):
+```
+action-name/
+├── src/
+│   └── main.ts              # TypeScript source
+├── dist/
+│   └── index.js             # Bundled output (committed with @vercel/ncc)
+├── action.yml               # Action metadata
+├── package.json             # Dependencies & scripts
+├── tsconfig.json            # TypeScript config
+└── README.md                # Documentation
+```
+
+**Actions**:
+- **check-snapshot-trigger** - Determines if visual snapshot update workflow should run
+- **extract-e2e-failures** - Parses Playwright JSON results and categorizes failures
+- **generate-failure-report** - Aggregates build errors into markdown reports
+
+**Benefits**:
+- ✅ Type safety with full TypeScript interfaces
+- ✅ Shared dependencies hoisted to root (saves ~400MB)
+- ✅ Unified build/lint/format commands
+- ✅ Better error handling with @actions/core
+- ✅ Action outputs available to downstream workflow steps
+- ✅ Testability with Jest infrastructure
+
+**Build command**:
+```bash
+npm run build --workspace=.github/actions/<action-name>
+# Or build all actions:
+npm run build:actions
+```
+
+**Important**: The `dist/` directory must be committed (GitHub Actions requirement). Always rebuild and commit after changing `src/main.ts`.
 
 ## Development Commands
 
