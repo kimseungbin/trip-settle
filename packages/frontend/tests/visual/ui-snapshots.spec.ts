@@ -53,8 +53,10 @@ test.describe('Visual Regression', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Take screenshot of entire page
+		// Increased timeout for fullPage screenshots in CI (can take longer than default 5s)
 		await expect(page).toHaveScreenshot('empty-state.png', {
 			fullPage: true,
+			timeout: 15000, // 15 seconds
 		})
 	})
 
@@ -81,8 +83,10 @@ test.describe('Visual Regression', () => {
 		await expect(page.locator('.expense-item')).toBeVisible({ timeout: 10000 })
 
 		// Screenshot the entire page with one expense
+		// Increased timeout for fullPage screenshots in CI (can take longer than default 5s)
 		await expect(page).toHaveScreenshot('single-expense.png', {
 			fullPage: true,
+			timeout: 15000, // 15 seconds
 		})
 	})
 
