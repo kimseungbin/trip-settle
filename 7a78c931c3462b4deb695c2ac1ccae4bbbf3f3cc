@@ -1,0 +1,59 @@
+=== SNAPSHOT UPDATE WORKFLOW REPORT ===
+
+[metadata]
+timestamp = 2025-10-28T06:10:47Z
+commit = 7a78c93
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18865739386
+workflow = update-snapshots
+triggered_by = workflow_dispatch
+
+[execution]
+status = failure
+outcome = failed
+checkout_step = true
+docker_setup = true
+playwright_tests = false
+commit_step = false
+push_step = false
+
+[snapshot_changes]
+has_changes = false
+files_changed = 0
+committed = false
+pushed = false
+
+[diagnostics]
+error_step = playwright_tests
+error_message = Playwright tests failed or timed out
+playwright_exit_code = unknown
+docker_container_status = unknown
+test_env = ci-docker
+updating_snapshots = true
+docker_user = root
+
+[error_details]
+# Captured Docker logs (last 50 lines, filtered for errors)
+playwright_error_log = none
+
+[test_results]
+total_tests = 0
+passed = 0
+failed = 0
+skipped = 0
+
+[timing]
+job_duration_seconds = 219
+timeout_limit_seconds = 1800
+timed_out = false
+
+[trigger_details]
+method = workflow_dispatch
+# workflow_dispatch: Manual trigger from GitHub UI
+# issue_comment: Triggered by /update-snapshots PR comment
+# push: Triggered by [update-snapshots] in commit message
+source_branch = main
+
+[recommendations]
+# For LLM analysis
+next_steps = Analyze error_step and error_message. Check artifacts in run_url.
