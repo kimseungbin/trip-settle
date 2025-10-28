@@ -237,72 +237,12 @@ npm run destroy --workspace=infra
 
 ### Configuration Commonization
 
-**Principle**: Always maximize configuration reuse through base/shared configs to reduce duplication and ensure consistency.
+**Principle**: Maximize configuration reuse through base/shared configs to reduce duplication and ensure consistency.
 
-#### TypeScript Configuration Hierarchy
-
-The monorepo uses a hierarchical TypeScript configuration system:
-
-```
-tsconfig.base.json (root)
-├── packages/backend/tsconfig.json
-│   └── module: ESNext, moduleResolution: bundler
-├── packages/infra/tsconfig.json
-│   └── module: ESNext, moduleResolution: bundler
-├── packages/frontend/tsconfig.node.json
-│   └── module: ESNext, moduleResolution: bundler
-└── .github/actions/tsconfig.base.json
-    ├── check-snapshot-trigger/tsconfig.json
-    ├── extract-e2e-failures/tsconfig.json
-    └── generate-failure-report/tsconfig.json
-        └── Inherits module: ESNext from root (ESM with esbuild bundler)
-```
-
-**Key points**:
-- `tsconfig.base.json` defines shared compiler options (module: ESNext, strict mode, etc.)
-- Package-specific configs extend the base and override only what's unique
-- GitHub Actions share `.github/actions/tsconfig.base.json` to eliminate duplication
-- **ESM for Actions**: All GitHub Actions use ESM (module: ESNext) bundled with esbuild for consistency with the monorepo. This provides 20-50x faster builds compared to the previous @vercel/ncc + CommonJS approach, while maintaining compatibility with GitHub Actions' Node.js 24 runtime.
-
-#### ESLint Configuration
-
-ESLint configs should follow similar patterns:
-- **Root config**: Define shared rules in root `.eslintrc.js` or `eslint.config.js`
-- **Package overrides**: Extend root config and add package-specific rules (e.g., Svelte rules for frontend)
-- **Avoid duplication**: Don't repeat rules that apply to all TypeScript files
-
-#### Prettier Configuration
-
-- **Single source**: `.prettierrc.yaml` at root level applies to all packages
-- **No overrides needed**: Prettier formatting should be consistent across the monorepo
-- All packages inherit: 120 char width, tabs (width: 4), single quotes, no semicolons
-
-#### Stylelint Configuration
-
-- Frontend-specific: `packages/frontend/.stylelintrc.json`
-- Other packages don't need stylelint (no CSS)
-
-#### General Guidelines for Claude Code
-
-When adding or modifying configurations:
-
-1. **Check for existing base configs** before creating package-specific configs
-2. **Identify commonalities** across packages and extract to shared base
-3. **Use extends** instead of copy-pasting configuration
-4. **Document hierarchy** in comments when creating new base configs
-5. **Minimize overrides** - only override settings that are truly package-specific
-
-**Examples of good candidates for base configs**:
-- TypeScript compiler options (strict mode, module resolution, target)
-- ESLint rules for TypeScript files
-- Prettier formatting rules
-- Vitest shared test configuration
-- Bundler configuration (Vite, Webpack, esbuild)
-
-**When to create separate configs**:
-- Framework-specific settings (e.g., Svelte config for frontend only)
-- Runtime-specific settings (e.g., Node.js vs browser environments)
-- Package-specific linting rules (e.g., NestJS decorators in backend)
+When adding or modifying configuration files (TypeScript, ESLint, Prettier, Stylelint, Vitest), see `.claude/skills/config-commonization/SKILL.md` for:
+- Existing hierarchy patterns (TypeScript, ESLint)
+- Guidelines for creating base configs vs package-specific configs
+- Decision criteria and examples
 
 ## Git Hooks
 
