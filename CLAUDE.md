@@ -434,13 +434,14 @@ tsconfig.base.json (root)
     ├── check-snapshot-trigger/tsconfig.json
     ├── extract-e2e-failures/tsconfig.json
     └── generate-failure-report/tsconfig.json
-        └── module: commonjs, target: ES2022
+        └── module: commonjs, target: ES2022 (GitHub Actions requirement)
 ```
 
 **Key points**:
-- `tsconfig.base.json` defines shared compiler options (strict mode, module resolution, etc.)
+- `tsconfig.base.json` defines shared compiler options (module: ESNext, strict mode, etc.)
 - Package-specific configs extend the base and override only what's unique
 - GitHub Actions share `.github/actions/tsconfig.base.json` to eliminate duplication
+- **Why CommonJS for Actions?** GitHub Actions runtime requires CommonJS modules. Actions run in Node.js with `@vercel/ncc` bundler, which compiles TypeScript → CommonJS for GitHub's action platform. This is a GitHub requirement, not a choice.
 
 #### ESLint Configuration
 
@@ -650,11 +651,11 @@ git notes --ref=ci/<namespace> list
 
 The project uses a hierarchical TypeScript configuration system with a shared base config:
 
-- **Root base** (`tsconfig.base.json`): Defines common compiler options for all packages
-- **Backend**: ESNext modules with bundler resolution (relaxed strict mode for NestJS decorators)
-- **Frontend**: ESNext modules with bundler resolution (Svelte-specific settings)
-- **Infra**: ESNext modules with bundler resolution (CDK-specific settings)
-- **GitHub Actions**: CommonJS modules with ES2022 target (for ncc bundling compatibility)
+- **Root base** (`tsconfig.base.json`): Defines common compiler options (module: ESNext, bundler resolution)
+- **Backend**: Inherits ESNext modules (relaxed strict mode for NestJS decorators)
+- **Frontend**: Inherits ESNext modules (Svelte-specific settings)
+- **Infra**: Inherits ESNext modules (CDK-specific settings)
+- **GitHub Actions**: Overrides to CommonJS + node resolution (GitHub Actions platform requirement)
 
 All packages extend `tsconfig.base.json` and override only package-specific settings. See "Configuration Commonization" section for detailed hierarchy and best practices.
 

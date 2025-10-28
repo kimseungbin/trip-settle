@@ -13,8 +13,9 @@
 		"noImplicitReturns": true,
 		"skipLibCheck": true,
 
-		// Module resolution
-		"moduleResolution": "node",
+		// Module system (packages can override if needed)
+		"module": "ESNext",
+		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,

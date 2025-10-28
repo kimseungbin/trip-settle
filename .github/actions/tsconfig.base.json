@@ -1,9 +1,10 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		// GitHub Actions runtime target
+		// GitHub Actions runtime (override base module system)
 		"target": "ES2022",
 		"module": "commonjs",
+		"moduleResolution": "node",
 		"lib": ["ES2022"],
 
 		// Build output (relative paths resolved from each action's directory)
