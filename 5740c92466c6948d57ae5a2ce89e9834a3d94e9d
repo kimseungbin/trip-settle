@@ -1,0 +1,59 @@
+=== SNAPSHOT UPDATE WORKFLOW REPORT ===
+
+[metadata]
+timestamp = 2025-10-28T02:22:22Z
+commit = 5740c92
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18861926963
+workflow = update-snapshots
+triggered_by = workflow_dispatch
+
+[execution]
+status = failure
+outcome = failed
+checkout_step = true
+docker_setup = true
+playwright_tests = false
+commit_step = false
+push_step = false
+
+[snapshot_changes]
+has_changes = false
+files_changed = 0
+committed = false
+pushed = false
+
+[diagnostics]
+error_step = playwright_tests
+error_message = Playwright tests failed or timed out
+playwright_exit_code = unknown
+docker_container_status = unknown
+test_env = ci-docker
+updating_snapshots = true
+docker_user = root
+
+[error_details]
+# Captured Docker logs (last 50 lines, filtered for errors)
+playwright_error_log = playwright-1  |     Error: page.waitForSelector: Test timeout of 30000ms exceeded.%0Aplaywright-1  | ::error file=tests/visual/ui-snapshots.spec.ts,title=[webkit] › tests/visual/ui-snapshots.spec.ts:56:2 › Visual Regression › expense list with single item,line=63,col=14::  1) [webkit] › tests/visual/ui-snapshots.spec.ts:56:2 › Visual Regression › expense list with single item %250A    Error: page.waitForSelector: Test timeout of 30000ms exceeded.%250A    Call log:%250A      - waiting for locator('.expense-item') to be visible%250A%250A%250A      61 |%250A      62 | 		// Wait for expense to appear%250A    > 63 | 		await page.waitForSelector('.expense-item')%250A         | 		           ^%250A      64 |%250A      65 | 		// Screenshot the entire page with one expense%250A      66 | 		await expect(page).toHaveScreenshot('single-expense.png', {%250A        at /app/packages/frontend/tests/visual/ui-snapshots.spec.ts:63:14
+
+[test_results]
+total_tests = 73
+passed = 47
+failed = 1
+skipped = 25
+
+[timing]
+job_duration_seconds = 254
+timeout_limit_seconds = 1800
+timed_out = false
+
+[trigger_details]
+method = workflow_dispatch
+# workflow_dispatch: Manual trigger from GitHub UI
+# issue_comment: Triggered by /update-snapshots PR comment
+# push: Triggered by [update-snapshots] in commit message
+source_branch = main
+
+[recommendations]
+# For LLM analysis
+next_steps = Analyze error_step and error_message. Check artifacts in run_url.
