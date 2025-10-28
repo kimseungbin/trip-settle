@@ -402,7 +402,8 @@ test.describe('Keyboard Accessibility - Visual Indicators', () => {
 		// Tab to currency selector
 		await page.keyboard.press('Tab')
 		const currencyButton = page.locator('button.currency-button')
-		await expect(currencyButton).toBeFocused()
+		// Wait for focus to settle (WebKit needs time for focus events)
+		await expect(currencyButton).toBeFocused({ timeout: 1000 })
 
 		// Tab to Add button
 		await page.keyboard.press('Tab')
