@@ -414,7 +414,8 @@ test.describe('Keyboard Accessibility - Visual Indicators', () => {
 		// Tab to remove button (on the expense item we added)
 		await page.keyboard.press('Tab')
 		const removeButton = page.locator('.remove-btn').first()
-		await expect(removeButton).toBeFocused()
+		// Wait for focus to settle (WebKit needs time for focus events)
+		await expect(removeButton).toBeFocused({ timeout: 1000 })
 
 		// All focused elements should be visible
 		await expect(page.locator(':focus')).toBeVisible()
