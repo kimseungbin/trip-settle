@@ -1,0 +1,59 @@
+=== SNAPSHOT UPDATE WORKFLOW REPORT ===
+
+[metadata]
+timestamp = 2025-10-28T08:10:11Z
+commit = b57d45a
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18868106696
+workflow = update-snapshots
+triggered_by = workflow_dispatch
+
+[execution]
+status = failure
+outcome = failed
+checkout_step = true
+docker_setup = true
+playwright_tests = false
+commit_step = false
+push_step = false
+
+[snapshot_changes]
+has_changes = false
+files_changed = 0
+committed = false
+pushed = false
+
+[diagnostics]
+error_step = playwright_tests
+error_message = Playwright tests failed or timed out
+playwright_exit_code = unknown
+docker_container_status = unknown
+test_env = ci-docker
+updating_snapshots = true
+docker_user = root
+
+[error_details]
+# Captured Docker logs (last 50 lines, filtered for errors)
+playwright_error_log = playwright-1  |     Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeFocused[2m([22m[2m)[22m failed%0Aplaywright-1  | ::error file=tests/e2e/expense-workflow.spec.ts,title=[webkit] › tests/e2e/expense-workflow.spec.ts:87:2 › Expense Workflow › can add multiple expenses,line=109,col=30::  1) [webkit] › tests/e2e/expense-workflow.spec.ts:87:2 › Expense Workflow › can add multiple expenses %250A    Error: expect(locator).toHaveCount(expected) failed%250A%250A    Locator:  locator('.expense-item')%250A    Expected: 3%250A    Received: 2%250A    Timeout:  5000ms%250A%250A    Call log:%250A      - Expect toHaveCount with timeout 5000ms%250A      - waiting for locator('.expense-item')%250A        9 × locator resolved to 2 elements%250A          - unexpected value 2%250A%250A%250A      107 | 		// Verify all expenses are in the list%250A      108 | 		const expenseItems = page.locator('.expense-item')%250A    > 109 | 		await expect(expenseItems).toHaveCount(3)%250A          | 		                           ^
+
+[test_results]
+total_tests = 73
+passed = 46
+failed = 2
+skipped = 25
+
+[timing]
+job_duration_seconds = 232
+timeout_limit_seconds = 1800
+timed_out = false
+
+[trigger_details]
+method = workflow_dispatch
+# workflow_dispatch: Manual trigger from GitHub UI
+# issue_comment: Triggered by /update-snapshots PR comment
+# push: Triggered by [update-snapshots] in commit message
+source_branch = main
+
+[recommendations]
+# For LLM analysis
+next_steps = Analyze error_step and error_message. Check artifacts in run_url.
