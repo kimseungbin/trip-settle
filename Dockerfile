@@ -110,8 +110,8 @@ RUN npm ci --workspace=frontend --include=dev
 # ==================================================
 FROM frontend-deps AS frontend-dev
 
-# Copy shared config
-COPY config ./config
+# Copy shared constants
+COPY constants.ts ./constants.ts
 
 # Copy frontend source code
 COPY packages/frontend ./packages/frontend
