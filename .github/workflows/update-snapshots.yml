@@ -44,13 +44,14 @@ jobs:
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       branch: ${{ steps.check.outputs.branch }}
+      test_scope: ${{ steps.check.outputs.test_scope }}
     steps:
-      - name: Checkout code (for scripts)
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Check trigger condition
         id: check
-        run: ./.github/scripts/snapshots/check-trigger.sh
+        uses: ./.github/actions/check-snapshot-trigger
 
   # Update snapshots
   update-snapshots:

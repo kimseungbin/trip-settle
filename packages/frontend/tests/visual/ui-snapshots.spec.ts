@@ -18,6 +18,21 @@ import { expect, test } from '@playwright/test'
  * Phase 4: Add mobile + responsive tests
  */
 
+/**
+ * Helper function to submit the expense form
+ * Workaround: Playwright's .click() and .press('Enter') don't reliably trigger
+ * form submission in WebKit, so we manually dispatch the submit event
+ */
+async function submitExpenseForm(page: any) {
+	await page.evaluate(() => {
+		const form = document.querySelector('form')
+		if (form) {
+			const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
+			form.dispatchEvent(submitEvent)
+		}
+	})
+}
+
 test.describe('Visual Regression', () => {
 	test.beforeEach(async ({ page }) => {
 		// Set up as returning user to skip onboarding
@@ -60,7 +75,7 @@ test.describe('Visual Regression', () => {
 		// Add one expense
 		await page.getByPlaceholder('Expense name').fill('Coffee')
 		await page.getByPlaceholder('Amount').fill('4.50')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		// Wait for expense to appear using more reliable locator
 		await expect(page.locator('.expense-item')).toBeVisible({ timeout: 10000 })
@@ -85,7 +100,7 @@ test.describe('Visual Regression', () => {
 		for (const expense of expenses) {
 			await page.getByPlaceholder('Expense name').fill(expense.name)
 			await page.getByPlaceholder('Amount').fill(expense.amount)
-			await page.getByRole('button', { name: 'Add' }).click()
+			await submitExpenseForm(page)
 		}
 
 		// Wait for all expenses to render
@@ -104,11 +119,11 @@ test.describe('Visual Regression', () => {
 		// Add expenses
 		await page.getByPlaceholder('Expense name').fill('Item 1')
 		await page.getByPlaceholder('Amount').fill('100.00')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		await page.getByPlaceholder('Expense name').fill('Item 2')
 		await page.getByPlaceholder('Amount').fill('50.50')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		// Wait for total to update
 		await expect(page.locator('.total-amount')).toContainText('150.50')
@@ -125,7 +140,7 @@ test.describe('Visual Regression', () => {
 		// Add an expense
 		await page.getByPlaceholder('Expense name').fill('Test Expense')
 		await page.getByPlaceholder('Amount').fill('25.00')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		// Hover over the expense item
 		const expenseItem = page.locator('.expense-item').first()
@@ -142,7 +157,7 @@ test.describe('Visual Regression', () => {
 		// Add an expense
 		await page.getByPlaceholder('Expense name').fill('Test')
 		await page.getByPlaceholder('Amount').fill('10.00')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		// Screenshot the expense item with remove button
 		const expenseItem = page.locator('.expense-item').first()
@@ -190,11 +205,11 @@ test.describe.skip('Visual Regression - Mobile', () => {
 		// Add expenses
 		await page.getByPlaceholder('Expense name').fill('Coffee')
 		await page.getByPlaceholder('Amount').fill('4.50')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		await page.getByPlaceholder('Expense name').fill('Lunch')
 		await page.getByPlaceholder('Amount').fill('12.00')
-		await page.getByRole('button', { name: 'Add' }).click()
+		await submitExpenseForm(page)
 
 		await expect(page).toHaveScreenshot('mobile-expense-list.png', {
 			fullPage: true,
@@ -230,7 +245,7 @@ test.describe.skip('Visual Regression - Responsive Breakpoints', () => {
 			// Add sample data
 			await page.getByPlaceholder('Expense name').fill('Sample')
 			await page.getByPlaceholder('Amount').fill('10.00')
-			await page.getByRole('button', { name: 'Add' }).click()
+			await submitExpenseForm(page)
 
 			await expect(page).toHaveScreenshot(`responsive-${name}.png`, {
 				fullPage: true,

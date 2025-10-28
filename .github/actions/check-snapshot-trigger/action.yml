@@ -1,0 +1,15 @@
+name: 'Check Snapshot Trigger'
+description: 'Determines if visual snapshot update workflow should run based on trigger method'
+author: 'Trip Settle'
+
+outputs:
+  should_run:
+    description: 'Whether the snapshot update workflow should run (true/false)'
+  branch:
+    description: 'Branch name to update snapshots on'
+  test_scope:
+    description: 'Test scope to run (all, visual, e2e)'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
