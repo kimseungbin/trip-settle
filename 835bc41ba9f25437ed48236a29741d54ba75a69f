@@ -1,0 +1,62 @@
+=== E2E TEST FAILURE REPORT ===
+
+[metadata]
+timestamp = 2025-10-28T05:30:01.435Z
+commit = 835bc41
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18864998798
+total_tests = 73
+passed = 45
+failed = 3
+skipped = 25
+pass_rate = 61.6%
+duration_sec = 199
+
+[summary]
+status = FAILED
+new_failures = 3
+timeout_failures = 3
+visual_failures = 0
+assertion_failures = 0
+navigation_failures = 0
+setup_failures = 0
+
+[failure.1]
+test_file = e2e/expense-workflow.spec.ts
+test_name = e2e/expense-workflow.spec.ts › Expense Workflow › can add multiple expenses
+browser = webkit
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveCount[2m([22m[32mexpected[39m[2m)[22m failed
+duration_ms = 9530
+screenshots = /app/packages/frontend/test-results/e2e-expense-workflow-Expen-57a85-w-can-add-multiple-expenses-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/e2e-expense-workflow-Expen-57a85-w-can-add-multiple-expenses-webkit/video.webm
+traces = none
+
+[failure.2]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › initial empty state
+browser = webkit
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveScreenshot[2m([22m[32mexpected[39m[2m)[22m failed
+duration_ms = 8026
+screenshots = /app/packages/frontend/tests/visual/ui-snapshots.spec.ts-snapshots/empty-state-webkit-linux.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/empty-state-actual.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/empty-state-diff.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/visual-ui-snapshots-Visual-Regression-initial-empty-state-webkit/video.webm
+traces = none
+
+[failure.3]
+test_file = visual/ui-snapshots.spec.ts
+test_name = visual/ui-snapshots.spec.ts › Visual Regression › expense list with single item
+browser = webkit
+error_type = timeout
+error_message = Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveScreenshot[2m([22m[32mexpected[39m[2m)[22m failed
+duration_ms = 4975
+screenshots = /app/packages/frontend/tests/visual/ui-snapshots.spec.ts-snapshots/single-expense-webkit-linux.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-e7e52-pense-list-with-single-item-webkit/single-expense-actual.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-e7e52-pense-list-with-single-item-webkit/single-expense-diff.png, /app/packages/frontend/test-results/visual-ui-snapshots-Visual-e7e52-pense-list-with-single-item-webkit/test-failed-1.png
+videos = /app/packages/frontend/test-results/visual-ui-snapshots-Visual-e7e52-pense-list-with-single-item-webkit/video.webm
+traces = none
+
+[diagnostics]
+playwright_version = 1.56.1
+test_env = unknown
+workers = 4
+reporter_output = packages/frontend/test-results/results.json
+artifacts_uploaded = yes (GitHub Actions)
