@@ -5,6 +5,7 @@
 	import CurrencySelector from './CurrencySelector.svelte'
 	import LanguageSelector from './LanguageSelector.svelte'
 	import CurrencyModeSelector from './CurrencyModeSelector.svelte'
+	import PaymentModeSelector from './PaymentModeSelector.svelte'
 	import { DEFAULT_CURRENCY, getCurrencyByCode } from '../data/currencies'
 	import { onMount } from 'svelte'
 	import { t } from 'svelte-i18n'
@@ -240,29 +241,9 @@
 		<h1>Payment Mode</h1>
 		<p class="tagline">Choose how expenses will be tracked</p>
 
-		<div class="currency-mode-section">
-			<h2 class="section-title">Select Payment Mode</h2>
+		<PaymentModeSelector bind:value={paymentMode} onselect={selectPaymentMode} />
 
-			<div class="mode-options">
-				<div class="mode-card">
-					<button class="mode-option" tabindex="0" onclick={() => selectPaymentMode('single')}>
-						<div class="mode-icon">👤</div>
-						<div class="mode-title">Single Payer</div>
-						<p class="mode-description desktop-only">All expenses paid by one person</p>
-					</button>
-				</div>
-
-				<div class="mode-card">
-					<button class="mode-option" tabindex="0" onclick={() => selectPaymentMode('multi')}>
-						<div class="mode-icon">👥</div>
-						<div class="mode-title">Multiple Payers</div>
-						<p class="mode-description desktop-only">Track who paid for each expense</p>
-					</button>
-				</div>
-			</div>
-
-			<button class="skip-link" tabindex="0" onclick={skipOnboarding}>Skip</button>
-		</div>
+		<button class="skip-link" tabindex="0" onclick={skipOnboarding}>Skip</button>
 
 		<p class="keyboard-hint">Press <kbd>Esc</kbd> to go back</p>
 	{:else if showCurrencySelector}
@@ -596,11 +577,6 @@
 
 	/* Mobile responsive */
 	@media (max-width: 640px) {
-		/* Mobile: Hide desktop descriptions, show expandable pattern */
-		.desktop-only {
-			display: none;
-		}
-
 		.onboarding-container {
 			padding: 1.5rem 1rem;
 		}
