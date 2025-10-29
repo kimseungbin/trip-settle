@@ -4,6 +4,7 @@
 	import type { CurrencyMode } from '../stores/settings.svelte'
 	import CurrencySelector from './CurrencySelector.svelte'
 	import LanguageSelector from './LanguageSelector.svelte'
+	import CurrencyModeSelector from './CurrencyModeSelector.svelte'
 	import { DEFAULT_CURRENCY, getCurrencyByCode } from '../data/currencies'
 	import { onMount } from 'svelte'
 	import { t } from 'svelte-i18n'
@@ -20,7 +21,6 @@
 	let showPaymentModeSelector = $state(false)
 	let showPayerCollection = $state(false)
 	let firstButton = $state<HTMLButtonElement | undefined>(undefined)
-	let expandedMode = $state<'single' | 'multi' | null>(null)
 	let payerInput = $state<HTMLInputElement | undefined>(undefined)
 	let payerListContainer = $state<HTMLDivElement | undefined>(undefined)
 	let lastAddedPayer = $state<string | null>(null)
@@ -311,87 +311,9 @@
 		<h1>{$t('onboarding.welcome')}</h1>
 		<p class="tagline">{$t('onboarding.tagline')}</p>
 
-		<div class="currency-mode-section">
-			<h2 class="section-title">{$t('onboarding.currencyModeTitle')}</h2>
+		<CurrencyModeSelector bind:value={currencyMode} onselect={selectCurrencyMode} autofocus={true} />
 
-			<div class="mode-options">
-				<div class="mode-card">
-					<button
-						bind:this={firstButton}
-						class="mode-option"
-						tabindex="0"
-						onclick={() => selectCurrencyMode('single')}
-						onkeydown={e => {
-							if (e.key === 'Enter') {
-								e.preventDefault()
-								e.stopPropagation()
-								selectCurrencyMode('single')
-							}
-						}}
-					>
-						<div class="mode-icon">{$t('onboarding.singleCurrency.icon')}</div>
-						<div class="mode-title">{$t('onboarding.singleCurrency.title')}</div>
-						<p class="mode-description desktop-only">{$t('onboarding.singleCurrency.description')}</p>
-					</button>
-					{#if expandedMode === 'single'}
-						<p class="mode-description mobile-only">{$t('onboarding.singleCurrency.description')}</p>
-					{/if}
-					<button
-						class="show-more-btn mobile-only"
-						onclick={e => {
-							e.stopPropagation()
-							expandedMode = expandedMode === 'single' ? null : 'single'
-						}}
-					>
-						{expandedMode === 'single' ? $t('onboarding.showLess') : $t('onboarding.showMore')}
-					</button>
-				</div>
-
-				<div class="mode-card">
-					<button
-						class="mode-option"
-						tabindex="0"
-						onclick={() => selectCurrencyMode('multi')}
-						onkeydown={e => {
-							if (e.key === 'Enter') {
-								e.preventDefault()
-								e.stopPropagation()
-								selectCurrencyMode('multi')
-							}
-						}}
-					>
-						<div class="mode-icon">{$t('onboarding.multiCurrency.icon')}</div>
-						<div class="mode-title">{$t('onboarding.multiCurrency.title')}</div>
-						<p class="mode-description desktop-only">{$t('onboarding.multiCurrency.description')}</p>
-					</button>
-					{#if expandedMode === 'multi'}
-						<p class="mode-description mobile-only">{$t('onboarding.multiCurrency.description')}</p>
-					{/if}
-					<button
-						class="show-more-btn mobile-only"
-						onclick={e => {
-							e.stopPropagation()
-							expandedMode = expandedMode === 'multi' ? null : 'multi'
-						}}
-					>
-						{expandedMode === 'multi' ? $t('onboarding.showLess') : $t('onboarding.showMore')}
-					</button>
-				</div>
-			</div>
-
-			<p class="keyboard-hint">
-				<span class="hint-icon">{$t('onboarding.keyboardHint.icon')}</span>
-				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-				{@html $t('onboarding.keyboardHint.navigate', {
-					values: {
-						tab: `<kbd>${$t('keyboard.tab')}</kbd>`,
-						enter: `<kbd>${$t('keyboard.enter')}</kbd>`,
-					},
-				})}
-			</p>
-
-			<button class="skip-link" tabindex="0" onclick={skipOnboarding}>{$t('onboarding.skipButton')}</button>
-		</div>
+		<button class="skip-link" tabindex="0" onclick={skipOnboarding}>{$t('onboarding.skipButton')}</button>
 
 		<p class="keyboard-hint">
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -458,156 +380,6 @@
 		outline-offset: 2px;
 	}
 
-	.currency-mode-section {
-		margin: 2rem 0;
-	}
-
-	.section-title {
-		font-size: 1.8rem;
-		color: var(--color-text);
-		margin-bottom: 2rem;
-		font-weight: 600;
-	}
-
-	.mode-options {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 1.5rem;
-		margin-bottom: 2rem;
-	}
-
-	.mode-card {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		height: 100%;
-	}
-
-	/* Mobile: Prevent grid from stretching cards when one expands */
-	@media (max-width: 640px) {
-		.mode-options {
-			align-items: start;
-		}
-
-		.mode-card {
-			height: auto;
-		}
-	}
-
-	.mode-option {
-		background: var(--color-surface);
-		border: 2px solid var(--color-border);
-		border-radius: 12px;
-		padding: 2rem;
-		cursor: pointer;
-		transition:
-			all var(--transition-normal),
-			transform var(--transition-fast);
-		text-align: center;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		width: 100%;
-		height: 100%;
-		min-height: 320px;
-	}
-
-	.mode-option:hover {
-		border-color: var(--color-primary);
-		transform: translateY(-4px);
-		box-shadow: var(--shadow-lg);
-	}
-
-	.mode-option:focus {
-		outline: none;
-		border-color: var(--color-primary);
-		box-shadow:
-			0 0 0 3px var(--color-primary-alpha-20),
-			var(--shadow-lg);
-		transform: translateY(-4px);
-		animation: focusPulse 2s ease-in-out infinite;
-	}
-
-	@keyframes focusPulse {
-		0%,
-		100% {
-			box-shadow:
-				0 0 0 3px var(--color-primary-alpha-20),
-				var(--shadow-lg);
-		}
-		50% {
-			box-shadow:
-				0 0 0 5px var(--color-primary-alpha-30),
-				var(--shadow-xl);
-		}
-	}
-
-	.mode-icon {
-		font-size: 3rem;
-		margin-bottom: 1rem;
-	}
-
-	.mode-title {
-		font-size: 1.3rem;
-		font-weight: 600;
-		color: var(--color-text);
-		margin-bottom: 0.5rem;
-		white-space: pre-line; /* Allow newlines in title text */
-	}
-
-	.mode-description {
-		font-size: 1rem;
-		color: var(--color-text-secondary);
-		margin: 0;
-		padding: 0 1rem;
-		line-height: 1.6;
-		white-space: pre-line;
-		text-align: left;
-		animation: slideDown 0.2s ease-out;
-	}
-
-	@keyframes slideDown {
-		from {
-			opacity: 0;
-			transform: translateY(-10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	.show-more-btn {
-		background: none;
-		border: none;
-		color: var(--color-primary);
-		font-size: 0.9rem;
-		padding: 0.5rem;
-		cursor: pointer;
-		text-decoration: underline;
-		transition: color var(--transition-fast);
-		font-weight: 500;
-	}
-
-	.show-more-btn:hover {
-		color: var(--color-primary-hover);
-	}
-
-	.show-more-btn:focus {
-		outline: 2px solid var(--color-focus-ring);
-		outline-offset: 2px;
-		border-radius: 4px;
-	}
-
-	/* Desktop: Always show descriptions, hide show more button */
-	.mobile-only {
-		display: none;
-	}
-
-	.desktop-only {
-		display: block;
-	}
-
 	.skip-link {
 		background: none;
 		border: none;
@@ -667,9 +439,6 @@
 		.currency-keyboard-hint {
 			display: none;
 		}
-	}
-	.hint-icon {
-		font-size: 1.2rem;
 	}
 
 	/* Payer collection styles */
@@ -832,10 +601,6 @@
 			display: none;
 		}
 
-		.mobile-only {
-			display: block;
-		}
-
 		.onboarding-container {
 			padding: 1.5rem 1rem;
 		}
@@ -848,50 +613,6 @@
 		.tagline {
 			font-size: 1.1rem;
 			margin-bottom: 2rem;
-		}
-
-		.section-title {
-			font-size: 1.3rem;
-			margin-bottom: 1.25rem;
-		}
-
-		.mode-options {
-			grid-template-columns: 1fr 1fr;
-			gap: 0.75rem;
-		}
-
-		.mode-card {
-			display: flex;
-			flex-direction: column;
-			min-height: 200px; /* Ensure equal height for collapsed cards */
-		}
-
-		.mode-option {
-			padding: 1rem 0.75rem;
-			min-height: auto;
-			flex-shrink: 0; /* Prevent button from shrinking */
-		}
-
-		.mode-icon {
-			font-size: 2.5rem;
-			margin-bottom: 0.5rem;
-		}
-
-		.mode-title {
-			font-size: 1rem;
-			margin-bottom: 0.25rem;
-			line-height: 1.3;
-		}
-
-		.mode-description {
-			font-size: 0.85rem;
-			line-height: 1.4;
-			padding: 0 0.5rem;
-		}
-
-		.show-more-btn {
-			font-size: 0.8rem;
-			padding: 0.25rem;
 		}
 
 		.actions {
