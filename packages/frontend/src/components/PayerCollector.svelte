@@ -7,10 +7,12 @@
 		payers = $bindable<string[]>([]),
 		onComplete,
 		onBack,
+		autofocus = false,
 	}: {
 		payers?: string[]
 		onComplete: () => void
 		onBack: () => void
+		autofocus?: boolean
 	} = $props()
 
 	let payerInput = $state<HTMLInputElement | undefined>(undefined)
@@ -18,10 +20,12 @@
 	let lastAddedPayer = $state<string | null>(null)
 
 	/**
-	 * Focus the payer input when component mounts
+	 * Focus the payer input when component mounts (only if autofocus is enabled)
 	 */
 	onMount(() => {
-		focusElement(payerInput)
+		if (autofocus) {
+			focusElement(payerInput)
+		}
 	})
 
 	/**

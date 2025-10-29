@@ -137,7 +137,7 @@
 		<h1>Add Payers</h1>
 		<p class="tagline">Enter names of people who will be paying for expenses</p>
 
-		<PayerCollector bind:payers onComplete={completeOnboarding} onBack={goBack} />
+		<PayerCollector bind:payers onComplete={completeOnboarding} onBack={goBack} autofocus={true} />
 
 		<p class="keyboard-hint">Press <kbd>Esc</kbd> to go back • Add at least 1 payer to continue</p>
 	{:else if showPaymentModeSelector}
