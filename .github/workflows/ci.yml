@@ -455,3 +455,117 @@ jobs:
           else
             echo "✅ All checks passed!"
           fi
+
+  # Capture workflow timing metrics for performance analysis
+  capture-workflow-metrics:
+    name: Capture Workflow Metrics
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [build-and-test, docker-e2e-test, infrastructure-validation, all-checks]
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch workflow metrics git notes
+        run: |
+          git fetch origin refs/notes/ci/workflow-metrics:refs/notes/ci/workflow-metrics || echo "No existing workflow metrics notes"
+
+      - name: Fetch workflow run data
+        id: fetch-metrics
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Fetch workflow run details including job timing
+          gh api /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs \
+            --jq '.jobs[] | {name: .name, status: .status, conclusion: .conclusion, started_at: .started_at, completed_at: .completed_at, steps: [.steps[] | {name: .name, status: .status, conclusion: .conclusion, started_at: .started_at, completed_at: .completed_at}]}' \
+            > workflow-jobs.json
+
+          # Display for debugging
+          cat workflow-jobs.json
+
+      - name: Parse and store metrics
+        run: |
+          # Calculate job durations and format as git note
+          python3 << 'EOF'
+          import json
+          from datetime import datetime
+
+          # Read workflow jobs data
+          with open('workflow-jobs.json', 'r') as f:
+              lines = f.readlines()
+
+          jobs = [json.loads(line) for line in lines if line.strip()]
+
+          # Parse timestamps and calculate durations
+          def parse_duration(started, completed):
+              if not started or not completed:
+                  return None
+              start = datetime.fromisoformat(started.replace('Z', '+00:00'))
+              end = datetime.fromisoformat(completed.replace('Z', '+00:00'))
+              return int((end - start).total_seconds())
+
+          # Create git note in INI format
+          note_lines = []
+          note_lines.append("[workflow]")
+          note_lines.append(f"run_id = ${{ github.run_id }}")
+          note_lines.append(f"run_number = ${{ github.run_number }}")
+          note_lines.append(f"workflow = ${{ github.workflow }}")
+          note_lines.append(f"event = ${{ github.event_name }}")
+          note_lines.append(f"ref = ${{ github.ref }}")
+          note_lines.append(f"sha = ${{ github.sha }}")
+          note_lines.append(f"actor = ${{ github.actor }}")
+          note_lines.append("")
+
+          # Add job metrics
+          for idx, job in enumerate(jobs, 1):
+              note_lines.append(f"[job.{idx}]")
+              note_lines.append(f"name = {job['name']}")
+              note_lines.append(f"status = {job['status']}")
+              note_lines.append(f"conclusion = {job['conclusion']}")
+
+              duration = parse_duration(job.get('started_at'), job.get('completed_at'))
+              if duration:
+                  note_lines.append(f"duration_seconds = {duration}")
+
+              note_lines.append("")
+
+              # Add step metrics
+              steps = job.get('steps', [])
+              for step_idx, step in enumerate(steps, 1):
+                  note_lines.append(f"[job.{idx}.step.{step_idx}]")
+                  note_lines.append(f"name = {step['name']}")
+                  note_lines.append(f"status = {step['status']}")
+                  note_lines.append(f"conclusion = {step['conclusion']}")
+
+                  step_duration = parse_duration(step.get('started_at'), step.get('completed_at'))
+                  if step_duration:
+                      note_lines.append(f"duration_seconds = {step_duration}")
+
+                  note_lines.append("")
+
+          # Write to file
+          with open('workflow-metrics.ini', 'w') as f:
+              f.write('\n'.join(note_lines))
+
+          print("✅ Workflow metrics captured successfully")
+          EOF
+
+      - name: Store metrics in git notes
+        run: |
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Add note to current commit
+          git notes --ref=ci/workflow-metrics add -F workflow-metrics.ini ${{ github.sha }} || \
+            git notes --ref=ci/workflow-metrics append -F workflow-metrics.ini ${{ github.sha }}
+
+          # Push notes to remote
+          git push origin refs/notes/ci/workflow-metrics
+
+          echo "✅ Workflow metrics stored in git notes (refs/notes/ci/workflow-metrics)"
