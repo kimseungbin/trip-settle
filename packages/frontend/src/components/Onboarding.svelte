@@ -6,13 +6,14 @@
 	import LanguageSelector from './LanguageSelector.svelte'
 	import CurrencyModeSelector from './CurrencyModeSelector.svelte'
 	import PaymentModeSelector from './PaymentModeSelector.svelte'
+	import PayerCollector from './PayerCollector.svelte'
 	import { DEFAULT_CURRENCY, getCurrencyByCode } from '../data/currencies'
 	import { onMount } from 'svelte'
 	import { t } from 'svelte-i18n'
 	import { toast } from '../stores/toast.svelte'
 	import type { PaymentMode } from '../stores/settings.svelte'
 	import { focusElement } from '../lib/focus'
-	import { ANIMATION_DURATION, TOAST_TIMING } from '../constants/timing'
+	import { TOAST_TIMING } from '../constants/timing'
 
 	let currencyMode = $state<CurrencyMode>('multi')
 	let defaultCurrency = $state(DEFAULT_CURRENCY)
@@ -22,9 +23,6 @@
 	let showPaymentModeSelector = $state(false)
 	let showPayerCollection = $state(false)
 	let firstButton = $state<HTMLButtonElement | undefined>(undefined)
-	let payerInput = $state<HTMLInputElement | undefined>(undefined)
-	let payerListContainer = $state<HTMLDivElement | undefined>(undefined)
-	let lastAddedPayer = $state<string | null>(null)
 
 	/**
 	 * Focus the first interactive element on mount for keyboard accessibility
@@ -32,35 +30,6 @@
 	onMount(() => {
 		focusElement(firstButton)
 	})
-
-	/**
-	 * Focus the payer input when the payer collection screen is shown
-	 */
-	$effect(() => {
-		if (showPayerCollection && payerInput) {
-			focusElement(payerInput)
-		}
-	})
-
-	/**
-	 * Add a new payer to the list
-	 */
-	function addPayer(name: string) {
-		if (name && !payers.includes(name)) {
-			payers = [name, ...payers]
-			lastAddedPayer = name
-			// Scroll to top to show the newly added item
-			setTimeout(() => {
-				if (payerListContainer) {
-					payerListContainer.scrollTop = 0
-				}
-			}, 0)
-			// Clear the animation marker after animation completes
-			setTimeout(() => {
-				lastAddedPayer = null
-			}, ANIMATION_DURATION.FAST)
-		}
-	}
 
 	/**
 	 * Select currency mode and proceed to payment mode selection
@@ -155,32 +124,6 @@
 			}
 		}
 	}
-
-	/**
-	 * Handle keydown on payer input (Enter to add)
-	 */
-	function handlePayerInputKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter') {
-			e.preventDefault()
-			const input = e.currentTarget as HTMLInputElement
-			const name = input.value.trim()
-			addPayer(name)
-			input.value = ''
-			focusElement(input)
-		}
-	}
-
-	/**
-	 * Handle add payer button click
-	 */
-	function handleAddPayerClick() {
-		if (payerInput) {
-			const name = payerInput.value.trim()
-			addPayer(name)
-			payerInput.value = ''
-			focusElement(payerInput)
-		}
-	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -194,46 +137,7 @@
 		<h1>Add Payers</h1>
 		<p class="tagline">Enter names of people who will be paying for expenses</p>
 
-		<div class="payer-collection">
-			<div class="payer-list" bind:this={payerListContainer}>
-				{#if payers.length === 0}
-					<p class="empty-state">No payers added yet. Add at least 1 payer to continue.</p>
-				{:else}
-					<ul>
-						{#each payers as payer, index}
-							<li class:newly-added={payer === lastAddedPayer}>
-								<span class="payer-name">{payer}</span>
-								<button
-									class="remove-btn"
-									onclick={() => {
-										payers = payers.filter((_, i) => i !== index)
-									}}
-								>
-									✕
-								</button>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</div>
-
-			<div class="payer-input">
-				<input
-					bind:this={payerInput}
-					type="text"
-					placeholder="Enter payer name"
-					onkeydown={handlePayerInputKeydown}
-				/>
-				<button onclick={handleAddPayerClick}>Add</button>
-			</div>
-
-			<div class="actions">
-				<button class="secondary" onclick={goBack}>Back</button>
-				<button onclick={completeOnboarding} disabled={payers.length < 1} class:disabled={payers.length < 1}>
-					Complete
-				</button>
-			</div>
-		</div>
+		<PayerCollector bind:payers onComplete={completeOnboarding} onBack={goBack} />
 
 		<p class="keyboard-hint">Press <kbd>Esc</kbd> to go back • Add at least 1 payer to continue</p>
 	{:else if showPaymentModeSelector}
@@ -422,145 +326,6 @@
 		}
 	}
 
-	/* Payer collection styles */
-	.payer-collection {
-		max-width: 500px;
-		margin: 0 auto;
-		padding: 2rem;
-	}
-
-	.payer-list {
-		margin-bottom: 1.5rem;
-		min-height: 80px;
-		max-height: 200px;
-		overflow-y: auto;
-	}
-
-	.payer-list ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-	}
-
-	.payer-list li {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem 1rem;
-		margin-bottom: 0.5rem;
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: 4px;
-	}
-
-	.payer-list li.newly-added {
-		animation: slideInFromTop 0.3s ease-out;
-	}
-
-	@keyframes slideInFromTop {
-		from {
-			opacity: 0;
-			transform: translateY(-10px);
-			background: var(--color-primary-alpha-20);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-			background: var(--color-surface);
-		}
-	}
-
-	.payer-name {
-		font-weight: 500;
-		color: var(--color-text);
-		flex: 1;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.remove-btn {
-		padding: 0.25rem 0.5rem;
-		font-size: 1rem;
-		background: transparent;
-		color: var(--color-text-tertiary);
-		border: 1px solid var(--color-border);
-		cursor: pointer;
-		transition: all var(--transition-fast);
-		min-width: 32px;
-		flex-shrink: 0;
-	}
-
-	.remove-btn:hover {
-		background: var(--color-error);
-		color: var(--color-surface);
-		border-color: var(--color-error);
-	}
-
-	/* Mobile: Smaller remove button */
-	@media (max-width: 640px) {
-		.remove-btn {
-			padding: 0.2rem 0.4rem;
-			font-size: 0.9rem;
-			min-width: 28px;
-			max-width: 28px;
-		}
-
-		.payer-list li {
-			padding: 0.6rem 0.8rem;
-			gap: 0.5rem;
-		}
-
-		.payer-name {
-			min-width: 0;
-		}
-	}
-
-	.empty-state {
-		text-align: center;
-		color: var(--color-text-tertiary);
-		font-style: italic;
-		padding: 2rem;
-	}
-
-	.payer-input {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.payer-input input {
-		flex: 1;
-		padding: 0.75rem;
-		border: 1px solid var(--color-border);
-		border-radius: 4px;
-		font-size: 1rem;
-		box-sizing: border-box;
-	}
-
-	.payer-input button {
-		padding: 0.75rem 1.5rem;
-		background: var(--color-primary);
-		color: var(--color-surface);
-		box-sizing: border-box;
-	}
-
-	.payer-input button:hover {
-		background: var(--color-primary-hover);
-	}
-
-	button.disabled,
-	button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	button.disabled:hover,
-	button:disabled:hover {
-		background-color: var(--color-surface-1);
-		transform: none;
-	}
-
 	/* Keyboard key styles are now injected via {@html} in translations */
 	:global(.keyboard-hint kbd),
 	:global(.currency-keyboard-hint kbd) {
@@ -602,26 +367,6 @@
 
 		.currency-selection {
 			padding: 1rem;
-		}
-
-		.payer-collection {
-			padding: 1rem;
-		}
-
-		.payer-list,
-		.payer-input,
-		.actions {
-			width: 100%;
-			box-sizing: border-box;
-		}
-
-		.payer-input button {
-			width: auto;
-			flex-shrink: 0;
-		}
-
-		.payer-input input {
-			min-width: 0;
 		}
 	}
 </style>
