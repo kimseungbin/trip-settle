@@ -1,0 +1,626 @@
+[workflow]
+run_id = 18901512214
+run_number = 150
+workflow = CI
+event = push
+ref = refs/heads/main
+sha = 5573d775eefe9a02d345de55d75f263ba8de9afe
+actor = kimseungbin
+
+[job.1]
+name = Lint
+status = completed
+conclusion = success
+duration_seconds = 43
+
+[job.1.step.1]
+name = Set up job
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.1.step.2]
+name = Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.1.step.3]
+name = Setup project
+status = completed
+conclusion = success
+duration_seconds = 21
+
+[job.1.step.4]
+name = Run linters
+status = completed
+conclusion = success
+duration_seconds = 17
+
+[job.1.step.5]
+name = Post Setup project
+status = completed
+conclusion = success
+
+[job.1.step.6]
+name = Post Checkout code
+status = completed
+conclusion = success
+
+[job.1.step.7]
+name = Complete job
+status = completed
+conclusion = success
+
+[job.2]
+name = Code Formatting
+status = completed
+conclusion = success
+duration_seconds = 28
+
+[job.2.step.1]
+name = Set up job
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.2.step.2]
+name = Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.2.step.3]
+name = Setup project
+status = completed
+conclusion = success
+duration_seconds = 20
+
+[job.2.step.4]
+name = Check formatting
+status = completed
+conclusion = success
+duration_seconds = 2
+
+[job.2.step.5]
+name = Post Setup project
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.2.step.6]
+name = Post Checkout code
+status = completed
+conclusion = success
+
+[job.2.step.7]
+name = Complete job
+status = completed
+conclusion = success
+
+[job.3]
+name = Type Check
+status = completed
+conclusion = success
+duration_seconds = 28
+
+[job.3.step.1]
+name = Set up job
+status = completed
+conclusion = success
+
+[job.3.step.2]
+name = Checkout code
+status = completed
+conclusion = success
+
+[job.3.step.3]
+name = Setup project
+status = completed
+conclusion = success
+duration_seconds = 21
+
+[job.3.step.4]
+name = Type check frontend
+status = completed
+conclusion = success
+duration_seconds = 3
+
+[job.3.step.5]
+name = Post Setup project
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.3.step.6]
+name = Post Checkout code
+status = completed
+conclusion = success
+
+[job.3.step.7]
+name = Complete job
+status = completed
+conclusion = success
+
+[job.4]
+name = Unit Tests (backend)
+status = completed
+conclusion = success
+duration_seconds = 25
+
+[job.4.step.1]
+name = Set up job
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.4.step.2]
+name = Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.4.step.3]
+name = Setup project
+status = completed
+conclusion = success
+duration_seconds = 20
+
+[job.4.step.4]
+name = Run backend tests
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.4.step.5]
+name = Post Setup project
+status = completed
+conclusion = success
+
+[job.4.step.6]
+name = Post Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.4.step.7]
+name = Complete job
+status = completed
+conclusion = success
+
+[job.5]
+name = Unit Tests (frontend)
+status = completed
+conclusion = success
+duration_seconds = 27
+
+[job.5.step.1]
+name = Set up job
+status = completed
+conclusion = success
+
+[job.5.step.2]
+name = Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.5.step.3]
+name = Setup project
+status = completed
+conclusion = success
+duration_seconds = 20
+
+[job.5.step.4]
+name = Run frontend tests
+status = completed
+conclusion = success
+duration_seconds = 3
+
+[job.5.step.5]
+name = Post Setup project
+status = completed
+conclusion = success
+
+[job.5.step.6]
+name = Post Checkout code
+status = completed
+conclusion = success
+
+[job.5.step.7]
+name = Complete job
+status = completed
+conclusion = success
+
+[job.6]
+name = Build
+status = completed
+conclusion = success
+duration_seconds = 31
+
+[job.6.step.1]
+name = Set up job
+status = completed
+conclusion = success
+
+[job.6.step.2]
+name = Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.6.step.3]
+name = Setup project
+status = completed
+conclusion = success
+duration_seconds = 20
+
+[job.6.step.4]
+name = Build all packages
+status = completed
+conclusion = success
+duration_seconds = 7
+
+[job.6.step.5]
+name = Check build status
+status = completed
+conclusion = skipped
+
+[job.6.step.6]
+name = Upload build log on failure
+status = completed
+conclusion = skipped
+
+[job.6.step.7]
+name = Post Setup project
+status = completed
+conclusion = success
+
+[job.6.step.8]
+name = Post Checkout code
+status = completed
+conclusion = success
+
+[job.6.step.9]
+name = Complete job
+status = completed
+conclusion = success
+
+[job.7]
+name = Build Docker Images
+status = completed
+conclusion = success
+duration_seconds = 120
+
+[job.7.step.1]
+name = Set up job
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.7.step.2]
+name = Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.7.step.3]
+name = Set up Docker Buildx
+status = completed
+conclusion = success
+duration_seconds = 5
+
+[job.7.step.4]
+name = Build and cache backend-e2e image (with detailed progress)
+status = completed
+conclusion = success
+duration_seconds = 47
+
+[job.7.step.5]
+name = Build and cache frontend-dev image (with detailed progress)
+status = completed
+conclusion = success
+duration_seconds = 21
+
+[job.7.step.6]
+name = Save backend image
+status = completed
+conclusion = success
+duration_seconds = 6
+
+[job.7.step.7]
+name = Save frontend image
+status = completed
+conclusion = success
+duration_seconds = 6
+
+[job.7.step.8]
+name = Upload backend image artifact
+status = completed
+conclusion = success
+duration_seconds = 13
+
+[job.7.step.9]
+name = Upload frontend image artifact
+status = completed
+conclusion = success
+duration_seconds = 13
+
+[job.7.step.10]
+name = Capture backend and frontend build metrics
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.7.step.11]
+name = Validate cache effectiveness
+status = completed
+conclusion = success
+
+[job.7.step.12]
+name = Post Set up Docker Buildx
+status = completed
+conclusion = success
+duration_seconds = 3
+
+[job.7.step.13]
+name = Post Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.7.step.14]
+name = Complete job
+status = completed
+conclusion = success
+
+[job.8]
+name = E2E Tests (Docker)
+status = completed
+conclusion = failure
+duration_seconds = 396
+
+[job.8.step.1]
+name = Set up job
+status = completed
+conclusion = success
+duration_seconds = 3
+
+[job.8.step.2]
+name = Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.8.step.3]
+name = Set up Docker Buildx
+status = completed
+conclusion = success
+duration_seconds = 6
+
+[job.8.step.4]
+name = Download backend image
+status = completed
+conclusion = success
+duration_seconds = 4
+
+[job.8.step.5]
+name = Download frontend image
+status = completed
+conclusion = success
+duration_seconds = 4
+
+[job.8.step.6]
+name = Load pre-built images
+status = completed
+conclusion = success
+duration_seconds = 27
+
+[job.8.step.7]
+name = Cache Playwright base image
+status = completed
+conclusion = success
+duration_seconds = 10
+
+[job.8.step.8]
+name = Diagnose cache status
+status = completed
+conclusion = success
+
+[job.8.step.9]
+name = Load or pull Playwright base image
+status = completed
+conclusion = success
+duration_seconds = 30
+
+[job.8.step.10]
+name = Cleanup any existing Docker resources
+status = completed
+conclusion = success
+
+[job.8.step.11]
+name = Build Playwright test image
+status = completed
+conclusion = success
+duration_seconds = 205
+
+[job.8.step.12]
+name = Append Playwright build metrics
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.8.step.13]
+name = Run E2E tests with pre-built images
+status = completed
+conclusion = failure
+duration_seconds = 95
+
+[job.8.step.14]
+name = Upload Playwright report
+status = completed
+conclusion = success
+
+[job.8.step.15]
+name = Upload test results
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.8.step.16]
+name = Extract E2E test failure metadata
+status = completed
+conclusion = success
+
+[job.8.step.17]
+name = Store failure metadata in git notes
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.8.step.18]
+name = Verify cache will be saved
+status = completed
+conclusion = success
+
+[job.8.step.19]
+name = Clean up Docker resources
+status = completed
+conclusion = success
+duration_seconds = 2
+
+[job.8.step.20]
+name = Post Build Playwright test image
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.8.step.21]
+name = Post Cache Playwright base image
+status = completed
+conclusion = skipped
+
+[job.8.step.22]
+name = Post Set up Docker Buildx
+status = completed
+conclusion = success
+duration_seconds = 3
+
+[job.8.step.23]
+name = Post Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.8.step.24]
+name = Complete job
+status = completed
+conclusion = success
+
+[job.9]
+name = All Checks Passed
+status = completed
+conclusion = failure
+duration_seconds = 14
+
+[job.9.step.1]
+name = Set up job
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.9.step.2]
+name = Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.9.step.3]
+name = Setup Node.js
+status = completed
+conclusion = success
+duration_seconds = 5
+
+[job.9.step.4]
+name = Download build log artifact
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.9.step.5]
+name = Generate failure report
+status = completed
+conclusion = success
+
+[job.9.step.6]
+name = Add report to job summary
+status = completed
+conclusion = success
+
+[job.9.step.7]
+name = Upload failure report
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.9.step.8]
+name = Check if all jobs succeeded
+status = completed
+conclusion = failure
+
+[job.9.step.9]
+name = Post Setup Node.js
+status = completed
+conclusion = skipped
+
+[job.9.step.10]
+name = Post Checkout code
+status = completed
+conclusion = success
+
+[job.9.step.11]
+name = Complete job
+status = completed
+conclusion = success
+
+[job.10]
+name = Capture Workflow Metrics
+status = in_progress
+conclusion = None
+
+[job.10.step.1]
+name = Set up job
+status = completed
+conclusion = success
+
+[job.10.step.2]
+name = Checkout code
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.10.step.3]
+name = Fetch workflow metrics git notes
+status = completed
+conclusion = success
+duration_seconds = 1
+
+[job.10.step.4]
+name = Fetch workflow run data
+status = in_progress
+conclusion = None
+
+[job.10.step.5]
+name = Parse and store metrics
+status = pending
+conclusion = None
+
+[job.10.step.6]
+name = Store metrics in git notes
+status = pending
+conclusion = None
+
+[job.10.step.7]
+name = Post Checkout code
+status = pending
+conclusion = None
