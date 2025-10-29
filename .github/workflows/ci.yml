@@ -212,6 +212,67 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Validate cache effectiveness
+        if: always()
+        run: |
+          # Extract cache hit rates from the metrics note
+          backend_rate=$(grep "cache_hit_rate" cache-note.txt | grep backend -A 1 | grep "cache_hit_rate" | cut -d'=' -f2 | tr -d ' %' || echo "0")
+          frontend_rate=$(grep "cache_hit_rate" cache-note.txt | grep frontend -A 1 | grep "cache_hit_rate" | cut -d'=' -f2 | tr -d ' %' || echo "0")
+          overall_rate=$(grep "overall_cache_hit_rate" cache-note.txt | cut -d'=' -f2 | tr -d ' %' || echo "0")
+
+          echo "📊 Cache Hit Rates:"
+          echo "  Backend:  ${backend_rate}%"
+          echo "  Frontend: ${frontend_rate}%"
+          echo "  Overall:  ${overall_rate}%"
+          echo ""
+
+          # Determine change type by checking which files changed
+          has_dockerfile_change=$(git diff --name-only HEAD~1 2>/dev/null | grep -c "^Dockerfile$" || echo "0")
+          has_package_json_change=$(git diff --name-only HEAD~1 2>/dev/null | grep -c "package.*\.json$" || echo "0")
+
+          # Set expected threshold based on change type
+          if [[ $has_dockerfile_change -gt 0 ]]; then
+            expected_threshold=0
+            change_type="Dockerfile change"
+            validation_note="Dockerfile changes trigger full rebuild (cache miss expected)"
+          elif [[ $has_package_json_change -gt 0 ]]; then
+            expected_threshold=50
+            change_type="dependency change"
+            validation_note="Dependency changes may invalidate npm install layers"
+          else
+            expected_threshold=80
+            change_type="code-only change"
+            validation_note="Code-only changes should have high cache hit rate (>80%)"
+          fi
+
+          echo "🎯 Change Type: $change_type"
+          echo "📏 Expected Threshold: ≥${expected_threshold}%"
+          echo "💡 Note: $validation_note"
+          echo ""
+
+          # Validate overall cache hit rate
+          if [[ $overall_rate -ge $expected_threshold ]]; then
+            echo "✅ Cache effectiveness validated: ${overall_rate}% ≥ ${expected_threshold}%"
+            exit 0
+          elif [[ $expected_threshold -eq 0 ]]; then
+            echo "ℹ️  Cache effectiveness not validated (full rebuild expected)"
+            exit 0
+          else
+            echo "⚠️  WARNING: Cache hit rate below threshold"
+            echo "   Current:  ${overall_rate}%"
+            echo "   Expected: ≥${expected_threshold}%"
+            echo ""
+            echo "This may indicate:"
+            echo "  • Dockerfile layer ordering changed"
+            echo "  • Base image changed"
+            echo "  • Cache was manually cleared"
+            echo "  • GitHub Actions cache expired (7 days)"
+            echo ""
+            echo "Review recent changes and consider optimizing Dockerfile layer order."
+            # Don't fail the build, just warn
+            exit 0
+          fi
+
   # Job 4: Unit tests
   unit-tests:
     name: Unit Tests
