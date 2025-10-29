@@ -40,11 +40,11 @@ graph TB
     Root --> Infra["Infrastructure Package<br/>packages/infra/<br/><br/>AWS CDK<br/>TypeScript"]
     Root --> Actions["GitHub Actions<br/>.github/actions/*<br/><br/>TypeScript Actions<br/>@vercel/ncc"]
 
-    style Root fill:#e1f5ff
-    style Frontend fill:#d4edda
-    style Backend fill:#d4edda
-    style Infra fill:#d4edda
-    style Actions fill:#fff3cd
+    style Root fill:#2d3748,stroke:#4a5568,stroke-width:2px,color:#e2e8f0
+    style Frontend fill:#1a365d,stroke:#2c5282,stroke-width:2px,color:#e2e8f0
+    style Backend fill:#1a365d,stroke:#2c5282,stroke-width:2px,color:#e2e8f0
+    style Infra fill:#1a365d,stroke:#2c5282,stroke-width:2px,color:#e2e8f0
+    style Actions fill:#744210,stroke:#975a16,stroke-width:2px,color:#e2e8f0
 ```
 
 #### Key Architecture Benefits
@@ -173,12 +173,12 @@ graph TB
 
     FE_Deps --> FE_Dev["Stage: frontend-dev<br/>Vite dev server<br/>HMR enabled"]
 
-    style Base fill:#fff3cd
-    style BE_Deps fill:#cfe2ff
-    style FE_Deps fill:#cfe2ff
-    style BE_Dev fill:#d4edda
-    style BE_E2E fill:#d4edda
-    style FE_Dev fill:#d4edda
+    style Base fill:#744210,stroke:#975a16,stroke-width:2px,color:#e2e8f0
+    style BE_Deps fill:#1a365d,stroke:#2c5282,stroke-width:2px,color:#e2e8f0
+    style FE_Deps fill:#1a365d,stroke:#2c5282,stroke-width:2px,color:#e2e8f0
+    style BE_Dev fill:#234e52,stroke:#2c7a7b,stroke-width:2px,color:#e2e8f0
+    style BE_E2E fill:#234e52,stroke:#2c7a7b,stroke-width:2px,color:#e2e8f0
+    style FE_Dev fill:#234e52,stroke:#2c7a7b,stroke-width:2px,color:#e2e8f0
 ```
 
 **Stage 1: Base (Shared by all services)**
