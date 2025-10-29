@@ -3,7 +3,7 @@
 	import ExpenseForm from './ExpenseForm.svelte'
 	import ExpenseList from './ExpenseList.svelte'
 	import KeyboardHint from './KeyboardHint.svelte'
-	import { shouldShowKeyboardHint, dismissKeyboardHint } from '../lib/keyboardHint'
+	import { settings } from '../stores/settings.svelte'
 	import { t } from 'svelte-i18n'
 
 	let expenses = $state<Expense[]>([])
@@ -27,14 +27,14 @@
 
 	function handleMouseSubmit() {
 		// Only show hint if it hasn't been dismissed before
-		if (shouldShowKeyboardHint()) {
+		if (!settings.hasSeenHint('expenseForm')) {
 			showHint = true
 		}
 	}
 
 	function handleDismissHint() {
 		showHint = false
-		dismissKeyboardHint()
+		settings.dismissHint('expenseForm')
 	}
 </script>
 

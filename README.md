@@ -69,8 +69,8 @@ graph TB
 
 npm workspaces automatically hoist shared dependencies, but explicit root declaration provides key benefits through clear separation of concerns:
 
-```
 Root package.json (Shared monorepo tooling):
+```JSON
 {
   "devDependencies": {
     "typescript": "^5.7.2",
@@ -79,8 +79,9 @@ Root package.json (Shared monorepo tooling):
     "vitest": "^3.2.4"
   }
 }
-
+```
 Backend package.json (Domain-specific only):
+```JSON
 {
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -88,8 +89,9 @@ Backend package.json (Domain-specific only):
     "supertest": "^7.0.0"
   }
 }
-
+```
 Frontend package.json (Domain-specific only):
+```JSON
 {
   "devDependencies": {
     "@playwright/test": "^1.49.1",

@@ -42,6 +42,8 @@ export interface SystemPreferences {
 	}
 	/** @deprecated Use keyboardHints['expenseForm'] instead. Kept for backward compatibility. */
 	hasSeenKeyboardHint?: boolean
+	/** Last selected payer name (for multi-payer mode convenience) */
+	lastSelectedPayer?: string
 }
 
 /**
@@ -244,6 +246,46 @@ export function settingsStore() {
 		},
 
 		/**
+		 * Get the last selected payer name
+		 * @returns The last selected payer name, or empty string if none
+		 */
+		get lastSelectedPayer(): string {
+			ensureLoaded()
+			return settings.system.lastSelectedPayer || ''
+		},
+
+		/**
+		 * Save the last selected payer name
+		 * @param payer - The payer name to remember
+		 */
+		setLastSelectedPayer(payer: string): void {
+			ensureLoaded()
+			settings = {
+				...settings,
+				system: {
+					...settings.system,
+					lastSelectedPayer: payer,
+				},
+			}
+			saveSettings(settings)
+		},
+
+		/**
+		 * Clear the last selected payer
+		 */
+		clearLastSelectedPayer(): void {
+			ensureLoaded()
+			settings = {
+				...settings,
+				system: {
+					...settings.system,
+					lastSelectedPayer: undefined,
+				},
+			}
+			saveSettings(settings)
+		},
+
+		/**
 		 * Complete onboarding with feature settings
 		 * This can only be called once - settings become immutable afterward
 		 */
@@ -397,6 +439,15 @@ export const settings = {
 	},
 	dismissHint(hintId: string) {
 		return getSettingsInstance().dismissHint(hintId)
+	},
+	get lastSelectedPayer() {
+		return getSettingsInstance().lastSelectedPayer
+	},
+	setLastSelectedPayer(payer: string) {
+		return getSettingsInstance().setLastSelectedPayer(payer)
+	},
+	clearLastSelectedPayer() {
+		return getSettingsInstance().clearLastSelectedPayer()
 	},
 	completeOnboarding(
 		currencyMode: CurrencyMode,
