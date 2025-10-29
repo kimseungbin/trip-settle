@@ -150,29 +150,41 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and cache backend-e2e image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          target: backend-e2e
-          push: false
-          load: true
-          tags: trip-settle-backend:ci
-          cache-from: type=gha,scope=backend-e2e
-          cache-to: type=gha,mode=max,scope=backend-e2e
+      - name: Build and cache backend-e2e image (with detailed progress)
+        id: backend-build
+        run: |
+          # Build with detailed progress output to capture layer-level cache data
+          docker buildx build \
+            --file ./Dockerfile \
+            --target backend-e2e \
+            --tag trip-settle-backend:ci \
+            --cache-from type=gha,scope=backend-e2e \
+            --cache-to type=gha,mode=max,scope=backend-e2e \
+            --progress=plain \
+            --load \
+            . 2>&1 | tee /tmp/backend-build.log
 
-      - name: Build and cache frontend-dev image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          target: frontend-dev
-          push: false
-          load: true
-          tags: trip-settle-frontend:ci
-          cache-from: type=gha,scope=frontend-dev
-          cache-to: type=gha,mode=max,scope=frontend-dev
+          echo "backend_layers<<EOF" >> $GITHUB_OUTPUT
+          grep -E "^\#[0-9]+ \[(internal|stage-)" /tmp/backend-build.log | head -50 >> $GITHUB_OUTPUT || true
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Build and cache frontend-dev image (with detailed progress)
+        id: frontend-build
+        run: |
+          # Build with detailed progress output to capture layer-level cache data
+          docker buildx build \
+            --file ./Dockerfile \
+            --target frontend-dev \
+            --tag trip-settle-frontend:ci \
+            --cache-from type=gha,scope=frontend-dev \
+            --cache-to type=gha,mode=max,scope=frontend-dev \
+            --progress=plain \
+            --load \
+            . 2>&1 | tee /tmp/frontend-build.log
+
+          echo "frontend_layers<<EOF" >> $GITHUB_OUTPUT
+          grep -E "^\#[0-9]+ \[(internal|stage-)" /tmp/frontend-build.log | head -50 >> $GITHUB_OUTPUT || true
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Save backend image
         run: docker save trip-settle-backend:ci -o /tmp/backend-image.tar
