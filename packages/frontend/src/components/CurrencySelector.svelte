@@ -4,6 +4,7 @@
 	import { locale, t } from 'svelte-i18n'
 	import { focusElementImmediate } from '../lib/focus'
 	import { FOCUS_TIMING, ANIMATION_DURATION } from '../constants/timing'
+	import { createListNavigationHandler, createToggleHandler } from '../lib/keyboard'
 
 	let {
 		value = $bindable(DEFAULT_CURRENCY),
@@ -80,36 +81,26 @@
 		}
 	}
 
-	function handleKeydown(event: KeyboardEvent) {
-		if (!isOpen) {
-			if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
-				event.preventDefault()
-				toggleDropdown()
-			}
-			return
-		}
+	// Keyboard handler for button (when dropdown is closed)
+	const buttonKeyHandler = createToggleHandler(toggleDropdown)
 
-		switch (event.key) {
-			case 'Escape':
-				event.preventDefault()
-				isOpen = false
-				searchQuery = ''
-				break
-			case 'ArrowDown':
-				event.preventDefault()
-				selectedIndex = Math.min(selectedIndex + 1, displayedCurrencies.length - 1)
-				break
-			case 'ArrowUp':
-				event.preventDefault()
-				selectedIndex = Math.max(selectedIndex - 1, 0)
-				break
-			case 'Enter':
-				event.preventDefault()
+	// Keyboard handler for input (when dropdown is open)
+	function handleDropdownKeydown(event: KeyboardEvent) {
+		const handler = createListNavigationHandler({
+			currentIndex: selectedIndex,
+			itemCount: displayedCurrencies.length,
+			onIndexChange: index => (selectedIndex = index),
+			onSelect: () => {
 				if (displayedCurrencies[selectedIndex]) {
 					selectCurrency(displayedCurrencies[selectedIndex])
 				}
-				break
-		}
+			},
+			onClose: () => {
+				isOpen = false
+				searchQuery = ''
+			},
+		})
+		handler(event)
 	}
 
 	function handleInput() {
@@ -135,7 +126,7 @@
 		tabindex="0"
 		bind:this={buttonElement}
 		onclick={toggleDropdown}
-		onkeydown={handleKeydown}
+		onkeydown={buttonKeyHandler}
 		aria-haspopup="listbox"
 		aria-expanded={isOpen}
 	>
@@ -153,7 +144,7 @@
 				bind:value={searchQuery}
 				bind:this={inputElement}
 				oninput={handleInput}
-				onkeydown={handleKeydown}
+				onkeydown={handleDropdownKeydown}
 				onblur={handleBlur}
 			/>
 
