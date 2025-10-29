@@ -534,7 +534,7 @@ jobs:
     name: Capture Workflow Metrics
     runs-on: ubuntu-latest
     if: always()
-    needs: [build-and-test, docker-e2e-test, infrastructure-validation, all-checks]
+    needs: [code-format, lint, type-check, build, docker-images, unit-tests, e2e-tests, all-checks]
     permissions:
       contents: write
       actions: read
