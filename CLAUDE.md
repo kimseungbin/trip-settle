@@ -468,10 +468,10 @@ npm run test:e2e:ui --workspace=frontend
 
 ### Failure Analysis
 
-When E2E tests fail, use the `e2e-failure-analysis` skill for quick diagnosis:
-- **Skill**: `.claude/skills/e2e-failure-analysis/analysis.yaml`
+When E2E tests fail, use the `workflow-analysis` skill:
+- **Skill**: `.claude/skills/workflow-analysis/` → `guides/e2e-tests.md`
 - **Purpose**: Categorize failures, identify root causes, provide fix recommendations
-- **Dependencies**: Uses `git-notes-helper` skill for historical analysis (Phase 2-3 features)
+- **Also covers**: Docker cache, workflow failures, snapshot updates
 - **Features**:
   - Basic: Parse test results, categorize errors, show artifacts
   - Advanced (Phase 3): Flaky test detection, trend analysis, blame integration, regression detection
@@ -633,7 +633,7 @@ The CI pipeline uses parallel execution (4 jobs) and Docker caching for speed (~
 - ❌ Using `--force-recreate` flag (bypasses Docker cache)
 
 **Detailed documentation**: `.claude/skills/ci-pipeline-optimization/SKILL.md`
-**Cache analysis**: Use `docker-cache-analysis` skill for performance trends
+**Cache analysis**: Use `workflow-analysis` skill → `guides/docker-cache.md` for performance trends
 
 ## AWS CDK Deployment
 
@@ -786,14 +786,19 @@ See README.md "Why Git Notes for CI Metadata?" for rationale and benefits.
 
 CI workflows use a **post-job architecture** to accurately capture workflow execution status.
 
-For implementation details, see `.claude/skills/git-notes-helper/` → "Writing Git Notes in CI" section.
+For implementation details, see `.claude/skills/workflow-analysis/guides/git-notes.md` → "Writing Notes in CI" section.
 
-### Helper Skill
+### Analysis Skill
 
-**Skill**: `.claude/skills/git-notes-helper/helper.yaml`
-- **Purpose**: Provides reusable git notes operations (fetch, parse, compare, historical analysis, writing in CI)
-- **Used by**: `docker-cache-analysis`, `e2e-failure-analysis`, `snapshot-update-analysis`, `workflow-metrics-analysis` skills
-- **Operations**: Fetch notes, show note content, parse INI fields, compare commits, historical walking, CI post-job pattern
+**Skill**: `.claude/skills/workflow-analysis/`
+- **Purpose**: Analyze GitHub Actions workflows using git notes metadata
+- **Covers**: Workflow failures, Docker cache, E2E tests, snapshot updates, performance metrics
+- **Guides**:
+  - `git-notes.md` - Git notes operations (fetch, parse, historical analysis)
+  - `workflows.md` - Workflow/job failures and performance metrics
+  - `docker-cache.md` - Docker cache optimization
+  - `e2e-tests.md` - E2E test failure analysis
+  - `snapshots.md` - Snapshot update workflow analysis
 
 ### Usage
 
@@ -808,11 +813,7 @@ git notes --ref=ci/<namespace> show <commit-hash>
 git notes --ref=ci/<namespace> list
 ```
 
-**See also**:
-- Docker cache analysis: `.claude/skills/docker-cache-analysis/`
-- E2E failure analysis: `.claude/skills/e2e-failure-analysis/`
-- Snapshot update analysis: `.claude/skills/snapshot-update-analysis/`
-- Git notes helper: `.claude/skills/git-notes-helper/`
+**See also**: `.claude/skills/workflow-analysis/` for comprehensive workflow analysis guides
 
 ## Testing & CI/CD Readiness
 
