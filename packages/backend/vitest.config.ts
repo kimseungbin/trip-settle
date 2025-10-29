@@ -1,17 +1,14 @@
-import { defineConfig } from 'vitest/config'
+import { mergeConfig } from 'vitest/config'
+import baseConfig from '../../vitest.config.base'
 
-export default defineConfig({
+export default mergeConfig(baseConfig, {
 	test: {
-		globals: true,
 		environment: 'node',
 		// Match both unit tests (*.spec.ts) and integration tests (*.integration.spec.ts)
 		// E2E tests excluded due to NestJS decorator metadata requirements
 		include: ['src/**/*.spec.ts'],
 		exclude: [
-			'**/node_modules/**',
-			'**/dist/**',
-			'**/test/**', // E2E tests directory
-			'**/.{idea,git,cache,output,temp}/**',
+			'**/test/**', // E2E tests directory (backend-specific)
 		],
 		coverage: {
 			provider: 'v8',

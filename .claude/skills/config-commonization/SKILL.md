@@ -2,7 +2,7 @@
 name: config-commonization
 description: |
   Guidelines for managing configuration files across the monorepo.
-  Use when adding or modifying TypeScript, ESLint, Prettier, Stylelint, or other config files.
+  Use when adding or modifying TypeScript, ESLint, Prettier, Stylelint, Vitest, or other config files.
   Helps maximize reuse through base/shared configs and avoid duplication.
 ---
 
@@ -24,7 +24,7 @@ tsconfig.base.json (root)
 │   └── module: ESNext, moduleResolution: bundler
 ├── packages/infra/tsconfig.json
 │   └── module: ESNext, moduleResolution: bundler
-├── packages/frontend/tsconfig.node.json
+├── packages/frontend/tsconfig.node.json (ONLY THIS ONE extends root base)
 │   └── module: ESNext, moduleResolution: bundler
 └── .github/actions/tsconfig.base.json
     ├── check-snapshot-trigger/tsconfig.json
@@ -38,6 +38,10 @@ tsconfig.base.json (root)
 - Package-specific configs extend the base and override only what's unique
 - GitHub Actions share `.github/actions/tsconfig.base.json` to eliminate duplication
 - **ESM for Actions**: All GitHub Actions use ESM (module: ESNext) bundled with esbuild for consistency with the monorepo. This provides 20-50x faster builds compared to the previous @vercel/ncc + CommonJS approach, while maintaining compatibility with GitHub Actions' Node.js 24 runtime.
+
+**Frontend has TWO TypeScript configs** (not a duplication issue):
+- `packages/frontend/tsconfig.json` - **Extends `@tsconfig/svelte`** (framework-specific, NOT part of monorepo commonization)
+- `packages/frontend/tsconfig.node.json` - **Extends root `tsconfig.base.json`** (follows monorepo commonization pattern for build tooling)
 
 ## ESLint Configuration
 
@@ -60,6 +64,59 @@ ESLint configs should follow similar patterns:
 
 - Frontend-specific: `packages/frontend/.stylelintrc.json`
 - Other packages don't need stylelint (no CSS)
+
+## Vitest Configuration Hierarchy
+
+The monorepo uses `mergeConfig()` utility from `vitest/config` to merge base and package-specific configurations:
+
+```
+vitest.config.base.ts (root)
+├── packages/backend/vitest.config.ts
+│   └── mergeConfig(baseConfig, { test: { environment: 'node', ... } })
+├── packages/frontend/vitest.config.ts
+│   └── mergeConfig(baseConfig, { plugins: [svelte()], test: { environment: 'happy-dom', ... } })
+└── packages/infra/vitest.config.ts
+    └── mergeConfig(baseConfig, { test: { environment: 'node', ... } })
+```
+
+**Key points**:
+- `vitest.config.base.ts` defines shared test settings (globals: true, common exclusions)
+- Package configs import `mergeConfig()` utility and merge base with package-specific overrides
+- Base exclusions apply to all packages (node_modules, dist, build, cdk.out)
+- Package-specific exclusions added only where needed (e.g., frontend excludes e2e/, visual/, accessibility/)
+
+**Example**:
+```typescript
+// vitest.config.base.ts (root)
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+	test: {
+		globals: true,
+		exclude: [
+			'**/node_modules/**',
+			'**/dist/**',
+			'**/.{idea,git,cache,output,temp}/**',
+			'**/build/**',
+			'**/cdk.out/**',
+		],
+	},
+})
+
+// packages/backend/vitest.config.ts
+import { mergeConfig } from 'vitest/config'
+import baseConfig from '../../vitest.config.base'
+
+export default mergeConfig(baseConfig, {
+	test: {
+		environment: 'node',
+		include: ['src/**/*.spec.ts'],
+		exclude: [
+			'**/test/**', // Backend-specific exclusion
+		],
+	},
+})
+```
 
 ## General Guidelines for Claude Code
 
@@ -148,4 +205,5 @@ If you notice 3+ packages have identical config:
 - GitHub Actions TypeScript base: `.github/actions/tsconfig.base.json`
 - GitHub Actions ESLint base: `.github/actions/eslint.config.base.mjs`
 - Root Prettier config: `.prettierrc.yaml`
+- Root Vitest config: `vitest.config.base.ts`
 - Frontend Stylelint config: `packages/frontend/.stylelintrc.json`

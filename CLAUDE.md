@@ -239,8 +239,14 @@ npm run destroy --workspace=infra
 
 **Principle**: Maximize configuration reuse through base/shared configs to reduce duplication and ensure consistency.
 
-When adding or modifying configuration files (TypeScript, ESLint, Prettier, Stylelint, Vitest), see `.claude/skills/config-commonization/SKILL.md` for:
-- Existing hierarchy patterns (TypeScript, ESLint)
+**Current hierarchy patterns:**
+- **TypeScript**: `tsconfig.base.json` → packages extend with `extends` field
+- **ESLint**: Root `eslint.config.js` → packages import and modify array
+- **Vitest**: `vitest.config.base.ts` → packages merge with `mergeConfig()` utility
+- **Prettier**: Root `.prettierrc.yaml` → single config, no inheritance needed
+
+When adding or modifying configuration files, see `.claude/skills/config-commonization/SKILL.md` for:
+- Detailed hierarchy examples and implementation patterns
 - Guidelines for creating base configs vs package-specific configs
 - Decision criteria and examples
 
@@ -699,9 +705,11 @@ npm run build:actions
 
 # TIER 5: TECHNICAL REFERENCE (Lookup)
 
-## TypeScript Configuration
+## TypeScript and Vitest Configuration
 
-The project uses a hierarchical TypeScript configuration system with a shared base config:
+The project uses hierarchical configuration systems with shared base configs:
+
+### TypeScript Hierarchy
 
 - **Root base** (`tsconfig.base.json`): Defines common compiler options (module: ESNext, bundler resolution)
 - **Backend**: Inherits ESNext modules (relaxed strict mode for NestJS decorators, requires `.js` extensions for ESM)
@@ -709,7 +717,16 @@ The project uses a hierarchical TypeScript configuration system with a shared ba
 - **Infra**: Inherits ESNext modules (CDK-specific settings)
 - **GitHub Actions**: Inherits ESNext modules (bundled with esbuild for 20-50x faster builds)
 
-All packages use ESM throughout the monorepo. All packages extend `tsconfig.base.json` and override only package-specific settings. See "Configuration Commonization" section for detailed hierarchy and best practices.
+All packages use ESM throughout the monorepo. All packages extend `tsconfig.base.json` and override only package-specific settings.
+
+### Vitest Hierarchy
+
+- **Root base** (`vitest.config.base.ts`): Defines common test settings (`globals: true`, common exclusions)
+- **Backend**: Merges base with `environment: 'node'`, `include: ['src/**/*.spec.ts']`, coverage config
+- **Frontend**: Merges base with `environment: 'happy-dom'`, svelte plugin, Playwright exclusions
+- **Infra**: Merges base with `environment: 'node'`, `include: ['**/*.test.ts']`, CDK exclusions
+
+Packages use `mergeConfig()` from vitest/config to combine base with package-specific settings. See "Configuration Commonization" section for detailed hierarchy and best practices.
 
 ## CSS & Mobile Responsive Design Best Practices
 

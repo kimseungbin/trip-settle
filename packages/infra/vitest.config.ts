@@ -1,10 +1,12 @@
-import { defineConfig } from 'vitest/config'
+import { mergeConfig } from 'vitest/config'
+import baseConfig from '../../vitest.config.base'
 
-export default defineConfig({
+export default mergeConfig(baseConfig, {
 	test: {
-		globals: true,
 		environment: 'node',
 		include: ['**/*.test.ts'],
-		exclude: ['node_modules', 'dist', 'cdk.out'],
+		exclude: [
+			'cdk.out/**', // CDK output directory (infra-specific)
+		],
 	},
 })

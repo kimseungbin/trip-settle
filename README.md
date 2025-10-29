@@ -50,9 +50,15 @@ graph TB
 #### Key Architecture Benefits
 
 **Shared configuration eliminates duplication:**
-- Root-level ESLint/Prettier/TypeScript configs used by all packages
-- Single source of truth for code quality rules
+- Root-level ESLint/Prettier/TypeScript/Vitest configs used by all packages
+- Single source of truth for code quality and testing rules
 - Changes apply instantly across the entire monorepo
+
+*Configuration hierarchy:*
+- **TypeScript**: `tsconfig.base.json` → package `tsconfig.json` (extends base)
+- **ESLint**: Root `eslint.config.js` → package configs (flat config inheritance)
+- **Vitest**: `vitest.config.base.ts` → package configs (`mergeConfig()`)
+- **Prettier**: Root `.prettierrc.yaml` (single config, no inheritance needed)
 
 **Unified CI/CD pipeline:**
 - Single pipeline builds and tests all packages in parallel (7-8 min total)
