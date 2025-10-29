@@ -1,0 +1,49 @@
+=== DOCKER CACHE METRICS (Layer-Level Analysis) ===
+
+[summary]
+overall_cache_hit_rate = 29%
+total_layers = 17
+cached_layers = 5
+built_layers = 12
+builds_analyzed = 2
+
+[backend.cache_stats]
+total_layers =
+cached_layers =
+built_layers =
+cache_hit_rate = 0%
+target = backend-e2e
+dockerfile = Dockerfile
+cache_scope = type=gha,scope=backend-e2e
+cache_mode = max
+
+[frontend.cache_stats]
+total_layers = 17
+cached_layers = 5
+built_layers = 12
+cache_hit_rate = 29%
+target = frontend-dev
+dockerfile = Dockerfile
+cache_scope = type=gha,scope=frontend-dev
+cache_mode = max
+
+[pipeline]
+# Build dependency graph (shared base → parallel deps → parallel targets)
+stage_1 = base (node:24-alpine + dumb-init + tsconfig.base.json)
+stage_2_parallel = backend-deps, frontend-deps (npm ci from base)
+stage_3_parallel = backend-e2e, frontend-dev (from deps + source code)
+
+[diagnostics]
+buildx_version = v0.12+
+progress_mode = plain (detailed layer output)
+layer_caching = enabled
+cache_backend = gha (GitHub Actions cache)
+mode = max (all intermediate layers cached)
+
+[metadata]
+timestamp = 2025-10-29T08:25:44Z
+commit = 5573d77
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18901512214
+job = docker-images
+note = Layer-level cache analysis from Docker BuildKit plain output
