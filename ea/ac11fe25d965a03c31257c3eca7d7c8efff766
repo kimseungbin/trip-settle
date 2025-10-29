@@ -1,0 +1,54 @@
+=== DOCKER CACHE METRICS ===
+
+[summary]
+total_build_time_sec = 105
+cache_effectiveness = pending_e2e_job
+builds_total = 3
+builds_pending = 1
+critical_issues = 0
+warnings = 0
+
+[pipeline]
+# Build dependency graph
+stage_1 = base (node:24-alpine + dumb-init + tsconfig.base.json)
+stage_2_parallel = backend-deps, frontend-deps (npm ci from base)
+stage_3_parallel = backend-e2e, frontend-dev (from deps + source code)
+stage_4_pending = playwright-e2e (will be appended by e2e-tests job)
+
+[build.backend-e2e]
+dockerfile = Dockerfile
+target = backend-e2e
+scope = backend-e2e
+build_time_sec = ~45
+cache_scope = type=gha,scope=backend-e2e
+cache_mode = max
+layers_info = See job summary for detailed breakdown
+image_size_mb = pending
+status = success
+
+[build.frontend-dev]
+dockerfile = Dockerfile
+target = frontend-dev
+scope = frontend-dev
+build_time_sec = ~60
+cache_scope = type=gha,scope=frontend-dev
+cache_mode = max
+layers_info = See job summary for detailed breakdown
+image_size_mb = pending
+status = success
+
+[diagnostics.docker-images-job]
+backend_build = success
+frontend_build = success
+cache_backend = gha (GitHub Actions cache)
+buildx_version = v0.12+
+layer_caching = enabled
+mode = max (all intermediate layers cached)
+
+[metadata]
+timestamp = 2025-10-29T01:05:09Z
+commit = eaac11f
+branch = main
+run_url = https://github.com/kimseungbin/trip-settle/actions/runs/18893771058
+job = docker-images
+note = Backend and frontend metrics captured. Playwright metrics will be appended by e2e-tests job.
