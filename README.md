@@ -419,6 +419,18 @@ These decisions demonstrate:
 
 Beyond technical architecture, this project demonstrates **product-focused engineering decisions** that balance user needs with implementation complexity.
 
+### Design Requirements
+
+All features in this project must meet the following standards:
+
+- **Keyboard accessible**: Every interaction must work without a mouse (Enter/Escape/Arrow keys for navigation and actions)
+- **ARIA compliant**: Proper semantic HTML and screen reader support for accessibility
+- **Mobile-first responsive**: Designs start with mobile viewports and progressively enhance for desktop
+- **Fast interactions**: Sub-second page loads and instant user feedback
+- **Visual feedback**: Clear, immediate response for every user action
+
+These requirements ensure the application is accessible, performant, and provides an excellent user experience across all devices and interaction modes. The sections below explain the engineering rationale behind each decision.
+
 ### Keyboard-First Accessibility
 
 **Decision**: All interactive features must work without a mouse.

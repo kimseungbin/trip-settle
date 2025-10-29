@@ -77,14 +77,13 @@ See `.claude/skills/tdd-workflow/workflow.yaml` for complete testing strategy.
 
 ## Design Requirements
 
-All features must meet these requirements:
-- **Keyboard accessible**: Work without mouse (Enter/Escape/Arrow keys)
-- **ARIA compliant**: Screen reader support, semantic HTML
-- **Mobile-first responsive**: Design for mobile viewport, enhance for desktop
-- **Fast interactions**: Sub-second loads, instant feedback
-- **Visual feedback**: Clear response for every user action
+All features must meet accessibility and UX standards. See README.md "Design Requirements" section for complete details.
 
-See README.md "Design Philosophy" section for rationale and implementation details.
+**Required for all features:**
+- Keyboard accessible (Enter/Escape/Arrow keys)
+- ARIA compliant, semantic HTML
+- Mobile-first responsive design
+- Sub-second interactions with visual feedback
 
 # TIER 2: FREQUENTLY REFERENCED (Active Development)
 
