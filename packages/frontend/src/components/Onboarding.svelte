@@ -3,10 +3,10 @@
 	import { settings } from '../stores/settings.svelte'
 	import type { CurrencyMode } from '../stores/settings.svelte'
 	import CurrencySelector from './CurrencySelector.svelte'
+	import LanguageSelector from './LanguageSelector.svelte'
 	import { DEFAULT_CURRENCY, getCurrencyByCode } from '../data/currencies'
 	import { onMount } from 'svelte'
-	import { locale, t } from 'svelte-i18n'
-	import { setLocale } from '../i18n'
+	import { t } from 'svelte-i18n'
 	import { toast } from '../stores/toast.svelte'
 	import type { PaymentMode } from '../stores/settings.svelte'
 	import { focusElement } from '../lib/focus'
@@ -186,25 +186,7 @@
 
 <div class="onboarding-container">
 	<!-- Language Selector -->
-	<div class="language-selector">
-		<button
-			class="language-option"
-			class:active={$locale === 'en'}
-			onclick={() => setLocale('en')}
-			aria-label="Switch to English"
-		>
-			English
-		</button>
-		<span class="language-divider">|</span>
-		<button
-			class="language-option"
-			class:active={$locale === 'ko'}
-			onclick={() => setLocale('ko')}
-			aria-label="한국어로 전환"
-		>
-			한국어
-		</button>
-	</div>
+	<LanguageSelector />
 
 	{#if showPayerCollection}
 		<!-- Step 4: Payer Collection (Multi-Payer Mode Only) -->
@@ -426,47 +408,6 @@
 		margin: 0 auto;
 		padding: 2rem;
 		text-align: center;
-	}
-
-	.language-selector {
-		display: flex;
-		justify-content: flex-end;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 2rem;
-		padding: 0.5rem 0;
-	}
-
-	.language-option {
-		background: none;
-		border: none;
-		color: var(--color-text-tertiary);
-		font-size: 0.95rem;
-		padding: 0.4rem 0.8rem;
-		cursor: pointer;
-		transition: all var(--transition-fast);
-		border-radius: 4px;
-		font-weight: 500;
-	}
-
-	.language-option:hover {
-		color: var(--color-text-secondary);
-		background-color: var(--color-surface-1);
-	}
-
-	.language-option.active {
-		color: var(--color-primary);
-		font-weight: 600;
-	}
-
-	.language-option:focus {
-		outline: 2px solid var(--color-focus-ring);
-		outline-offset: 2px;
-	}
-
-	.language-divider {
-		color: var(--color-border);
-		user-select: none;
 	}
 
 	h1 {
