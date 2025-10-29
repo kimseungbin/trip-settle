@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { locale } from 'svelte-i18n'
-	import { setLocale } from '../i18n'
+	import { setLocale } from '../../../i18n'
 </script>
 
 <div class="language-selector">

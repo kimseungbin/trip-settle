@@ -1,11 +1,11 @@
 <script lang="ts">
-	import CurrencySelector from './CurrencySelector.svelte'
-	import PayerSelector from './PayerSelector.svelte'
-	import { DEFAULT_CURRENCY } from '../data/currencies'
-	import { settings } from '../stores/settings.svelte'
+	import CurrencySelector from '../../common/CurrencySelector.svelte'
+	import PayerSelector from '../../common/PayerSelector.svelte'
+	import { DEFAULT_CURRENCY } from '../../../data/currencies'
+	import { settings } from '../../../stores/settings.svelte'
 	import { onMount } from 'svelte'
 	import { t } from 'svelte-i18n'
-	import { focusElement, focusElementImmediate } from '../lib/focus'
+	import { focusElement, focusElementImmediate } from '../../../lib/focus'
 
 	let {
 		onAdd,

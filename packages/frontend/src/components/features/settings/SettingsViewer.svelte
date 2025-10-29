@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { settings } from '../stores/settings.svelte'
-	import { navigate } from '../lib/router.svelte'
+	import { settings } from '../../../stores/settings.svelte'
+	import { navigate } from '../../../lib/router.svelte'
 
 	let keyboardHintsExpanded = $state(false)
 

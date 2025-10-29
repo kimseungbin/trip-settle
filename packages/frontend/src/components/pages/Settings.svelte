@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { navigate } from '../lib/router.svelte'
-	import { settings } from '../stores/settings.svelte'
-	import type { CurrencyMode } from '../stores/settings.svelte'
-	import SettingsViewMode from './SettingsViewMode.svelte'
-	import SettingsEditMode from './SettingsEditMode.svelte'
+	import { navigate } from '../../lib/router.svelte'
+	import { settings } from '../../stores/settings.svelte'
+	import type { CurrencyMode } from '../../stores/settings.svelte'
+	import SettingsViewMode from '../features/settings/SettingsViewMode.svelte'
+	import SettingsEditMode from '../features/settings/SettingsEditMode.svelte'
 	import { t, locale } from 'svelte-i18n'
 
 	// Current settings (reactive)

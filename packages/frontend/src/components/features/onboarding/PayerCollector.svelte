@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { focusElement } from '../lib/focus'
-	import { ANIMATION_DURATION } from '../constants/timing'
+	import { focusElement } from '../../../lib/focus'
+	import { ANIMATION_DURATION } from '../../../constants/timing'
 
 	let {
 		payers = $bindable<string[]>([]),

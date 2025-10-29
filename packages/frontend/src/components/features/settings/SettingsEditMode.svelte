@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { t } from 'svelte-i18n'
-	import CurrencySelector from './CurrencySelector.svelte'
-	import CurrencyModeSelector from './CurrencyModeSelector.svelte'
-	import type { CurrencyMode } from '../stores/settings.svelte'
+	import CurrencySelector from '../../common/CurrencySelector.svelte'
+	import CurrencyModeSelector from '../onboarding/CurrencyModeSelector.svelte'
+	import type { CurrencyMode } from '../../../stores/settings.svelte'
 
 	let {
 		currencyMode = $bindable<CurrencyMode>('multi'),

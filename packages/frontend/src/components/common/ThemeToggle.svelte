@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { theme, type ThemeMode } from '../stores/theme.svelte'
+	import { theme, type ThemeMode } from '../../stores/theme.svelte'
 
 	const themes: ThemeMode[] = ['auto', 'light', 'dark']
 

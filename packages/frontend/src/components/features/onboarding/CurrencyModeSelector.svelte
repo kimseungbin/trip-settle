@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CurrencyMode } from '../stores/settings.svelte'
+	import type { CurrencyMode } from '../../../stores/settings.svelte'
 	import { t } from 'svelte-i18n'
 
 	let {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PaymentMode } from '../stores/settings.svelte'
+	import type { PaymentMode } from '../../../stores/settings.svelte'
 
 	let {
 		value = $bindable<PaymentMode>('single'),

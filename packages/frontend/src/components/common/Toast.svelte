@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { toast } from '../stores/toast.svelte'
+	import { toast } from '../../stores/toast.svelte'
 
 	/**
 	 * Get icon for toast type

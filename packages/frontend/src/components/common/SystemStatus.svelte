@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { config } from '../config'
+	import { config } from '../../config'
 	import { t } from 'svelte-i18n'
 
 	let healthStatus = $state('loading')

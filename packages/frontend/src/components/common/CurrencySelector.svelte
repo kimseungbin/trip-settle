@@ -1,10 +1,15 @@
 <script lang="ts">
-	import type { Currency } from '../types/currency'
-	import { DEFAULT_CURRENCY, getCurrencyByCode, searchCurrencies, getCurrencyDisplayName } from '../data/currencies'
+	import type { Currency } from '../../types/currency'
+	import {
+		DEFAULT_CURRENCY,
+		getCurrencyByCode,
+		searchCurrencies,
+		getCurrencyDisplayName,
+	} from '../../data/currencies'
 	import { locale, t } from 'svelte-i18n'
-	import { focusElementImmediate } from '../lib/focus'
-	import { FOCUS_TIMING, ANIMATION_DURATION } from '../constants/timing'
-	import { createListNavigationHandler, createToggleHandler } from '../lib/keyboard'
+	import { focusElementImmediate } from '../../lib/focus'
+	import { FOCUS_TIMING, ANIMATION_DURATION } from '../../constants/timing'
+	import { createListNavigationHandler, createToggleHandler } from '../../lib/keyboard'
 
 	let {
 		value = $bindable(DEFAULT_CURRENCY),

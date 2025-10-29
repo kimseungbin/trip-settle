@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { t } from 'svelte-i18n'
-	import { setLocale } from '../i18n'
-	import type { CurrencyMode } from '../stores/settings.svelte'
+	import { setLocale } from '../../../i18n'
+	import type { CurrencyMode } from '../../../stores/settings.svelte'
 
 	let {
 		currencyMode,

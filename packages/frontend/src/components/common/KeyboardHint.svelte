@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { t } from 'svelte-i18n'
-	import { TOAST_TIMING, ANIMATION_DURATION } from '../constants/timing'
+	import { TOAST_TIMING, ANIMATION_DURATION } from '../../constants/timing'
 
 	let {
 		visible = false,

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Expense } from '../types/expense'
-	import { settings } from '../stores/settings.svelte'
+	import type { Expense } from '../../../types/expense'
+	import { settings } from '../../../stores/settings.svelte'
 	import { t } from 'svelte-i18n'
 
 	let {

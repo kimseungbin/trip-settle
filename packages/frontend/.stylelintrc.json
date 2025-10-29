@@ -36,7 +36,7 @@
 			}
 		},
 		{
-			"files": ["**/components/DevTools.svelte"],
+			"files": ["**/components/common/DevTools.svelte"],
 			"rules": {
 				"color-no-hex": null,
 				"color-named": null,
@@ -44,13 +44,13 @@
 			}
 		},
 		{
-			"files": ["**/components/Toast.svelte"],
+			"files": ["**/components/common/Toast.svelte"],
 			"rules": {
 				"color-no-hex": null
 			}
 		},
 		{
-			"files": ["**/components/KeyboardHint.svelte"],
+			"files": ["**/components/common/KeyboardHint.svelte"],
 			"rules": {
 				"function-disallowed-list": null
 			}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import SystemStatus from './SystemStatus.svelte'
-	import SettingsViewer from './SettingsViewer.svelte'
+	import SettingsViewer from '../features/settings/SettingsViewer.svelte'
 </script>
 
 <div class="dev-tools" data-testid="dev-tools">

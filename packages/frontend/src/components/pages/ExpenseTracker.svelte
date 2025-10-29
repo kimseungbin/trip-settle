@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { Expense } from '../types/expense'
-	import ExpenseForm from './ExpenseForm.svelte'
-	import ExpenseList from './ExpenseList.svelte'
-	import KeyboardHint from './KeyboardHint.svelte'
-	import { settings } from '../stores/settings.svelte'
+	import type { Expense } from '../../types/expense'
+	import ExpenseForm from '../features/expense/ExpenseForm.svelte'
+	import ExpenseList from '../features/expense/ExpenseList.svelte'
+	import KeyboardHint from '../common/KeyboardHint.svelte'
+	import { settings } from '../../stores/settings.svelte'
 	import { t } from 'svelte-i18n'
 
 	let expenses = $state<Expense[]>([])
