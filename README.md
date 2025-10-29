@@ -59,10 +59,85 @@ graph TB
 - Atomic deployments ensure frontend/backend changes deployed together
 - No coordination between separate repositories
 
-**Dependency deduplication:**
-- Common dependencies hoisted to root, reducing `node_modules` size by ~40%
-- Root dependencies: `typescript`, `eslint`, `prettier`, `@types/node`
-- Package-specific dependencies stay isolated in their workspace
+**Centralized dependency version management:**
+
+npm workspaces automatically hoist shared dependencies, but explicit root declaration provides key benefits through clear separation of concerns:
+
+```
+Root package.json (Shared monorepo tooling):
+{
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "eslint": "^9.37.0",
+    "prettier": "^3.4.2",
+    "vitest": "^3.2.4"
+  }
+}
+
+Backend package.json (Domain-specific only):
+{
+  "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
+    "pg-mem": "^3.0.4",
+    "supertest": "^7.0.0"
+  }
+}
+
+Frontend package.json (Domain-specific only):
+{
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "vite": "^7.1.12",
+    "svelte-check": "^4.2.1"
+  }
+}
+```
+
+**Benefits:**
+- **Prevents version drift** - All packages guaranteed to use same TypeScript/ESLint/Prettier versions
+- **GitHub Actions cache optimization** - Partial cache hits on single-package updates (saves ~15s per CI run)
+- **Docker layer caching** - Root deps cached separately from package deps (saves ~8s on E2E test builds)
+- **Easier updates** - Single version bump for shared tooling affects entire monorepo
+- **Clear ownership** - Root = shared tooling, packages = domain-specific dependencies
+- **Disk savings** - Common dependencies installed once at root (`~213 packages` hoisted)
+
+*CI Cache Strategy:*
+
+All CI jobs reuse a shared setup action that ensures consistent caching:
+
+```yaml
+# .github/actions/setup-node-project/action.yml (Reused across all jobs)
+- name: Setup Node.js
+  uses: actions/setup-node@v4
+  with:
+    node-version: '24'
+    cache: 'npm'
+    cache-dependency-path: './package-lock.json'
+
+- name: Install dependencies
+  run: npm ci  # Installs all workspaces (root + packages)
+```
+
+```yaml
+# Every CI job uses the same cached setup
+jobs:
+  lint:
+    steps:
+      - uses: ./.github/actions/setup-node-project  # ✅ Cache reused
+
+  type-check:
+    steps:
+      - uses: ./.github/actions/setup-node-project  # ✅ Cache reused
+
+  build:
+    steps:
+      - uses: ./.github/actions/setup-node-project  # ✅ Cache reused
+```
+
+**Cache effectiveness by change type:**
+- Code-only changes: Full cache hit (~0s install)
+- Single package update: Partial cache hit - root deps cached (~15s install vs 30-40s)
+- Root tooling update: Partial cache hit - package deps cached (~20s install)
 
 **GitHub Actions as workspace members:**
 - Custom actions written in TypeScript, not bash/Node.js scripts
