@@ -331,3 +331,29 @@ npm run synth --workspace=infra  # ✅ Works!
 - Explain the "why" behind each fix
 - Link to relevant documentation when applicable
 - Check git notes first for historical context
+
+## Workflow Performance Metrics
+
+Beyond failures, track workflow performance using `ci/workflow-metrics` namespace.
+
+### Job Duration Analysis
+
+```bash
+# Show job durations
+git notes --ref=ci/workflow-metrics show HEAD | grep -E "^name =|^duration_seconds =" | paste - -
+
+# Find slow jobs
+for commit in $(git log --oneline -10 --format='%h'); do
+  git notes --ref=ci/workflow-metrics show $commit 2>/dev/null | awk '/^name =/ {name=$3} /^duration_seconds =/ {if($3>300) print name, $3 "s"}'
+done
+```
+
+### Step-Level Timing
+
+```bash
+# Detailed step timing
+git notes --ref=ci/workflow-metrics show HEAD | grep -A 3 "^\[job\..*\.step"
+```
+
+See existing `workflow-metrics-analysis` skill for detailed performance analysis.
+

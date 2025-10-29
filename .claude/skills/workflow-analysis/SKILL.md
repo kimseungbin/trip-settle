@@ -1,19 +1,22 @@
 ---
-name: ci-failure-analysis
-description: Analyze GitHub Actions CI/CD failures using git notes. Covers workflow issues, Docker cache, E2E tests, and snapshot updates. Use when CI fails or performance degrades.
+name: workflow-analysis
+description: Analyze GitHub Actions workflows using git notes metadata. Covers workflow failures, performance metrics, Docker cache optimization, E2E test analysis, and snapshot updates. Use when workflows fail or performance degrades.
 ---
 
-# CI Failure Analysis Skill
+# Workflow Analysis Skill
 
-This skill provides comprehensive analysis of GitHub Actions CI/CD failures using git notes metadata.
+This skill provides comprehensive analysis of GitHub Actions workflows using git notes metadata.
 
 ## When to Use
 
-- CI workflow fails or won't start
-- E2E tests fail in CI
+- Any GitHub Actions workflow fails or won't start
+- CI pipeline (test/lint/build) issues
+- Deployment workflows fail (CDK, Pages)
+- E2E tests fail or are flaky
 - Docker builds are slow or failing
 - Visual snapshot updates fail
-- Performance degradation in CI
+- Performance degradation in any workflow
+- Need to analyze workflow metrics or trends
 
 ## How It Works
 
@@ -23,6 +26,18 @@ This skill provides comprehensive analysis of GitHub Actions CI/CD failures usin
 4. **Provides actionable fixes** with code examples
 
 ## Available Guides
+
+### `guides/git-notes.md` - Git Notes Operations (NEW)
+**Use when:**
+- Need to fetch/parse git notes
+- Understanding git notes structure
+- Common operations reference
+
+**Provides:**
+- Fetching notes from remote
+- Parsing INI-format metadata
+- Historical trend analysis patterns
+- Best practices and examples
 
 ### `guides/workflows.md` - Workflow & Job Failures
 **Use when:**
@@ -79,13 +94,13 @@ This skill provides comprehensive analysis of GitHub Actions CI/CD failures usin
 
 ## Git Notes Integration
 
-All guides use the `git-notes-helper` skill for consistent git notes operations:
+All workflow analysis relies on git notes metadata captured during CI runs. The `guides/git-notes.md` provides common operations for:
 - Fetching notes from remote
 - Parsing INI-format metadata
 - Historical trend analysis
 - Comparative analysis across commits
 
-Reference: `.claude/skills/git-notes-helper/helper.yaml`
+Each analysis guide references git-notes operations as needed.
 
 ## Quick Start
 
