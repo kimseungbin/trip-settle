@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { t } from 'svelte-i18n'
 	import CurrencySelector from './CurrencySelector.svelte'
+	import CurrencyModeSelector from './CurrencyModeSelector.svelte'
 	import type { CurrencyMode } from '../stores/settings.svelte'
 
 	let {
@@ -22,8 +23,7 @@
 	/**
 	 * Handle currency mode selection
 	 */
-	function selectCurrencyMode(mode: CurrencyMode) {
-		currencyMode = mode
+	function handleModeSelect(mode: CurrencyMode) {
 		onCurrencyModeChange(mode)
 	}
 </script>
@@ -32,30 +32,7 @@
 	<h2>{$t('settings.editSettings')}</h2>
 
 	<!-- Currency Mode Selection -->
-	<div class="mode-selection">
-		<h3>{$t('settings.currencyMode.label')}</h3>
-		<div class="mode-options">
-			<button
-				class="mode-option"
-				class:selected={currencyMode === 'single'}
-				onclick={() => selectCurrencyMode('single')}
-			>
-				<div class="mode-icon">💵</div>
-				<div class="mode-title">{$t('settings.currencyMode.single')}</div>
-				<p class="mode-description">{$t('settings.currencyMode.singleDesc')}</p>
-			</button>
-
-			<button
-				class="mode-option"
-				class:selected={currencyMode === 'multi'}
-				onclick={() => selectCurrencyMode('multi')}
-			>
-				<div class="mode-icon">🌍</div>
-				<div class="mode-title">{$t('settings.currencyMode.multi')}</div>
-				<p class="mode-description">{$t('settings.currencyMode.multiDesc')}</p>
-			</button>
-		</div>
-	</div>
+	<CurrencyModeSelector bind:value={currencyMode} onselect={handleModeSelect} variant="settings" />
 
 	<!-- Currency Selection (for single-currency mode) -->
 	{#if showCurrencySelector}
@@ -98,65 +75,6 @@
 		font-size: 1.2rem;
 		margin: 1.5rem 0 1rem;
 		font-weight: 600;
-	}
-
-	.mode-selection {
-		margin-bottom: 2rem;
-	}
-
-	.mode-options {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 1.5rem;
-	}
-
-	.mode-option {
-		background: var(--color-surface);
-		border: 2px solid var(--color-border);
-		border-radius: 12px;
-		padding: 1.5rem;
-		cursor: pointer;
-		transition:
-			all var(--transition-normal),
-			transform var(--transition-fast);
-		text-align: center;
-	}
-
-	.mode-option:hover {
-		border-color: var(--color-primary);
-		transform: translateY(-4px);
-		box-shadow: var(--shadow-lg);
-	}
-
-	.mode-option.selected {
-		border-color: var(--color-primary);
-		background: var(--color-primary-light);
-		box-shadow: var(--shadow-lg);
-	}
-
-	.mode-option:focus {
-		outline: none;
-		border-color: var(--color-primary);
-		box-shadow: 0 0 0 3px var(--color-primary-alpha-20);
-	}
-
-	.mode-icon {
-		font-size: 3rem;
-		margin-bottom: 1rem;
-	}
-
-	.mode-title {
-		font-size: 1.2rem;
-		font-weight: 600;
-		color: var(--color-text);
-		margin-bottom: 0.5rem;
-	}
-
-	.mode-description {
-		font-size: 0.95rem;
-		color: var(--color-text-secondary);
-		margin: 0;
-		line-height: 1.4;
 	}
 
 	.currency-selection {
@@ -241,10 +159,6 @@
 	@media (max-width: 640px) {
 		.settings-section {
 			padding: 1.5rem;
-		}
-
-		.mode-options {
-			grid-template-columns: 1fr;
 		}
 
 		.actions {
