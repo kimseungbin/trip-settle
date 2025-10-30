@@ -2,6 +2,8 @@
 
 Analyze Docker build cache efficiency and optimize build performance using git notes metrics.
 
+> **Note**: This guide uses bash for loops to iterate commits. For syntax guidance and ZSH compatibility, see [`git-notes.md` → "Common Bash Patterns"](git-notes.md#common-bash-patterns).
+
 ## When to Use
 
 - Docker builds are slow in CI

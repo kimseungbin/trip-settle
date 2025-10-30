@@ -2,6 +2,8 @@
 
 Analyze visual snapshot update workflow performance using git notes.
 
+> **Note**: This guide uses bash for loops to iterate commits. For syntax guidance and ZSH compatibility, see [`git-notes.md` → "Common Bash Patterns"](git-notes.md#common-bash-patterns).
+
 ## Git Notes Namespace
 
 `ci/snapshot-updates` - Snapshot workflow execution metadata

@@ -152,13 +152,80 @@ echo "=== Commit B ==="
 git notes --ref=ci/<namespace> show <commit-b> | grep "^metric ="
 ```
 
+## Common Bash Patterns
+
+### Safe For Loops (ZSH Compatible)
+
+**CORRECT ✅ - Command Substitution with For Loop**
+```bash
+# Standard pattern used in all guides
+for commit in $(git log --oneline -10 --format='%h'); do
+  if git notes --ref=ci/<namespace> show $commit 2>/dev/null; then
+    echo "=== $commit ==="
+    git notes --ref=ci/<namespace> show $commit | grep "^field ="
+  fi
+done
+```
+
+**CORRECT ✅ - Pipe to While Read**
+```bash
+# Alternative pattern (safer for commits with spaces)
+git log --oneline -10 --format='%h' | while read commit; do
+  if git notes --ref=ci/<namespace> show $commit 2>/dev/null; then
+    echo "=== $commit ==="
+  fi
+done
+```
+
+**CORRECT ✅ - Sequential Command Chaining**
+```bash
+# Best for small number of known commits
+echo "=== Commit 1 ===" && \
+git notes --ref=ci/<namespace> show abc123 | grep "^field =" && \
+echo "=== Commit 2 ===" && \
+git notes --ref=ci/<namespace> show def456 | grep "^field ="
+```
+
+**INCORRECT ❌ - Inline For Loop**
+```bash
+# FAILS in ZSH with "parse error near done"
+for commit in "abc123" "def456"; do echo $commit; done
+
+# Why it fails: ZSH requires proper line breaks in multi-command for loops
+# when entered as a single line in interactive shell
+```
+
+### When to Use Which Pattern
+
+| Pattern | Use Case | Performance | Safety |
+|---------|----------|-------------|--------|
+| `for commit in $(...)` | Standard iteration, most readable | Fast | Good |
+| `... \| while read` | Commits with spaces in format | Slower | Best |
+| Command chaining `&&` | 2-5 known commits | Fastest | Good |
+
+### Error Handling
+
+```bash
+# Always redirect stderr when notes might not exist
+git notes --ref=ci/<namespace> show $commit 2>/dev/null
+
+# Check exit code before processing
+if git notes --ref=ci/<namespace> show $commit 2>/dev/null; then
+  # Process note
+fi
+
+# Provide default value if note missing
+value=$(git notes show $commit 2>/dev/null | grep "^field =" | cut -d'=' -f2 || echo "N/A")
+```
+
 ## Best Practices
 
 1. **Always fetch first**: Notes aren't fetched with `git pull`
-2. **Handle missing notes gracefully**: Not all commits have notes
+2. **Handle missing notes gracefully**: Not all commits have notes (use `2>/dev/null`)
 3. **Use specific namespaces**: Don't mix different data types
 4. **Keep notes structured**: Use INI format for consistency
-5. **Avoid complex loops**: Use simple sequential commands when possible
+5. **Prefer command substitution**: `for commit in $(...)` works reliably
+6. **Avoid inline loops**: Multi-line for loops need proper syntax in ZSH
 
 ## Troubleshooting
 

@@ -2,10 +2,11 @@
 
 Diagnose and fix GitHub Actions workflow failures using git notes and local testing.
 
-## Prerequisites: Git Notes Helper
+## Prerequisites
 
-This guide uses git notes for historical analysis. Reference operations from:
-`.claude/skills/git-notes-helper/helper.yaml`
+This guide uses git notes for historical analysis.
+
+> **Note**: This guide uses bash for loops to iterate commits. For syntax guidance and ZSH compatibility, see [`git-notes.md` → "Common Bash Patterns"](git-notes.md#common-bash-patterns).
 
 **Git notes namespace**: `ci/workflow-metrics`
 
