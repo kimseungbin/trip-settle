@@ -29,8 +29,8 @@ Trip Settle uses **AWS CDK** for infrastructure as code, enabling:
 ## Prerequisites
 
 - AWS account with appropriate permissions
-- Node.js >= 18
-- npm >= 9
+- Node.js >= 20.19.0 (Node 24 recommended)
+- npm >= 9 (npm 11+ recommended)
 - AWS CLI (for manual deployments only)
 
 ## First-Time Setup

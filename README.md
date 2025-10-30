@@ -16,8 +16,8 @@ What makes this project interesting:
 
 ### Prerequisites
 
-- Node.js >= 18
-- npm >= 9
+- Node.js >= 20.19.0 (Node 24 recommended)
+- npm >= 9 (npm 11+ recommended)
 
 **That's it!** No database installation required for local development.
 
